@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Play } from 'lucide-react';
 
 const INITIAL_PROJECTS = [
   { id: '1', title: 'Martínez Gutter Work', category: 'Canales', status: 'nuevo' },
@@ -33,7 +32,7 @@ export default function KanbanSandbox() {
       id: i,
       x: `${(Math.random() - 0.5) * 300}px`,
       y: `${-Math.random() * 200 - 50}px`,
-      color: ['#8B5CF6', '#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#EC4899'][i % 6],
+      color: ['#f97316', '#34d399', '#60a5fa', '#fbbf24', '#f87171', '#a7b1ff'][i % 6],
       size: `${Math.random() * 8 + 5}px`,
       delay: `${Math.random() * 0.2}s`,
       r: `${Math.random() * 720}deg`,
@@ -60,7 +59,7 @@ export default function KanbanSandbox() {
   };
 
   return (
-    <div className="space-y-6 text-zinc-300 relative select-none">
+    <div className="space-y-6 text-[var(--text-secondary)] relative select-none">
       {/* CSS Confetti Overlay */}
       {confettiParticles.length > 0 && (
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-50 overflow-hidden">
@@ -99,8 +98,8 @@ export default function KanbanSandbox() {
       )}
 
       <div>
-        <h3 className="text-lg font-bold text-zinc-100">Control de Obras</h3>
-        <p className="text-xs text-zinc-400">Arrastra y suelta las tarjetas para actualizar el estado del proyecto.</p>
+        <h3 className="text-lg font-bold text-[var(--text-primary)]">Control de Obras</h3>
+        <p className="text-xs text-[var(--text-secondary)]">Arrastra y suelta las tarjetas para actualizar el estado del proyecto.</p>
       </div>
 
       {/* Kanban Grid */}
@@ -112,11 +111,11 @@ export default function KanbanSandbox() {
               key={col.id}
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(col.id)}
-              className="flex flex-col bg-zinc-900/30 border border-white/5 rounded-2xl p-4 min-h-[300px] transition-all hover:bg-zinc-900/40"
+              className="flex flex-col bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-4 min-h-[300px] transition-all hover:bg-[var(--bg-card-hover)]"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-black tracking-widest uppercase text-zinc-400">{col.label}</span>
-                <span className="text-[10px] font-black bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-black tracking-widest uppercase text-[var(--text-secondary)]">{col.label}</span>
+                <span className="text-[10px] font-black bg-[var(--bg-sidebar)] text-[var(--text-secondary)] px-2 py-0.5 rounded-full border border-[var(--border)]">
                   {colProjects.length}
                 </span>
               </div>
@@ -128,18 +127,18 @@ export default function KanbanSandbox() {
                     key={p.id}
                     draggable
                     onDragStart={() => handleDragStart(p.id)}
-                    className="bg-zinc-950/60 border border-white/5 p-4 rounded-xl cursor-grab active:cursor-grabbing hover:border-white/20 transition-all select-none shadow-sm"
+                    className="bg-[var(--bg-input)] border border-[var(--border)] p-4 rounded-xl cursor-grab active:cursor-grabbing hover:border-[var(--accent)]/30 transition-all select-none shadow-sm"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-[9px] font-black bg-violet-600/10 text-violet-400 border border-violet-500/20 px-2 py-0.5 rounded-md">
+                      <span className="text-[9px] font-black bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/20 px-2 py-0.5 rounded-md">
                         {p.category}
                       </span>
                     </div>
-                    <h4 className="text-xs font-bold text-zinc-100">{p.title}</h4>
+                    <h4 className="text-xs font-bold text-[var(--text-primary)]">{p.title}</h4>
                   </div>
                 ))}
                 {colProjects.length === 0 && (
-                  <div className="flex-1 flex items-center justify-center border-2 border-dashed border-white/5 rounded-xl py-8 text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
+                  <div className="flex-1 flex items-center justify-center border-2 border-dashed border-[var(--border)] rounded-xl py-8 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest">
                     Vacio
                   </div>
                 )}

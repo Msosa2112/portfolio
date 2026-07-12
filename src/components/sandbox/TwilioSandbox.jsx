@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Smartphone, MessageSquareCode } from 'lucide-react';
+import { Send, Smartphone } from 'lucide-react';
 
 const TEMPLATES = [
   {
@@ -66,7 +66,7 @@ export default function TwilioSandbox() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 items-stretch text-zinc-300">
+    <div className="flex flex-col lg:flex-row gap-8 items-stretch text-[var(--text-secondary)]">
       <style>{`
         @keyframes ios-slide-down {
           0% {
@@ -84,19 +84,19 @@ export default function TwilioSandbox() {
       `}</style>
 
       {/* Left: Configuration Form */}
-      <div className="flex-1 bg-zinc-900/40 border border-white/5 rounded-2xl p-6 flex flex-col justify-between space-y-6">
+      <div className="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col justify-between space-y-6">
         <div className="space-y-4">
           <div>
-            <h4 className="text-sm font-bold text-zinc-200">Simulador de Notificaciones Automáticas</h4>
-            <p className="text-[11px] text-zinc-400">Automatización de comunicación bidireccional mediante la API de Twilio.</p>
+            <h4 className="text-sm font-bold text-[var(--text-primary)]">Simulador de Notificaciones Automáticas</h4>
+            <p className="text-[11px] text-[var(--text-secondary)]">Automatización de comunicación bidireccional mediante la API de Twilio.</p>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Plantilla de Mensaje</label>
+            <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Plantilla de Mensaje</label>
             <select
               value={selectedTemplate}
               onChange={(e) => setSelectedTemplate(e.target.value)}
-              className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+              className="crm-select bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
             >
               {TEMPLATES.map((t) => (
                 <option key={t.id} value={t.id}>{t.label}</option>
@@ -106,31 +106,31 @@ export default function TwilioSandbox() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Nombre Cliente</label>
+              <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Nombre Cliente</label>
               <input
                 type="text"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+                className="crm-input bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Monto / Detalle</label>
+              <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Monto / Detalle</label>
               <input
                 type="text"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+                className="crm-input bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Servicio Contratado</label>
+            <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Servicio Contratado</label>
             <select
               value={service}
               onChange={(e) => setService(e.target.value)}
-              className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+              className="crm-select bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
             >
               <option value="Canales">Canales de Aluminio</option>
               <option value="Techo Completo">Techado de Shingle</option>
@@ -140,12 +140,12 @@ export default function TwilioSandbox() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Cuerpo del Mensaje (Compilado)</label>
+            <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Cuerpo del Mensaje (Compilado)</label>
             <textarea
               readOnly
               value={message}
               rows={4}
-              className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-zinc-400 focus:outline-none resize-none font-mono leading-relaxed"
+              className="bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2.5 text-xs text-[var(--text-secondary)] focus:outline-none resize-none font-mono leading-relaxed"
             />
           </div>
         </div>
@@ -153,10 +153,10 @@ export default function TwilioSandbox() {
         <button
           onClick={handleSendSMS}
           disabled={isSending}
-          className={`w-full py-3.5 rounded-xl text-xs font-black tracking-widest uppercase flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+          className={`crm-btn-accent w-full py-3.5 rounded-xl text-xs font-black tracking-widest uppercase flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
             isSent
-              ? 'bg-emerald-600 text-white'
-              : 'bg-violet-600 text-white hover:bg-violet-500 shadow-lg shadow-violet-600/10'
+              ? 'bg-emerald-600 text-white hover:bg-emerald-500'
+              : 'bg-[var(--accent)] text-black hover:bg-[var(--accent-hover)] shadow-lg shadow-orange-500/10'
           }`}
         >
           <Send size={14} />
@@ -179,7 +179,7 @@ export default function TwilioSandbox() {
           {/* iOS Notification Banner */}
           {showNotification && (
             <div className="ios-notification absolute top-8 left-1/2 w-[90%] bg-black/85 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-white z-50 flex gap-2 shadow-lg">
-              <div className="h-6 w-6 rounded bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-[10px] font-black tracking-tight flex-none">
+              <div className="h-6 w-6 rounded bg-[var(--accent-soft)] border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] font-extrabold text-[10px] tracking-tight flex-none">
                 BP
               </div>
               <div className="flex flex-col min-w-0">

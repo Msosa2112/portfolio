@@ -72,13 +72,13 @@ export default function EstimatorSandbox() {
   const total = subtotal + tax;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 items-start text-zinc-300">
+    <div className="flex flex-col lg:flex-row gap-8 items-start text-[var(--text-secondary)]">
       
       {/* Configurator Side */}
       <div className="flex-1 w-full space-y-6">
         <div>
-          <h3 className="text-lg font-bold text-zinc-100">Nuevo Estimado</h3>
-          <p className="text-xs text-zinc-400">Configura los servicios y materiales para el cliente</p>
+          <h3 className="text-lg font-bold text-[var(--text-primary)]">Nuevo Estimado</h3>
+          <p className="text-xs text-[var(--text-secondary)]">Configura los servicios y materiales para el cliente</p>
         </div>
 
         {/* Category Grid */}
@@ -92,22 +92,22 @@ export default function EstimatorSandbox() {
                 onClick={() => setActiveCategory(cat.id)}
                 className={`p-4 rounded-2xl flex flex-col items-start text-left border transition-all active:scale-[0.97] group ${
                   isActive
-                    ? 'bg-zinc-900 border-violet-500 shadow-md shadow-violet-500/5'
-                    : 'bg-zinc-950/40 border-white/5 hover:border-white/10'
+                    ? 'bg-[var(--bg-card)] border-[var(--accent)] shadow-md'
+                    : 'bg-[var(--bg-input)] border-[var(--border)] hover:border-[var(--text-muted)]'
                 }`}
               >
                 <div className="flex justify-between items-center w-full mb-3">
-                  <span className={`transition-colors ${isActive ? 'text-violet-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                  <span className={`transition-colors ${isActive ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]'}`}>
                     <Icon size={22} />
                   </span>
                   <span className={`text-[8px] tracking-widest px-1.5 py-0.5 rounded font-black ${
-                    isActive ? 'bg-violet-600 text-white' : 'bg-zinc-900 text-zinc-500'
+                    isActive ? 'bg-[var(--accent)] text-black' : 'bg-[var(--bg-card)] text-[var(--text-muted)]'
                   }`}>
                     {isActive ? 'ACTIVO' : cat.status}
                   </span>
                 </div>
-                <h4 className="text-xs font-bold text-zinc-100">{cat.title}</h4>
-                <p className="text-[9px] text-zinc-500 uppercase tracking-wider mt-0.5">{cat.desc}</p>
+                <h4 className="text-xs font-bold text-[var(--text-primary)]">{cat.title}</h4>
+                <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider mt-0.5">{cat.desc}</p>
               </button>
             );
           })}
@@ -115,25 +115,25 @@ export default function EstimatorSandbox() {
 
         {/* Configuration Panel */}
         {activeCategory === 'gutters' ? (
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-6">
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 space-y-6">
             <div className="flex items-center gap-4">
-              <div className="h-[1px] bg-violet-500/30 flex-1 rounded-full"></div>
-              <span className="text-[10px] font-black tracking-widest text-violet-400 uppercase">Configuración de Canales</span>
-              <div className="h-[1px] bg-white/5 flex-1 rounded-full"></div>
+              <div className="h-[1px] bg-[var(--accent)]/30 flex-1 rounded-full"></div>
+              <span className="text-[10px] font-black tracking-widest text-[var(--accent)] uppercase">Configuración de Canales</span>
+              <div className="h-[1px] bg-[var(--border)] flex-1 rounded-full"></div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left Column: Profile & Size */}
               <div className="space-y-6">
                 <div>
-                  <label className="text-[10px] font-black tracking-widest text-zinc-500 uppercase block mb-3">Perfil del Canal</label>
+                  <label className="text-[10px] font-black tracking-widest text-[var(--text-muted)] uppercase block mb-3">Perfil del Canal</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setGutterConfig({ ...gutterConfig, profile: 'k-style' })}
                       className={`p-4 rounded-xl flex flex-col items-center gap-2 border transition-all active:scale-95 ${
                         gutterConfig.profile === 'k-style'
-                          ? 'bg-violet-600/10 text-violet-400 border-violet-500'
-                          : 'bg-zinc-950/40 text-zinc-500 border-white/5 hover:border-white/10'
+                          ? 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]'
+                          : 'bg-[var(--bg-input)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--text-muted)]'
                       }`}
                     >
                       <Square size={24} />
@@ -143,8 +143,8 @@ export default function EstimatorSandbox() {
                       onClick={() => setGutterConfig({ ...gutterConfig, profile: 'half-round' })}
                       className={`p-4 rounded-xl flex flex-col items-center gap-2 border transition-all active:scale-95 ${
                         gutterConfig.profile === 'half-round'
-                          ? 'bg-violet-600/10 text-violet-400 border-violet-500'
-                          : 'bg-zinc-950/40 text-zinc-500 border-white/5 hover:border-white/10'
+                          ? 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]'
+                          : 'bg-[var(--bg-input)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--text-muted)]'
                       }`}
                     >
                       <Circle size={24} />
@@ -154,16 +154,16 @@ export default function EstimatorSandbox() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black tracking-widest text-zinc-500 uppercase block mb-3">Tamaño (Pulgadas)</label>
-                  <div className="flex bg-zinc-950/50 rounded-xl p-1 border border-white/5">
+                  <label className="text-[10px] font-black tracking-widest text-[var(--text-muted)] uppercase block mb-3">Tamaño (Pulgadas)</label>
+                  <div className="flex bg-[var(--bg-input)] rounded-xl p-1 border border-[var(--border)]">
                     {['5', '6', '7'].map((size) => (
                       <button
                         key={size}
                         onClick={() => setGutterConfig({ ...gutterConfig, size })}
                         className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all active:scale-95 ${
                           gutterConfig.size === size
-                            ? 'bg-violet-600 text-white shadow-md'
-                            : 'text-zinc-500 hover:text-zinc-200'
+                            ? 'bg-[var(--accent)] text-black shadow-md'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                         }`}
                       >
                         {size}"
@@ -176,12 +176,12 @@ export default function EstimatorSandbox() {
               {/* Right Column: Numpad */}
               <div className="space-y-4">
                 <div>
-                  <label className="text-[10px] font-black tracking-widest text-zinc-500 uppercase block mb-2">Pies Lineales Totales</label>
-                  <div className="bg-zinc-950/50 border border-white/5 p-4 rounded-xl flex items-center justify-between shadow-inner">
-                    <span className={`text-3xl font-black ${gutterConfig.linearFeet === '0' ? 'text-zinc-700' : 'text-violet-400'}`}>
+                  <label className="text-[10px] font-black tracking-widest text-[var(--text-muted)] uppercase block mb-2">Pies Lineales Totales</label>
+                  <div className="bg-[var(--bg-input)] border border-[var(--border)] p-4 rounded-xl flex items-center justify-between shadow-inner">
+                    <span className={`text-3xl font-black ${gutterConfig.linearFeet === '0' ? 'text-[var(--text-muted)]' : 'text-[var(--accent)]'}`}>
                       {gutterConfig.linearFeet}
                     </span>
-                    <span className="text-zinc-500 text-xs font-bold uppercase">PL</span>
+                    <span className="text-[var(--text-secondary)] text-xs font-bold uppercase">PL</span>
                   </div>
                 </div>
 
@@ -190,26 +190,26 @@ export default function EstimatorSandbox() {
                     <button
                       key={num}
                       onClick={() => appendDigit(num.toString())}
-                      className="py-3 bg-zinc-950/30 rounded-xl text-base font-bold text-zinc-300 border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95 transition-all"
+                      className="py-3 bg-[var(--bg-sidebar)] rounded-xl text-base font-bold text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--text-muted)] active:scale-95 transition-all"
                     >
                       {num}
                     </button>
                   ))}
                   <button
                     onClick={clearDigits}
-                    className="py-3 bg-red-950/20 rounded-xl text-sm font-black text-red-400 border border-red-900/30 hover:bg-red-900/20 active:scale-95 transition-all"
+                    className="py-3 bg-red-950/20 rounded-xl text-sm font-black text-red-400 border border-red-900/30 hover:bg-red-900/40 active:scale-95 transition-all"
                   >
                     C
                   </button>
                   <button
                     onClick={() => appendDigit('0')}
-                    className="py-3 bg-zinc-950/30 rounded-xl text-base font-bold text-zinc-300 border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95 transition-all"
+                    className="py-3 bg-[var(--bg-sidebar)] rounded-xl text-base font-bold text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--text-muted)] active:scale-95 transition-all"
                   >
                     0
                   </button>
                   <button
                     onClick={addToReceipt}
-                    className="py-3 bg-violet-600 rounded-xl text-white hover:bg-violet-500 active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-violet-600/10"
+                    className="crm-btn-accent py-3 bg-[var(--accent)] rounded-xl text-black hover:bg-[var(--accent-hover)] active:scale-95 transition-all flex items-center justify-center shadow-lg"
                   >
                     <CornerDownLeft size={20} />
                   </button>
@@ -218,50 +218,50 @@ export default function EstimatorSandbox() {
             </div>
           </div>
         ) : (
-          <div className="bg-zinc-900/20 border border-white/5 border-dashed rounded-2xl p-12 text-center text-zinc-500 text-xs font-bold uppercase tracking-widest">
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] border-dashed rounded-2xl p-12 text-center text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest">
             Categoría disponible en la versión completa. Selecciona "Canales".
           </div>
         )}
       </div>
 
       {/* Receipt Side */}
-      <div className="w-full lg:w-[350px] shrink-0 border border-white/5 bg-zinc-900/30 rounded-2xl overflow-hidden flex flex-col">
-        <div className="p-4 bg-zinc-950/40 border-b border-white/5 flex justify-between items-center">
-          <h4 className="text-xs font-black tracking-widest uppercase text-violet-400">Resumen del Estimado</h4>
+      <div className="w-full lg:w-[350px] shrink-0 border border-[var(--border)] bg-[var(--bg-card)] rounded-2xl overflow-hidden flex flex-col shadow-sm">
+        <div className="p-4 bg-black/10 border-b border-[var(--border)] flex justify-between items-center">
+          <h4 className="text-xs font-black tracking-widest uppercase text-[var(--accent)]">Resumen del Estimado</h4>
           <span className="bg-emerald-500/10 text-emerald-400 text-[8px] font-black border border-emerald-500/20 px-1.5 py-0.5 rounded tracking-widest uppercase">Borrador</span>
         </div>
 
         {/* Receipt List */}
         <div className="p-4 flex flex-col gap-3 min-h-[180px] max-h-[220px] overflow-y-auto">
           {receiptItems.map((item) => (
-            <div key={item.id} className={`bg-zinc-950/40 border border-white/5 p-3 rounded-xl flex justify-between items-center ${item.faded ? 'opacity-40' : ''}`}>
+            <div key={item.id} className={`bg-[var(--bg-input)] border border-[var(--border)] p-3 rounded-xl flex justify-between items-center ${item.faded ? 'opacity-40' : ''}`}>
               <div className="min-w-0">
-                <p className="font-bold text-xs text-zinc-200 truncate">{item.name}</p>
-                <span className="text-[9px] text-zinc-500">{item.details}</span>
+                <p className="font-bold text-xs text-[var(--text-primary)] truncate">{item.name}</p>
+                <span className="text-[9px] text-[var(--text-muted)]">{item.details}</span>
               </div>
-              <span className="text-sm font-black text-violet-400 shrink-0 ml-3">${item.price.toFixed(2)}</span>
+              <span className="text-sm font-black text-[var(--accent)] shrink-0 ml-3">${item.price.toFixed(2)}</span>
             </div>
           ))}
         </div>
 
         {/* Pricing Summary */}
-        <div className="p-4 border-t border-white/5 bg-zinc-950/20 space-y-2">
-          <div className="flex justify-between text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+        <div className="p-4 border-t border-[var(--border)] bg-black/10 space-y-2">
+          <div className="flex justify-between text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
             <span>Subtotal</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+          <div className="flex justify-between text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
             <span>Impuesto (8.25%)</span>
             <span>${tax.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between items-end border-t border-white/5 pt-3 mb-4">
-            <span className="text-xs font-black text-zinc-200 uppercase tracking-widest">Total</span>
-            <span className="text-2xl font-black text-violet-400 tracking-tight">${total.toFixed(2)}</span>
+          <div className="flex justify-between items-end border-t border-[var(--border)] pt-3 mb-4">
+            <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest">Total</span>
+            <span className="text-2xl font-black text-[var(--accent)] tracking-tight">${total.toFixed(2)}</span>
           </div>
 
           <button
             onClick={() => setShowProposal(true)}
-            className="w-full py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-black tracking-widest uppercase flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-violet-600/10"
+            className="crm-btn-accent w-full py-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-black rounded-xl text-xs font-black tracking-widest uppercase flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg"
           >
             <Send size={14} />
             <span>Generar Propuesta</span>
@@ -271,8 +271,8 @@ export default function EstimatorSandbox() {
 
       {/* PDF Proposal Preview Modal */}
       {showProposal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-          <div className="bg-white text-zinc-900 rounded-3xl w-full max-w-xl p-8 space-y-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md text-zinc-900">
+          <div className="bg-white rounded-3xl w-full max-w-xl p-8 space-y-6 shadow-2xl relative">
             <button
               onClick={() => setShowProposal(false)}
               className="absolute top-4 right-4 h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-zinc-800 transition-all"
@@ -342,7 +342,7 @@ export default function EstimatorSandbox() {
                   </div>
                   <div className="flex justify-between border-t border-zinc-100 pt-2 text-sm">
                     <span className="font-black text-zinc-900">Total:</span>
-                    <span className="font-black text-violet-600">${total.toFixed(2)}</span>
+                    <span className="font-black text-orange-600">${total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
