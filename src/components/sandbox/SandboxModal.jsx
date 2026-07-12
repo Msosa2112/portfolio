@@ -58,11 +58,14 @@ export default function SandboxModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, [isOpen]);
 
@@ -71,7 +74,11 @@ export default function SandboxModal({ isOpen, onClose }) {
   const ActiveComponent = TABS.find((tab) => tab.id === activeTab)?.component || CRMDashboardSandbox;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-md">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 bg-black/85 backdrop-blur-md"
+      data-lenis-prevent
+      onClick={(e) => e.stopPropagation()}
+    >
       
       {/* CSS Theme Definition */}
       <style>{`

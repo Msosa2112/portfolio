@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, Map, Sparkles, Mail, Bot, CheckCircle, AlertCircle, 
   Upload, Send, ChevronRight, Calendar, Info, RefreshCw, 
-  Home, Building, MapPin, Maximize, Flame, Lock, Eye, Menu
+  Home, Building, MapPin, Maximize, Flame, Lock, Eye, Menu,
+  Heart, Share2, Phone, Play, Pause, Trash2
 } from 'lucide-react';
 
 const MOCK_PROPERTIES = [
-  { id: 'prop-1', address: '1234 Street, Louisville, KY', price: 450000, status: 'approved', icon: CheckCircle, badgeColor: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10', statusText: 'Aprobado' },
-  { id: 'prop-2', address: '334 East Kentucky St, Louisville, KY', price: 340000, status: 'back_on_market', icon: Flame, badgeColor: 'text-amber-400 border-amber-500/20 bg-amber-500/10', statusText: 'Volvió al Mercado' },
-  { id: 'prop-3', address: '1048 Ocean Parkway, Brooklyn, NY', price: 1250000, status: 'pending', icon: Lock, badgeColor: 'text-blue-400 border-blue-500/20 bg-blue-500/10', statusText: 'Pendiente' }
+  { id: 'prop-1', address: '1234 Street, Louisville, KY', price: 450000, beds: 3, baths: 2, sqft: 1800, status: 'Active', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600', exclusive: true },
+  { id: 'prop-2', address: '334 East Kentucky St, Louisville, KY', price: 340000, beds: 4, baths: 2, sqft: 2100, status: 'Active', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600', exclusive: false },
+  { id: 'prop-3', address: '1048 Ocean Parkway, Brooklyn, NY', price: 1250000, beds: 5, baths: 4, sqft: 3400, status: 'Pending', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600', exclusive: true }
 ];
 
 export default function ZHomesSandboxModal({ isOpen, onClose }) {
@@ -17,33 +18,39 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [docStatus, setDocStatus] = useState('pending_upload'); // pending_upload, scanning, approved
   const [copilotMessages, setCopilotMessages] = useState([
-    { sender: 'bot', text: 'Hola, soy tu AI Copilot Transaccional. He analizado el contrato de Compra-Venta subido para 1234 Street. ¿Qué deseas consultar?' }
+    { sender: 'bot', text: 'Hola, soy tu AI Copilot Transaccional de ZHomes. He analizado el contrato de Compra-Venta subido para 1234 Street. ¿Qué deseas consultar hoy?' }
   ]);
   const [copilotInput, setCopilotInput] = useState('');
   const [copilotTyping, setCopilotTyping] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationText, setNotificationText] = useState('');
 
+  // Vibe Feed specific states
+  const [vibeLiked, setVibeLiked] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  // Sync scroll lock
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  // Sidebar triggers
   const navigateTo = (screen) => {
     setActiveScreen(screen);
     setMenuOpen(false);
   };
 
-  // Document upload simulation
   const handleUpload = () => {
     if (docStatus === 'approved' || uploadingDoc) return;
     setUploadingDoc(true);
@@ -52,13 +59,11 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
       setTimeout(() => {
         setDocStatus('approved');
         setUploadingDoc(false);
-        // Add message in chat
         setCopilotMessages(prev => [
           ...prev,
-          { sender: 'bot', text: '✓ Reporte de Inspección analizado por Vision AI. Sin reparaciones estructurales mayores obligatorias detectadas. Cláusula de compliance aprobada.' }
+          { sender: 'bot', text: '✓ Reporte de Inspección analizado por el OCR de Vision AI. Cláusula de compliance aprobada y guardada.' }
         ]);
-        // Trigger notification
-        triggerNotification('¡Inspección aprobada por IA e Inyectada al Deal Room!');
+        triggerNotification('¡Inspección aprobada por IA e inyectada al Deal Room!');
       }, 1500);
     }, 1000);
   };
@@ -69,7 +74,6 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
     setTimeout(() => setShowNotification(false), 3000);
   };
 
-  // Copilot message handler
   const handleCopilotSend = (textToSend) => {
     const text = textToSend || copilotInput;
     if (!text.trim()) return;
@@ -83,14 +87,14 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
       const lower = text.toLowerCase();
 
       if (lower.includes('inspeccion') || lower.includes('fecha') || lower.includes('inspección')) {
-        reply = 'Según la cláusula 4.2 del contrato de Compra-Venta de 1234 Street, el plazo de inspección expira el 24 de Julio de 2026. Faltan 12 días naturales.';
+        reply = 'Según la cláusula 4.2 del contrato de Compra-Venta de 1234 Street, el plazo de inspección expira el 24 de Julio de 2026. Quedan 12 días.';
       } else if (lower.includes('documento') || lower.includes('falta') || lower.includes('compliance')) {
         reply = docStatus === 'approved' 
           ? 'Todos los documentos obligatorios del checklist han sido subidos y aprobados con firma de compliance.' 
-          : 'Falta subir el "Reporte de Inspección". Puedes cargarlo desde la sección de Documentos para que el OCR lo valide.';
+          : 'Falta subir el "Reporte de Inspección". Haz clic en + Subir en la sección de Documentos para que el OCR lo valide.';
       } else if (lower.includes('reenviar') || lower.includes('cliente') || lower.includes('john')) {
-        reply = '¡Entendido! He enviado un extracto del estado del Deal y los hitos del contrato al chat privado del cliente John Doe.';
-        triggerNotification('Notificación enviada al Deal Room del cliente.');
+        reply = 'He enviado un extracto del estado de compliance y las fechas límite del contrato al chat privado del cliente John Doe.';
+        triggerNotification('Mensaje enviado al Deal Room del cliente.');
       } else {
         reply = 'He verificado la metadata del Deal. Todo marcha según el cronograma. El Appraisal está fijado para el 28 de Julio.';
       }
@@ -100,25 +104,24 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
     }, 1200);
   };
 
-  // Descriptions for left panel
   const getScreenDescription = () => {
     switch (activeScreen) {
       case 'map':
         return {
           title: 'Mapa & Búsqueda Geográfica',
-          desc: 'Interfaz móvil de búsqueda inmobiliaria. Integra filtros rápidos (Casas, Apartamentos) y marcadores interactivos. Los inmuebles cuentan con etiquetas visuales de estado y compliance de transacciones vinculadas.',
-          highlight: 'Observa cómo 1234 Street figura con estatus "Aprobado", mientras que otras propiedades muestran alertas de "Volvió al Mercado" o "Pendiente".'
+          desc: 'Interfaz móvil de búsqueda inmobiliaria. Reclama un diseño idéntico al del portal de ZHomes: fondo oscuro, barra de búsqueda con IA integrada y pins flotantes con los precios de los listados en rojo.',
+          highlight: 'Observa la tarjeta inferior estilo Airbnb que te permite explorar detalles de la propiedad en un formato sumamente fluido.'
         };
       case 'vibe':
         return {
           title: 'Vibe Feed IA',
-          desc: 'Un muro interactivo impulsado por IA que condensa estadísticas de estilo de vida, seguridad y accesibilidad de los vecindarios. En lugar de leer PDFs masivos, los compradores e inversores obtienen un sumario conversacional.',
-          highlight: 'El feed analiza métricas de conectividad y ruido y provee un resumen proactivo automatizado.'
+          desc: 'Sección inspirada en el formato de videos verticales de TikTok. En ZHomes, los listados exclusivos se presentan mediante micro-videos del vecindario con estadísticas de estilo de vida, seguridad y accesibilidad superpuestas.',
+          highlight: 'Prueba a darle Like (Corazón) o a pausar la reproducción de la propiedad para ver cómo interactúa el feed.'
         };
       case 'deal':
         return {
           title: 'Checklist & Deal Room',
-          desc: 'Espacio de trabajo transaccional. Los Realtors y Brokers supervisan el checklist legal. Subir un archivo inicia un escaneo OCR automático con Vision AI que valida los hitos del contrato y los aprueba automáticamente.',
+          desc: 'Espacio de trabajo transaccional. Los Realtors y Brokers supervisan el checklist de compliance. Subir un archivo inicia un escaneo OCR automático con Vision AI que valida los hitos del contrato y los aprueba automáticamente.',
           highlight: 'Haz clic en el botón "+ Subir" en el casillero de "Reporte de Inspección" para simular el escaneo legal y ver cómo la IA valida el documento en tiempo real.'
         };
       case 'copilot':
@@ -141,34 +144,41 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
   const screenInfo = getScreenDescription();
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 bg-black/85 backdrop-blur-md font-sans">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 bg-black/90 backdrop-blur-md font-sans"
+      data-lenis-prevent
+      onClick={(e) => e.stopPropagation()}
+    >
       
-      {/* Liquid Glass Shell Container wrapped in cyan theme */}
-      <div className="relative w-full h-full md:max-w-5xl md:h-[90vh] bg-[#070b13] md:rounded-3xl border border-cyan-500/10 shadow-2xl flex flex-col md:flex-row overflow-hidden text-zinc-300">
+      {/* Liquid Glass Shell Container wrapped in red theme */}
+      <div className="relative w-full h-full md:max-w-5xl md:h-[90vh] bg-[#0c0d12] md:rounded-3xl border border-red-500/10 shadow-2xl flex flex-col md:flex-row overflow-hidden text-zinc-300">
         
         {/* Glow effect */}
-        <div className="absolute -top-[10%] -left-[10%] w-[35%] h-[35%] rounded-full bg-cyan-500/5 blur-[90px] pointer-events-none" />
-        <div className="absolute -bottom-[10%] -right-[10%] w-[35%] h-[35%] rounded-full bg-indigo-500/5 blur-[90px] pointer-events-none" />
+        <div className="absolute -top-[10%] -left-[10%] w-[35%] h-[35%] rounded-full bg-[#E31E24]/5 blur-[90px] pointer-events-none" />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[35%] h-[35%] rounded-full bg-red-600/5 blur-[90px] pointer-events-none" />
 
         {/* Left Explainer Panel */}
-        <div className="w-full md:w-[380px] border-b md:border-b-0 md:border-r border-zinc-900 bg-[#080d19] p-6 flex flex-col justify-between shrink-0 select-none">
+        <div 
+          className="w-full md:w-[380px] border-b md:border-b-0 md:border-r border-zinc-900 bg-[#08090e] p-6 flex flex-col justify-between shrink-0 select-none overflow-y-auto"
+          data-lenis-prevent
+        >
           
           <div className="space-y-6">
             
             {/* Header logo */}
             <div className="flex items-center gap-3 border-b border-zinc-900 pb-4">
-              <div className="h-9 w-9 rounded-lg bg-cyan-950 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-extrabold">
+              <div className="h-9 w-9 rounded-lg bg-red-950/40 border border-red-500/30 flex items-center justify-center text-[#E31E24] font-extrabold text-sm">
                 ZH
               </div>
               <div>
                 <h3 className="font-extrabold text-sm text-white tracking-wider">ZHOMES TC</h3>
-                <p className="text-[9px] text-cyan-400 uppercase tracking-widest font-black">Transaction Portal</p>
+                <p className="text-[9px] text-[#E31E24] uppercase tracking-widest font-black">Transaction Portal</p>
               </div>
             </div>
 
             {/* Screen info */}
             <div className="space-y-3.5 animate-in fade-in duration-300">
-              <span className="text-[8px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 px-2 py-0.5 rounded font-black tracking-widest uppercase inline-block">
+              <span className="text-[8px] bg-red-500/10 text-red-400 border border-red-500/25 px-2 py-0.5 rounded font-black tracking-widest uppercase inline-block">
                 EXPLICADOR DE SANDBOX
               </span>
               <h2 className="text-lg font-black text-white leading-tight">{screenInfo.title}</h2>
@@ -176,8 +186,8 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                 {screenInfo.desc}
               </p>
               
-              <div className="bg-cyan-500/5 border border-cyan-500/10 rounded-xl p-3.5 space-y-1.5 mt-2">
-                <span className="text-[9px] font-black text-cyan-400 uppercase tracking-wider block">Punto Clave a Probar:</span>
+              <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-3.5 space-y-1.5 mt-2">
+                <span className="text-[9px] font-black text-[#E31E24] uppercase tracking-wider block">Punto Clave a Probar:</span>
                 <p className="text-[11px] text-zinc-300 leading-relaxed font-medium">
                   {screenInfo.highlight}
                 </p>
@@ -207,7 +217,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                     onClick={() => navigateTo(item.id)}
                     className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold tracking-wider uppercase transition-all whitespace-nowrap active:scale-97 border ${
                       isActive 
-                        ? 'bg-cyan-950/45 text-cyan-400 border-cyan-500/30 font-black' 
+                        ? 'bg-red-950/45 text-red-400 border-red-500/30 font-black' 
                         : 'text-zinc-400 hover:text-white border-transparent hover:bg-white/5'
                     }`}
                   >
@@ -220,7 +230,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
             <button
               onClick={onClose}
-              className="w-full mt-4 py-2 bg-zinc-900 hover:bg-zinc-850 text-white font-bold rounded-xl text-[10px] uppercase border border-zinc-800 transition-all active:scale-95 text-center"
+              className="w-full mt-4 py-2 bg-zinc-900 hover:bg-zinc-850 text-white font-bold rounded-xl text-[10px] uppercase border border-zinc-800 transition-all active:scale-95 text-center shadow-lg"
             >
               Cerrar Simulador
             </button>
@@ -229,40 +239,46 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
         </div>
 
         {/* Center/Right Phone Simulator Viewport */}
-        <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-[#090f1a] relative overflow-hidden">
+        <div 
+          className="flex-1 flex items-center justify-center p-4 md:p-8 bg-[#07080c] relative overflow-hidden"
+          data-lenis-prevent
+        >
           
           {/* Notifications banner inside simulator */}
           {showNotification && (
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-[#0e1726] border border-cyan-500/30 text-cyan-400 text-[10px] font-black tracking-wider uppercase px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 z-[130] animate-in slide-in-from-top-4 duration-300">
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-[#0e0f14] border border-red-500/30 text-[#E31E24] text-[10px] font-black tracking-wider uppercase px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 z-[130] animate-in slide-in-from-top-4 duration-300">
               <CheckCircle size={12} />
               <span>{notificationText}</span>
             </div>
           )}
 
           {/* Smartphone Simulator Mock Container */}
-          <div className="relative w-[280px] h-[550px] bg-black rounded-[40px] p-2.5 shadow-2xl border-[5px] border-zinc-800 flex flex-col overflow-hidden shrink-0">
+          <div className="relative w-[300px] h-[580px] bg-black rounded-[45px] p-3 shadow-2xl border-[6px] border-zinc-800 flex flex-col overflow-hidden shrink-0">
             
             {/* Notch */}
-            <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-28 h-4 bg-black rounded-full z-50 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-zinc-900 ml-6" />
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-4.5 bg-black rounded-full z-50 flex items-center justify-center">
+              <div className="w-2.5 h-2.5 rounded-full bg-zinc-900 ml-8" />
             </div>
 
             {/* Screen Inner Container */}
-            <div className="flex-1 bg-[#0b0e14] rounded-[30px] overflow-hidden flex flex-col relative text-[11px]">
+            <div 
+              className="flex-1 bg-[#121212] rounded-[32px] overflow-hidden flex flex-col relative text-[11px]"
+              data-lenis-prevent
+            >
               
               {/* App Status bar */}
-              <div className="h-6 pt-1.5 px-6 flex justify-between items-center text-[8px] text-zinc-500 font-bold tracking-wider bg-[#0b0e14]/50 select-none z-40 shrink-0">
+              <div className="h-6 pt-1.5 px-6 flex justify-between items-center text-[8px] text-zinc-500 font-bold tracking-wider bg-transparent select-none z-40 shrink-0">
                 <span>9:41 AM</span>
                 <div className="flex items-center gap-1">
                   <span>LTE</span>
-                  <div className="w-4 h-2 border border-zinc-600 rounded-sm p-0.5 flex items-center justify-start">
-                    <div className="w-2.5 h-1 bg-zinc-400 rounded-2xs" />
+                  <div className="w-4.5 h-2 border border-zinc-600 rounded-sm p-0.5 flex items-center justify-start">
+                    <div className="w-3 h-1 bg-zinc-400 rounded-2xs" />
                   </div>
                 </div>
               </div>
 
               {/* App Header */}
-              <header className="px-4 py-3 bg-[#0d121c] border-b border-zinc-900 flex justify-between items-center z-40 shrink-0 select-none">
+              <header className="px-4 py-3 bg-[#141414]/90 backdrop-blur-md border-b border-zinc-900 flex justify-between items-center z-45 shrink-0 select-none">
                 <button 
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="p-1 hover:bg-white/5 rounded-lg text-zinc-400 hover:text-white transition-all"
@@ -271,9 +287,9 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                 </button>
                 <div className="flex items-center gap-1">
                   <span className="font-extrabold text-[10px] text-white tracking-widest">ZHOMES</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#E31E24] animate-pulse" />
                 </div>
-                <div className="w-5 h-5 rounded-full bg-cyan-950 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-[8px]">
+                <div className="w-5 h-5 rounded-full bg-red-950/40 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-[8px]">
                   JD
                 </div>
               </header>
@@ -281,11 +297,11 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
               {/* Sidebar Menu Overlay inside Phone Simulator */}
               {menuOpen && (
                 <div 
-                  className="absolute inset-0 bg-[#070b13]/90 backdrop-blur-sm z-[110] flex flex-col p-5 animate-in slide-in-from-left duration-200"
+                  className="absolute inset-0 bg-black/90 backdrop-blur-sm z-[110] flex flex-col p-5 animate-in slide-in-from-left duration-200"
                   onClick={() => setMenuOpen(false)}
                 >
                   <div 
-                    className="w-48 bg-[#0d121c] h-full border-r border-zinc-900 p-4 space-y-4 flex flex-col"
+                    className="w-48 bg-[#141414] h-full border-r border-zinc-900 p-4 space-y-4 flex flex-col"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div className="flex justify-between items-center border-b border-zinc-900 pb-2.5">
@@ -310,7 +326,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                             key={link.id}
                             onClick={() => navigateTo(link.id)}
                             className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-[9px] font-bold text-left tracking-wider uppercase transition-all ${
-                              isLinkActive ? 'bg-cyan-500/10 text-cyan-400' : 'text-zinc-400 hover:text-white'
+                              isLinkActive ? 'bg-red-500/10 text-red-400' : 'text-zinc-400 hover:text-white'
                             }`}
                           >
                             <Icon size={11} />
@@ -328,72 +344,93 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
               )}
 
               {/* Viewport Content */}
-              <div className="flex-1 overflow-y-auto relative p-3.5 space-y-3.5 scrollbar-none select-none">
+              <div 
+                className="flex-1 overflow-y-auto relative p-3.5 space-y-3.5 scrollbar-none select-none"
+                data-lenis-prevent
+              >
                 
                 {/* 1. Map Search Page Screen */}
                 {activeScreen === 'map' && (
-                  <div className="space-y-3.5 animate-in fade-in duration-300">
+                  <div className="space-y-3.5 animate-in fade-in duration-200">
                     
                     {/* Mock Searchbar */}
-                    <div className="bg-[#121926] border border-zinc-900 rounded-xl px-3 py-2 text-[10px] text-zinc-400 flex items-center justify-between">
-                      <span>Buscar ciudad, código postal...</span>
-                      <MapPin size={10} className="text-cyan-400" />
+                    <div className="bg-[#1a1a1a] border border-zinc-800 rounded-2xl px-3.5 py-2.5 text-[10px] text-zinc-400 flex items-center justify-between shadow-md">
+                      <span className="truncate">Casas cerca de escuelas...</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#E31E24] animate-ping" />
+                        <MapPin size={11} className="text-[#E31E24]" />
+                      </div>
                     </div>
 
                     {/* Filter Pills */}
                     <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                      <span className="px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-500/20 text-[8px] font-black uppercase whitespace-nowrap">Casas</span>
-                      <span className="px-2 py-0.5 rounded-full bg-[#121926] text-zinc-400 text-[8px] font-black uppercase whitespace-nowrap">Departamentos</span>
-                      <span className="px-2 py-0.5 rounded-full bg-[#121926] text-zinc-400 text-[8px] font-black uppercase whitespace-nowrap">AI Labels</span>
+                      <span className="px-3 py-1 rounded-full bg-red-950/40 text-red-400 border border-red-500/20 text-[8px] font-black uppercase whitespace-nowrap">Casas</span>
+                      <span className="px-3 py-1 rounded-full bg-[#1a1a1a] text-zinc-400 border border-zinc-800 text-[8px] font-black uppercase whitespace-nowrap">Departamentos</span>
+                      <span className="px-3 py-1 rounded-full bg-[#1a1a1a] text-zinc-400 border border-zinc-800 text-[8px] font-black uppercase whitespace-nowrap">AI Labels</span>
                     </div>
 
                     {/* Mock Map Vector Grid */}
-                    <div className="h-44 bg-[#0d121c] border border-zinc-900 rounded-2xl relative overflow-hidden flex items-center justify-center">
+                    <div className="h-44 bg-[#141414] border border-zinc-800 rounded-2xl relative overflow-hidden flex items-center justify-center">
                       
                       {/* Grid representation */}
-                      <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 opacity-5 pointer-events-none">
+                      <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 opacity-[0.03] pointer-events-none">
                         {Array.from({ length: 36 }).map((_, i) => (
                           <div key={i} className="border border-white" />
                         ))}
                       </div>
 
-                      {/* Map Pins */}
+                      {/* Map Pins (Prices in Red style like actual MapPageMobile) */}
                       <div className="absolute top-1/4 left-1/3 flex flex-col items-center animate-bounce">
-                        <MapPin size={14} className="text-cyan-400 fill-cyan-450" />
-                        <span className="bg-black/80 px-1 py-0.2 rounded text-[7px] font-black text-white">$450k</span>
+                        <div className="bg-[#E31E24] text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 shadow-md">
+                          $450K
+                        </div>
+                        <div className="w-1.5 h-1.5 bg-[#E31E24] rotate-45 -mt-0.5" />
                       </div>
 
                       <div className="absolute bottom-1/3 right-1/4 flex flex-col items-center">
-                        <MapPin size={12} className="text-amber-400" />
-                        <span className="bg-black/80 px-1 py-0.2 rounded text-[7px] font-black text-white">$340k</span>
+                        <div className="bg-[#222] text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-zinc-700 shadow-md">
+                          $340K
+                        </div>
+                        <div className="w-1.5 h-1.5 bg-[#222] rotate-45 -mt-0.5" />
                       </div>
 
-                      <span className="text-[8px] font-black tracking-widest text-zinc-600 uppercase">Interactive Map view</span>
+                      <span className="text-[8px] font-black tracking-widest text-zinc-700 uppercase">MapLibre Raster Engine</span>
                     </div>
 
-                    {/* Properties List */}
-                    <div className="space-y-2">
-                      <h5 className="text-[9px] font-black text-white uppercase tracking-wider">Propiedades Cercanas</h5>
-                      <div className="space-y-2">
-                        {MOCK_PROPERTIES.map((prop) => {
-                          const Icon = prop.icon;
-                          return (
-                            <div 
-                              key={prop.id}
-                              onClick={() => navigateTo('deal')}
-                              className="bg-[#0d121c] border border-zinc-900 rounded-xl p-2.5 flex items-center justify-between gap-3 hover:border-cyan-500/25 transition-all cursor-pointer"
-                            >
-                              <div className="space-y-1">
-                                <p className="font-bold text-white text-[10px] leading-tight truncate max-w-[150px]">{prop.address}</p>
-                                <span className="text-[9px] font-bold text-zinc-500">${prop.price.toLocaleString()}</span>
-                              </div>
-                              <span className={`px-2 py-0.5 rounded border text-[8px] font-black tracking-wider uppercase flex items-center gap-1 ${prop.badgeColor}`}>
-                                <Icon size={8} />
-                                {prop.statusText}
-                              </span>
+                    {/* Properties List (Airbnb-style bottom card in actual code) */}
+                    <div className="space-y-2.5">
+                      <div className="flex justify-between items-center">
+                        <h5 className="text-[9px] font-black text-white uppercase tracking-wider">Propiedades Encontradas</h5>
+                        <span className="text-[8px] text-zinc-500 font-bold">3 resultados</span>
+                      </div>
+                      
+                      <div className="space-y-2.5">
+                        {MOCK_PROPERTIES.map((prop) => (
+                          <div 
+                            key={prop.id}
+                            onClick={() => navigateTo('deal')}
+                            className="bg-[#1a1a1a] border border-zinc-800 rounded-xl overflow-hidden flex gap-3 hover:border-red-500/20 transition-all cursor-pointer"
+                          >
+                            <div className="w-20 h-16 shrink-0 relative">
+                              <img src={prop.image} alt="" className="w-full h-full object-cover" />
+                              {prop.exclusive && (
+                                <span className="absolute top-1 left-1 bg-[#E31E24] text-white text-[6px] font-black px-1.5 py-0.2 rounded uppercase">
+                                  ZH
+                                </span>
+                              )}
                             </div>
-                          );
-                        })}
+                            <div className="p-2 flex flex-col justify-center min-w-0">
+                              <p className="font-bold text-white text-[9px] leading-tight truncate">{prop.address}</p>
+                              <div className="flex items-center gap-1.5 text-zinc-400 text-[8px] mt-1 font-semibold">
+                                <span>{prop.beds}bd</span>
+                                <span>•</span>
+                                <span>{prop.baths}ba</span>
+                                <span>•</span>
+                                <span className="text-[#E31E24] font-black">${(prop.price/1000)}K</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
@@ -402,47 +439,68 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
                 {/* 2. Vibe Feed Screen */}
                 {activeScreen === 'vibe' && (
-                  <div className="space-y-3.5 animate-in fade-in duration-300">
+                  <div className="space-y-3.5 -m-3.5 h-[480px] relative bg-black flex flex-col justify-between overflow-hidden animate-in fade-in duration-200">
                     
-                    {/* Header */}
-                    <div className="flex justify-between items-center">
-                      <h5 className="text-[9px] font-black text-white uppercase tracking-wider">Vecindario Vibe Feed</h5>
-                      <span className="text-[8px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-1.5 py-0.5 rounded font-black">AI ANALYZED</span>
+                    {/* Background Ken Burns Pan Image Mocking Video */}
+                    <div className="absolute inset-0 z-1">
+                      <img 
+                        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600" 
+                        alt="" 
+                        className={`w-full h-full object-cover transform scale-110 origin-center ${isPlaying ? 'animate-pulse' : ''}`}
+                        style={{ filter: 'brightness(0.75)' }}
+                      />
                     </div>
 
-                    {/* Vibe Score Card */}
-                    <div className="bg-gradient-to-br from-[#0d121c] to-[#121a2c] border border-zinc-900 rounded-2xl p-3.5 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-1.5 text-cyan-400">
-                          <Sparkles size={12} />
-                          <span className="font-black text-[9px] uppercase tracking-wider">Ocean Parkway Area</span>
-                        </div>
-                        <span className="text-[12px] font-black text-white">92%</span>
-                      </div>
-                      
-                      <p className="text-[10px] text-zinc-400 leading-relaxed font-medium">
-                        "Este vecindario cuenta con una valoración de tranquilidad excepcional. Se destaca por una alta concentración de parques familiares, ciclovías, y excelente índice de conectividad vial."
-                      </p>
+                    {/* Vibe overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-black/45 z-2" />
 
-                      <div className="grid grid-cols-2 gap-1.5 text-[8px] font-black uppercase text-zinc-300">
-                        <span className="bg-cyan-950/30 border border-cyan-500/10 px-2 py-1 rounded flex items-center gap-1">
-                          🟢 Alta Conectividad
-                        </span>
-                        <span className="bg-cyan-950/30 border border-cyan-500/10 px-2 py-1 rounded flex items-center gap-1">
-                          🟢 Nivel Ruido: Bajo
-                        </span>
-                      </div>
+                    {/* Top overlay navigation */}
+                    <div className="p-4 flex justify-between items-center z-10 select-none">
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest text-shadow">Ocean Parkway Area</span>
+                      <span className="bg-[#E31E24] text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow">
+                        92% VIBE
+                      </span>
                     </div>
 
-                    {/* Additional Posts */}
-                    <div className="bg-[#0d121c] border border-zinc-900 rounded-xl p-3 space-y-2">
-                      <div className="flex items-center gap-1.5 text-zinc-400 text-[8px] font-bold">
-                        <Building size={10} />
-                        <span>Residencias Unifamiliares</span>
+                    {/* Right action controls */}
+                    <div className="absolute right-3.5 bottom-24 flex flex-col gap-4 z-10 items-center">
+                      <button 
+                        onClick={() => setVibeLiked(!vibeLiked)}
+                        className={`h-9 w-9 rounded-full flex items-center justify-center border shadow transition-all ${
+                          vibeLiked ? 'bg-[#E31E24] border-[#E31E24] text-white' : 'bg-black/40 border-white/20 text-white'
+                        }`}
+                      >
+                        <Heart size={14} className={vibeLiked ? 'fill-white' : ''} />
+                      </button>
+                      <button className="h-9 w-9 rounded-full bg-black/40 border border-white/20 flex items-center justify-center text-white shadow">
+                        <Share2 size={12} />
+                      </button>
+                      <button 
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        className="h-9 w-9 rounded-full bg-black/40 border border-white/20 flex items-center justify-center text-white shadow"
+                      >
+                        {isPlaying ? <Pause size={12} /> : <Play size={12} />}
+                      </button>
+                    </div>
+
+                    {/* Bottom Property Detail overlay */}
+                    <div className="p-4 z-10 space-y-2 select-none">
+                      <div className="flex items-center gap-1.5 text-red-400">
+                        <Sparkles size={11} />
+                        <span className="font-black text-[9px] uppercase tracking-wider">RECOMENDADO POR IA</span>
                       </div>
-                      <p className="text-[9px] text-zinc-500 font-medium">
-                        El 84% de las propiedades corresponde a residencias unifamiliares con una media de 3.5 habitaciones.
+                      <h4 className="text-white font-extrabold text-[12px] leading-tight text-shadow">1234 Street, Louisville, KY</h4>
+                      <p className="text-[9px] text-zinc-300 leading-relaxed font-medium text-shadow">
+                        "Estadísticas del vecindario muestran bajos niveles de ruido y alta densidad de zonas verdes familiares. La IA reporta un excelente ratio de revalorización."
                       </p>
+                      <div className="flex gap-1.5 text-[8px] font-black uppercase text-zinc-300 pt-1">
+                        <span className="bg-black/60 border border-white/10 px-2 py-0.5 rounded">
+                          🌳 Parques Familiares
+                        </span>
+                        <span className="bg-black/60 border border-white/10 px-2 py-0.5 rounded">
+                          📶 Fibra Simétrica
+                        </span>
+                      </div>
                     </div>
 
                   </div>
@@ -450,34 +508,34 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
                 {/* 3. Deal Checklist / Properties Screen */}
                 {activeScreen === 'deal' && (
-                  <div className="space-y-3.5 animate-in fade-in duration-300">
+                  <div className="space-y-3.5 animate-in fade-in duration-200">
                     
-                    {/* Property header */}
-                    <div className="bg-[#0d121c] border border-zinc-900 rounded-xl p-3 space-y-1.5">
+                    {/* Deal Header */}
+                    <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-3 space-y-1.5 shadow-sm">
                       <div className="flex justify-between items-center text-[7px] font-black text-zinc-500 uppercase tracking-widest">
-                        <span>Transaction ID: #TC-1234</span>
-                        <span className="text-cyan-400">Client Deal Room</span>
+                        <span>DEAL: #TC-1234</span>
+                        <span className="text-[#E31E24]">Compliance Audit</span>
                       </div>
-                      <h4 className="font-extrabold text-white text-[11px] leading-tight">1234 Street, Louisville, KY</h4>
-                      <div className="flex justify-between items-center text-[9px] pt-1">
+                      <h4 className="font-extrabold text-white text-[10px] leading-tight">1234 Street, Louisville, KY</h4>
+                      <div className="flex justify-between items-center text-[8px] pt-1 border-t border-zinc-900 mt-1">
                         <span className="text-zinc-400 font-bold">$450,000</span>
-                        <span className="text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded">Activo</span>
+                        <span className="text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded">Aprobado</span>
                       </div>
                     </div>
 
-                    {/* Checklist */}
+                    {/* Checklist Documents */}
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <h5 className="text-[9px] font-black text-white uppercase tracking-wider">Documentos Compliance</h5>
-                        <span className="text-[8px] text-zinc-500 font-black">2 / 3 Completados</span>
+                        <h5 className="text-[9px] font-black text-white uppercase tracking-wider">Checklist Transaccional</h5>
+                        <span className="text-[8px] text-zinc-500 font-bold">2 / 3 Listo</span>
                       </div>
 
                       <div className="space-y-2">
                         
                         {/* Doc 1 */}
-                        <div className="bg-[#0d121c] border border-zinc-900 rounded-xl p-2.5 flex items-center justify-between gap-3">
+                        <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-2.5 flex items-center justify-between gap-3 shadow-2xs">
                           <div className="space-y-0.5">
-                            <p className="font-bold text-white text-[9px]">Contrato de Compra-Venta</p>
+                            <p className="font-bold text-white text-[9px]">Purchase Agreement</p>
                             <span className="text-[8px] text-zinc-500">Subido el 10 Jul</span>
                           </div>
                           <span className="text-emerald-400 font-black flex items-center gap-1 text-[8px] uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
@@ -486,9 +544,9 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                         </div>
 
                         {/* Doc 2 */}
-                        <div className="bg-[#0d121c] border border-zinc-900 rounded-xl p-2.5 flex items-center justify-between gap-3">
+                        <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-2.5 flex items-center justify-between gap-3 shadow-2xs">
                           <div className="space-y-0.5">
-                            <p className="font-bold text-white text-[9px]">Prueba de Fondos (POF)</p>
+                            <p className="font-bold text-white text-[9px]">Proof of Funds (POF)</p>
                             <span className="text-[8px] text-zinc-500">Subido el 11 Jul</span>
                           </div>
                           <span className="text-emerald-400 font-black flex items-center gap-1 text-[8px] uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
@@ -497,11 +555,11 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                         </div>
 
                         {/* Doc 3 (Interactive Upload) */}
-                        <div className="bg-[#0d121c] border border-zinc-900 rounded-xl p-2.5 flex items-center justify-between gap-3 relative overflow-hidden">
+                        <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-2.5 flex items-center justify-between gap-3 relative overflow-hidden shadow-2xs">
                           
                           {/* OCR scanning overlay effect */}
                           {docStatus === 'scanning' && (
-                            <div className="absolute inset-0 bg-cyan-950/20 backdrop-blur-2xs flex items-center justify-center text-cyan-400 font-bold text-[8px] uppercase tracking-wider">
+                            <div className="absolute inset-0 bg-red-950/20 backdrop-blur-2xs flex items-center justify-center text-red-400 font-bold text-[8px] uppercase tracking-wider">
                               <span className="animate-pulse">Vision AI OCR Escaneando...</span>
                             </div>
                           )}
@@ -514,14 +572,14 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                           </div>
 
                           {docStatus === 'approved' ? (
-                            <span className="text-emerald-400 font-black flex items-center gap-1 text-[8px] uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                            <span className="text-emerald-400 font-black flex items-center gap-1 text-[8px] uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full animate-bounce">
                               <CheckCircle size={8} /> Aprobado
                             </span>
                           ) : (
                             <button
                               onClick={handleUpload}
                               disabled={uploadingDoc}
-                              className="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-black font-black rounded-lg text-[8px] uppercase flex items-center gap-1 active:scale-95 transition-all disabled:opacity-50"
+                              className="px-2.5 py-1.5 bg-[#E31E24] hover:bg-red-500 text-white font-black rounded-lg text-[8px] uppercase flex items-center gap-1 active:scale-95 transition-all disabled:opacity-50"
                             >
                               <Upload size={8} />
                               <span>{uploadingDoc ? 'Cargando...' : '+ Subir'}</span>
@@ -537,15 +595,15 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
                 {/* 4. AI Copilot Chat Screen */}
                 {activeScreen === 'copilot' && (
-                  <div className="flex flex-col h-[400px] -m-3.5 relative bg-[#0b0e14]">
+                  <div className="flex flex-col h-[400px] -m-3.5 relative bg-[#121212]">
                     
                     {/* Chat top header */}
-                    <div className="p-3 bg-[#0d121c] border-b border-zinc-900 flex items-center justify-between select-none">
+                    <div className="p-3 bg-[#141414] border-b border-zinc-900 flex items-center justify-between select-none">
                       <div className="flex items-center gap-1.5">
-                        <Bot size={12} className="text-cyan-400 animate-pulse" />
+                        <Bot size={12} className="text-[#E31E24] animate-pulse" />
                         <span className="font-black text-[9px] text-white uppercase tracking-wider">Asistente Transaccional</span>
                       </div>
-                      <span className="text-[8px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 px-1.5 py-0.2 rounded font-black">RAG ACTIVE</span>
+                      <span className="text-[8px] bg-red-500/10 text-red-400 border border-red-500/25 px-1.5 py-0.2 rounded font-black">RAG ACTIVE</span>
                     </div>
 
                     {/* Messages Scroll Area */}
@@ -556,14 +614,14 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                           className={`flex gap-2 max-w-[85%] ${msg.sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
                         >
                           {msg.sender === 'bot' && (
-                            <div className="h-5 w-5 rounded bg-cyan-950 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                            <div className="h-5 w-5 rounded bg-red-950 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
                               <Bot size={10} />
                             </div>
                           )}
                           <div className={`p-2 rounded-xl leading-normal font-medium ${
                             msg.sender === 'user' 
-                              ? 'bg-cyan-950 text-white rounded-tr-none border border-cyan-500/20' 
-                              : 'bg-[#0d121c] text-zinc-300 border border-zinc-900 rounded-tl-none'
+                              ? 'bg-red-500/10 text-white rounded-tr-none border border-red-500/20' 
+                              : 'bg-[#1a1a1a] text-zinc-300 border border-zinc-800 rounded-tl-none'
                           }`}>
                             {msg.text}
                           </div>
@@ -572,10 +630,10 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
                       {copilotTyping && (
                         <div className="flex gap-2 max-w-[85%]">
-                          <div className="h-5 w-5 rounded bg-cyan-950 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                          <div className="h-5 w-5 rounded bg-red-950 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
                             <Bot size={10} />
                           </div>
-                          <div className="bg-[#0d121c] border border-zinc-900 p-2 rounded-xl rounded-tl-none text-zinc-500 flex items-center gap-1">
+                          <div className="bg-[#1a1a1a] border border-zinc-800 p-2 rounded-xl rounded-tl-none text-zinc-500 flex items-center gap-1">
                             <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '0ms' }} />
                             <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '150ms' }} />
                             <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -588,19 +646,19 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                     <div className="p-2 border-t border-zinc-900 bg-black/15 flex gap-1.5 overflow-x-auto scrollbar-none select-none">
                       <button
                         onClick={() => handleCopilotSend('¿Cuándo vence la inspección de 1234 Street?')}
-                        className="px-2 py-1 bg-[#0d121c] border border-zinc-900 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-cyan-500/30 whitespace-nowrap"
+                        className="px-2 py-1 bg-[#1a1a1a] border border-zinc-850 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-red-500/30 whitespace-nowrap"
                       >
                         Inspección Fecha
                       </button>
                       <button
                         onClick={() => handleCopilotSend('¿Faltan documentos en 1234 Street?')}
-                        className="px-2 py-1 bg-[#0d121c] border border-zinc-900 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-cyan-500/30 whitespace-nowrap"
+                        className="px-2 py-1 bg-[#1a1a1a] border border-zinc-850 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-red-500/30 whitespace-nowrap"
                       >
                         Faltantes
                       </button>
                       <button
                         onClick={() => handleCopilotSend('Reenviar resumen al cliente')}
-                        className="px-2 py-1 bg-[#0d121c] border border-zinc-900 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-cyan-500/30 whitespace-nowrap"
+                        className="px-2 py-1 bg-[#1a1a1a] border border-zinc-850 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-red-500/30 whitespace-nowrap"
                       >
                         Reenviar Al Cliente
                       </button>
@@ -609,7 +667,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                     {/* Input Bar */}
                     <form 
                       onSubmit={(e) => { e.preventDefault(); handleCopilotSend(); }}
-                      className="p-2 bg-[#090f1a] border-t border-zinc-900 flex gap-1.5 items-center select-none shrink-0"
+                      className="p-2 bg-black border-t border-zinc-900 flex gap-1.5 items-center select-none shrink-0"
                     >
                       <input
                         type="text"
@@ -617,12 +675,12 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                         value={copilotInput}
                         onChange={(e) => setCopilotInput(e.target.value)}
                         disabled={copilotTyping}
-                        className="flex-1 bg-[#0d121c] border border-zinc-900 rounded-xl px-2.5 py-1.5 text-[9px] text-white focus:outline-none placeholder-zinc-700"
+                        className="flex-1 bg-[#1a1a1a] border border-zinc-850 rounded-xl px-2.5 py-1.5 text-[9px] text-white focus:outline-none placeholder-zinc-700"
                       />
                       <button
                         type="submit"
                         disabled={copilotTyping || !copilotInput.trim()}
-                        className="p-1.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-black rounded-lg transition-all"
+                        className="p-1.5 bg-[#E31E24] hover:bg-red-500 disabled:opacity-50 text-white rounded-lg transition-all"
                       >
                         <Send size={10} />
                       </button>
@@ -633,10 +691,10 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
                 {/* 5. Resend Email Screen */}
                 {activeScreen === 'email' && (
-                  <div className="space-y-3 animate-in fade-in duration-300 text-[10px]">
+                  <div className="space-y-3 animate-in fade-in duration-200 text-[10px]">
                     
                     {/* Email Headers */}
-                    <div className="bg-[#0d121c] border border-zinc-900 rounded-xl p-3 space-y-1.5 text-zinc-400">
+                    <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-3 space-y-1.5 text-zinc-400">
                       <div>
                         <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-500 block">De:</span>
                         <p className="font-bold text-white">info@zhomesapp.com</p>
@@ -647,12 +705,12 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                       </div>
                       <div className="border-t border-zinc-900 pt-1.5">
                         <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-500 block">Asunto:</span>
-                        <p className="font-bold text-cyan-400 leading-tight">Compliance Aprobado - 1234 Street, Louisville, KY</p>
+                        <p className="font-bold text-[#E31E24] leading-tight">Compliance Aprobado - 1234 Street, Louisville, KY</p>
                       </div>
                     </div>
 
                     {/* Email Template Body (Charcoal background) */}
-                    <div className="bg-[#121824] border border-zinc-900 rounded-xl p-4 space-y-4 text-zinc-300 font-medium">
+                    <div className="bg-[#1c1c1e] border border-zinc-800 rounded-xl p-4 space-y-4 text-zinc-355 font-medium shadow-md">
                       
                       {/* Logo header */}
                       <div className="flex justify-center border-b border-zinc-800 pb-3">
@@ -663,7 +721,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                         Estimado **John Doe**,
                       </p>
 
-                      <p className="text-[10px] leading-relaxed">
+                      <p className="text-[10px] leading-relaxed font-medium">
                         Nos complace informarle que el checklist de compliance para la transacción de su propiedad en **1234 Street** ha sido completado y validado.
                       </p>
 
@@ -695,7 +753,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
               </div>
 
               {/* Home Indicator bar */}
-              <div className="h-4 bg-[#0b0e14] flex items-center justify-center shrink-0 select-none pb-1">
+              <div className="h-4 bg-[#121212] flex items-center justify-center shrink-0 select-none pb-1">
                 <div className="w-20 h-1 bg-zinc-700 rounded-full" />
               </div>
 
@@ -707,7 +765,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
           {activeScreen !== 'copilot' && (
             <button
               onClick={() => setActiveScreen('copilot')}
-              className="absolute bottom-12 right-[calc(50%-110px)] h-9 w-9 rounded-full bg-cyan-600 hover:bg-cyan-500 text-black flex items-center justify-center shadow-lg transition-all active:scale-95 cursor-pointer z-50 animate-bounce"
+              className="absolute bottom-12 right-[calc(50%-120px)] h-9 w-9 rounded-full bg-[#E31E24] hover:bg-red-500 text-white flex items-center justify-center shadow-lg transition-all active:scale-95 cursor-pointer z-50 animate-bounce"
               title="Abrir AI Copilot"
             >
               <Bot size={16} />
