@@ -133,7 +133,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
     >
       
       {/* Liquid Glass Shell Container wrapped in red theme */}
-      <div className="relative w-full h-full md:max-w-5xl md:h-[90vh] bg-[#0c0d12] md:rounded-3xl border border-red-500/10 shadow-2xl flex flex-col md:flex-row overflow-hidden text-zinc-300">
+      <div className="relative w-full h-full md:max-w-5xl md:h-[92vh] bg-[#0b0c10] md:rounded-3xl border border-red-500/10 shadow-2xl flex flex-col md:flex-row overflow-hidden text-zinc-300">
         
         {/* Glow effect */}
         <div className="absolute -top-[10%] -left-[10%] w-[35%] h-[35%] rounded-full bg-[#E31E24]/5 blur-[90px] pointer-events-none" />
@@ -141,7 +141,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
         {/* Left Explainer Panel */}
         <div 
-          className="w-full md:w-[380px] border-b md:border-b-0 md:border-r border-zinc-900 bg-[#08090e] p-6 flex flex-col justify-between shrink-0 select-none overflow-y-auto"
+          className="w-full md:w-[380px] border-b md:border-b-0 md:border-r border-zinc-900 bg-[#08090d] p-6 flex flex-col justify-between shrink-0 select-none overflow-y-auto"
           data-lenis-prevent
         >
           
@@ -222,7 +222,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
         {/* Center/Right Phone Simulator Viewport */}
         <div 
-          className="flex-1 flex items-center justify-center p-4 md:p-8 bg-[#07080c] relative overflow-hidden"
+          className="flex-1 flex items-center justify-center p-4 md:p-6 bg-[#06070a] relative overflow-hidden"
           data-lenis-prevent
         >
           
@@ -289,22 +289,47 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* Smartphone Simulator Mock Container */}
-          <div className="relative w-[300px] h-[580px] bg-black rounded-[45px] p-3.5 shadow-2xl border-[6px] border-zinc-850 flex flex-col overflow-hidden shrink-0">
+          {/* Premium iPhone 17 Pro Max Simulator Shell */}
+          <div className="relative w-[370px] h-[790px] max-h-[85vh] bg-[#121215] rounded-[56px] p-3 shadow-2xl border-[12px] border-[#2d2e32] ring-2 ring-zinc-800 flex flex-col overflow-hidden shrink-0 transition-all select-none">
             
-            {/* Notch */}
-            <div className="absolute top-3.5 left-1/2 -translate-x-1/2 w-32 h-4.5 bg-black rounded-full z-50 flex items-center justify-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-zinc-900 ml-8" />
-            </div>
+            {/* Volume Buttons (Left Side) */}
+            <div className="absolute left-[-15px] top-[110px] w-[3px] h-[35px] bg-[#3a3b3f] rounded-l-md" />
+            <div className="absolute left-[-15px] top-[165px] w-[3px] h-[55px] bg-[#3a3b3f] rounded-l-md" />
+            <div className="absolute left-[-15px] top-[230px] w-[3px] h-[55px] bg-[#3a3b3f] rounded-l-md" />
+            
+            {/* Power Button (Right Side) */}
+            <div className="absolute right-[-15px] top-[185px] w-[3px] h-[70px] bg-[#3a3b3f] rounded-r-md" />
 
-            {/* Screen Inner Container */}
+            {/* Speaker Earphone */}
+            <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-16 h-1 bg-[#252528] rounded-full z-50" />
+
+            {/* Screen Inner Viewport (Matches iPhone 17 Pro Max 19.6:9 aspect) */}
             <div 
-              className="flex-1 bg-[#f7f8fa] rounded-[32px] overflow-hidden flex flex-col relative text-[11px] text-zinc-900"
+              className="flex-1 bg-white rounded-[44px] overflow-hidden flex flex-col relative"
               data-lenis-prevent
             >
               
-              {/* Iframe embedding the live ZHomes application */}
-              <div className="absolute inset-0 z-10 w-full h-full overflow-hidden bg-zinc-100">
+              {/* Dynamic Island (Pill Notch) */}
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-50 flex items-center justify-between px-3.5 shadow-inner">
+                <div className="w-2.5 h-2.5 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center">
+                  <div className="w-1 h-1 rounded-full bg-indigo-950/80" />
+                </div>
+                <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+
+              {/* Status bar */}
+              <div className="h-10 pt-4 px-8 flex justify-between items-center text-[9px] text-black font-bold tracking-wider bg-white select-none z-40 shrink-0">
+                <span>9:41 AM</span>
+                <div className="flex items-center gap-1.5">
+                  <span>5G</span>
+                  <div className="w-4.5 h-2 border border-black rounded-sm p-0.5 flex items-center justify-start">
+                    <div className="w-3 h-1 bg-black rounded-2xs" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Web Application embedded via iframe */}
+              <div className="flex-1 overflow-hidden relative bg-white">
                 <iframe
                   src={iframeUrl}
                   className="w-full h-full border-none"
@@ -313,9 +338,9 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                 />
               </div>
 
-              {/* Home Indicator bar */}
-              <div className="h-4 bg-white flex items-center justify-center shrink-0 select-none pb-1 relative z-40">
-                <div className="w-20 h-1 bg-zinc-400 rounded-full" />
+              {/* iOS Home Indicator bar */}
+              <div className="h-5 bg-white flex items-center justify-center shrink-0 select-none pb-2 relative z-40">
+                <div className="w-24 h-1 bg-zinc-350 rounded-full" />
               </div>
 
             </div>
@@ -333,10 +358,10 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
               setDocStatus('pending');
               setShowCompliancePopup(true);
             }}
-            className="absolute bottom-12 right-[calc(50%-120px)] h-9 w-9 rounded-full bg-[#E31E24] hover:bg-red-500 text-white flex items-center justify-center shadow-lg transition-all active:scale-95 cursor-pointer z-[130] animate-bounce"
+            className="absolute bottom-16 right-[calc(50%-150px)] h-10 w-10 rounded-full bg-[#E31E24] hover:bg-red-500 text-white flex items-center justify-center shadow-lg transition-all active:scale-95 cursor-pointer z-[130] animate-bounce"
             title="Abrir Auditoría de Compliance"
           >
-            <Bot size={16} />
+            <Bot size={18} />
           </button>
 
         </div>
