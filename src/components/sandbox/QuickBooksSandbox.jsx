@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Link2, CheckCircle, AlertTriangle, FileSpreadsheet, Eye, Play, Check } from 'lucide-react';
+import { RefreshCw, Link2, CheckCircle, AlertTriangle, FileSpreadsheet, Eye, Download, FileText, DollarSign, Check } from 'lucide-react';
 
 const INITIAL_TRANSACTIONS = [
   { 
@@ -12,6 +12,7 @@ const INITIAL_TRANSACTIONS = [
     total: 3319.25, 
     status: 'synced', 
     qboId: '#EST-0053',
+    type: 'Estimate',
     items: [
       { desc: 'Techado (Teja Composite)', price: 3040.00 },
       { desc: 'Canal (5" K-Style)', price: 125.00 }
@@ -27,6 +28,7 @@ const INITIAL_TRANSACTIONS = [
     total: 8000.00, 
     status: 'synced', 
     qboId: '#EST-0044',
+    type: 'Estimate',
     items: [
       { desc: 'Techado (Teja Composite)', price: 5700.00 },
       { desc: 'Siding (James Hardie Plank)', price: 1440.00 },
@@ -43,6 +45,7 @@ const INITIAL_TRANSACTIONS = [
     total: 4500.00, 
     status: 'pending', 
     qboId: '—',
+    type: 'Estimate',
     items: [
       { desc: 'Ventana (Double Hung)', price: 2700.00 },
       { desc: 'Canal (6" Half-Round)', price: 1800.00 }
@@ -58,8 +61,106 @@ const INITIAL_TRANSACTIONS = [
     total: 125.00, 
     status: 'pending', 
     qboId: '—',
+    type: 'Estimate',
     items: [
       { desc: 'Canal (5" K-Style)', price: 125.00 }
+    ]
+  }
+];
+
+const IMPORTED_ESTIMATES = [
+  {
+    id: 'EST-1021',
+    client: 'John Doe',
+    phone: '+1 (555) 019-2834',
+    email: 'john.doe@example.com',
+    address: '1234 Street, Louisville, KY',
+    service: 'Roofing Shingles Replacement',
+    total: 3319.25,
+    qboId: 'EST-1021',
+    type: 'Estimate',
+    items: [
+      { desc: 'Tejas Composite Roof Shingles', price: 3040.00 },
+      { desc: '5" K-Style Seamless Gutters', price: 125.00 }
+    ]
+  },
+  {
+    id: 'EST-1022',
+    client: 'John Doe',
+    phone: '+1 (555) 019-2834',
+    email: 'john.doe@example.com',
+    address: '1234 Street, Louisville, KY',
+    service: 'HardiePlank Siding Install',
+    total: 8000.00,
+    qboId: 'EST-1022',
+    type: 'Estimate',
+    items: [
+      { desc: 'Tejas Composite Shingles', price: 5700.00 },
+      { desc: 'James Hardie Siding Boards', price: 1440.00 },
+      { desc: '5" K-Style Seamless Gutters', price: 625.00 }
+    ]
+  },
+  {
+    id: 'EST-1023',
+    client: 'John Doe',
+    phone: '+1 (555) 019-2834',
+    email: 'john.doe@example.com',
+    address: '1234 Street, Louisville, KY',
+    service: 'Windows Replacement Pack',
+    total: 4500.00,
+    qboId: 'EST-1023',
+    type: 'Estimate',
+    items: [
+      { desc: 'Double Hung Vinyl Windows', price: 2700.00 },
+      { desc: '6" Half-Round Gutters Install', price: 1800.00 }
+    ]
+  }
+];
+
+const IMPORTED_INVOICES = [
+  {
+    id: 'INV-2081',
+    client: 'John Doe',
+    phone: '+1 (555) 019-2834',
+    email: 'john.doe@example.com',
+    address: '1234 Street, Louisville, KY',
+    service: 'Gutter Downspout Repair',
+    total: 1250.00,
+    qboId: 'INV-2081',
+    type: 'Invoice',
+    items: [
+      { desc: 'Mano de Obra y Limpieza de Canalón', price: 850.00 },
+      { desc: 'Geocel Sealant Tubes & Downspouts', price: 400.00 }
+    ]
+  },
+  {
+    id: 'INV-2082',
+    client: 'John Doe',
+    phone: '+1 (555) 019-2834',
+    email: 'john.doe@example.com',
+    address: '1234 Street, Louisville, KY',
+    service: 'Siding Partial Replacement',
+    total: 5400.00,
+    qboId: 'INV-2082',
+    type: 'Invoice',
+    items: [
+      { desc: 'Vinyl Siding Panels (Double 4")', price: 4800.00 },
+      { desc: 'Siding Trim & Nails box', price: 600.00 }
+    ]
+  },
+  {
+    id: 'INV-2083',
+    client: 'John Doe',
+    phone: '+1 (555) 019-2834',
+    email: 'john.doe@example.com',
+    address: '1234 Street, Louisville, KY',
+    service: 'Roof Leak Repair Service',
+    total: 3100.00,
+    qboId: 'INV-2083',
+    type: 'Invoice',
+    items: [
+      { desc: 'Ice & Water Shield barrier repair', price: 2500.00 },
+      { desc: 'Flashing replacement & cleanup', price: 600.00 }
     ]
   }
 ];
@@ -71,6 +172,15 @@ export default function QuickBooksSandbox() {
   const [logs, setLogs] = useState([]);
   const [activeLogTx, setActiveLogTx] = useState(null);
   const [checkingConnection, setCheckingConnection] = useState(false);
+  
+  // Import States
+  const [importedEstimates, setImportedEstimates] = useState([]);
+  const [importedInvoices, setImportedInvoices] = useState([]);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importStatus, setImportStatus] = useState('');
+  const [activeImportSubTab, setActiveImportSubTab] = useState('estimates');
+
+  // Conflict state
   const [conflictResolved, setConflictResolved] = useState(false);
   const [resolvingMode, setResolvingMode] = useState(null);
 
@@ -118,6 +228,36 @@ export default function QuickBooksSandbox() {
     }, 450);
   };
 
+  // Simulate Pull from QuickBooks API
+  const handleImportFromQuickbooks = () => {
+    if (isImporting) return;
+    setIsImporting(true);
+    setImportStatus('Conectando a QuickBooks API...');
+    setActiveLogTx('QBO-IMPORT-OAuth2');
+    setLogs([`[${new Date().toLocaleTimeString()}] Iniciando descarga masiva de QuickBooks Online...`]);
+
+    const steps = [
+      { text: 'Validando Token de Auditoría y Acceso OAuth 2.0...', delay: 600 },
+      { text: 'Buscando Estimados de John Doe en QuickBooks... (3 encontrados)', delay: 1200 },
+      { text: 'Buscando Invoices de John Doe en QuickBooks... (3 encontrados)', delay: 1800 },
+      { text: 'Descargando items de inventario y reconciliando tasas tributarias...', delay: 2400 },
+      { text: 'Importación terminada con éxito. 6 registros almacenados en caché local.', delay: 3000 }
+    ];
+
+    steps.forEach((step, idx) => {
+      setTimeout(() => {
+        setImportStatus(step.text);
+        setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${step.text}`]);
+        
+        if (idx === steps.length - 1) {
+          setIsImporting(false);
+          setImportedEstimates(IMPORTED_ESTIMATES);
+          setImportedInvoices(IMPORTED_INVOICES);
+        }
+      }, step.delay);
+    });
+  };
+
   const handleCheckConnection = () => {
     setCheckingConnection(true);
     setTimeout(() => {
@@ -160,15 +300,39 @@ export default function QuickBooksSandbox() {
           </div>
         </div>
 
-        <button
-          onClick={handleCheckConnection}
-          disabled={checkingConnection}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 border border-[var(--border)] hover:bg-white/5 rounded-xl text-xs font-bold text-white transition-all active:scale-95 disabled:opacity-50"
-        >
-          <RefreshCw size={14} className={checkingConnection ? 'animate-spin text-[var(--accent)]' : ''} />
-          <span>{checkingConnection ? 'Verificando OAuth...' : 'Verificar Conexión'}</span>
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          
+          {/* Load QBO data button */}
+          <button
+            onClick={handleImportFromQuickbooks}
+            disabled={isImporting}
+            className="crm-btn-accent flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--accent)] text-black rounded-xl text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+          >
+            <Download size={14} className={isImporting ? 'animate-bounce' : ''} />
+            <span>{isImporting ? 'Importando...' : 'Importar de QuickBooks'}</span>
+          </button>
+
+          <button
+            onClick={handleCheckConnection}
+            disabled={checkingConnection}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 border border-[var(--border)] hover:bg-white/5 rounded-xl text-xs font-bold text-white transition-all active:scale-95 disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={checkingConnection ? 'animate-spin text-[var(--accent)]' : ''} />
+            <span>{checkingConnection ? 'Verificando OAuth...' : 'Verificar Conexión'}</span>
+          </button>
+        </div>
       </div>
+
+      {/* Import Loading State Overlay */}
+      {isImporting && (
+        <div className="bg-[#121926] border border-orange-500/25 rounded-2xl p-4 flex items-center gap-3 text-orange-400 text-xs">
+          <div className="w-4 h-4 rounded-full border-2 border-orange-500/20 border-t-orange-500 animate-spin shrink-0" />
+          <div className="flex-1">
+            <span className="font-black uppercase tracking-wider text-[10px]">Descargando registros bidireccionales</span>
+            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{importStatus}</p>
+          </div>
+        </div>
+      )}
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -178,9 +342,14 @@ export default function QuickBooksSandbox() {
           
           {/* Sync table card */}
           <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2.5">
-              <FileSpreadsheet size={16} className="text-[var(--accent)]" />
-              <h4 className="text-xs font-black tracking-widest uppercase text-[var(--text-primary)]">Sincronización de Ventas</h4>
+            <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
+              <div className="flex items-center gap-2.5">
+                <FileSpreadsheet size={16} className="text-[var(--accent)]" />
+                <h4 className="text-xs font-black tracking-widest uppercase text-[var(--text-primary)]">Sincronización de Ventas</h4>
+              </div>
+              <span className="text-[9px] bg-[var(--bg-sidebar)] text-[var(--text-muted)] border border-[var(--border)] px-2 py-0.5 rounded font-black tracking-wider uppercase">
+                EMISIÓN CRM
+              </span>
             </div>
 
             <div className="overflow-x-auto">
@@ -247,6 +416,105 @@ export default function QuickBooksSandbox() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Imported QuickBooks data block (Estimates and Invoices simulation) */}
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+            
+            <div className="p-4 border-b border-[var(--border)] flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Download size={16} className="text-emerald-400" />
+                <h4 className="text-xs font-black tracking-widest uppercase text-[var(--text-primary)]">
+                  Registros Bajados desde QuickBooks
+                </h4>
+              </div>
+
+              {/* Sub-tabs selector for imported data */}
+              <div className="flex bg-[var(--bg-input)] rounded-lg p-0.5 border border-[var(--border)] self-start">
+                <button
+                  onClick={() => setActiveImportSubTab('estimates')}
+                  className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-md transition-all ${
+                    activeImportSubTab === 'estimates' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' : 'text-[var(--text-muted)] hover:text-white'
+                  }`}
+                >
+                  Estimados ({importedEstimates.length})
+                </button>
+                <button
+                  onClick={() => setActiveImportSubTab('invoices')}
+                  className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-md transition-all ${
+                    activeImportSubTab === 'invoices' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' : 'text-[var(--text-muted)] hover:text-white'
+                  }`}
+                >
+                  Invoices ({importedInvoices.length})
+                </button>
+              </div>
+            </div>
+
+            {/* List content */}
+            {importedEstimates.length === 0 ? (
+              <div className="p-8 text-center flex flex-col items-center justify-center space-y-4">
+                <div className="h-10 w-10 rounded-full border border-dashed border-[var(--border)] flex items-center justify-center text-[var(--text-muted)]">
+                  <Download size={18} />
+                </div>
+                <div className="space-y-1">
+                  <h5 className="text-xs font-bold text-[var(--text-primary)]">No hay datos importados</h5>
+                  <p className="text-[10px] text-[var(--text-muted)] max-w-xs leading-relaxed">
+                    Haz clic en el botón de arriba para simular la descarga bidireccional de 3 Estimados y 3 Invoices de prueba.
+                  </p>
+                </div>
+                <button
+                  onClick={handleImportFromQuickbooks}
+                  className="px-4 py-2 border border-emerald-500/20 hover:bg-emerald-500/5 text-emerald-400 rounded-xl text-xs font-bold transition-all"
+                >
+                  Simular Carga de Registros QB
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] bg-black/10 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-wider">
+                      <th className="py-2.5 px-4">ID Transacción</th>
+                      <th className="py-2.5 px-4">Cliente</th>
+                      <th className="py-2.5 px-4">Concepto</th>
+                      <th className="py-2.5 px-4 text-right">Monto</th>
+                      <th className="py-2.5 px-4 text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)] text-[var(--text-secondary)]">
+                    {(activeImportSubTab === 'estimates' ? importedEstimates : importedInvoices).map((importTx) => {
+                      const isSelected = selectedTx.id === importTx.id;
+                      return (
+                        <tr 
+                          key={importTx.id}
+                          onClick={() => setSelectedTx(importTx)}
+                          className={`hover:bg-white/5 cursor-pointer transition-all ${isSelected ? 'bg-white/5 border-l-2 border-l-emerald-500' : ''}`}
+                        >
+                          <td className="py-2.5 px-4 font-mono font-bold text-emerald-400">{importTx.qboId}</td>
+                          <td className="py-2.5 px-4 font-bold text-[var(--text-primary)]">{importTx.client}</td>
+                          <td className="py-2.5 px-4 text-[10px] text-[var(--text-muted)] truncate max-w-[120px]">
+                            {importTx.service}
+                          </td>
+                          <td className="py-2.5 px-4 text-right font-bold text-[var(--text-primary)]">
+                            ${importTx.total.toFixed(2)}
+                          </td>
+                          <td className="py-2.5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => setSelectedTx(importTx)}
+                              className="p-1.5 border border-[var(--border)] hover:bg-white/5 rounded-lg text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1 mx-auto text-[9px] font-bold"
+                            >
+                              <Eye size={10} />
+                              <span>Ver</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
           </div>
 
           {/* Sync logs trace console */}
@@ -343,7 +611,9 @@ export default function QuickBooksSandbox() {
               <div className="bg-[#2ca01c] p-4 text-white flex justify-between items-start">
                 <div>
                   <h3 className="text-base font-black">quickbooks</h3>
-                  <p className="text-[8px] tracking-widest font-black uppercase mt-0.5 opacity-90">Estimate # {selectedTx.qboId === '—' ? 'PENDIENTE' : selectedTx.qboId.replace('QBO #', '')}</p>
+                  <p className="text-[8px] tracking-widest font-black uppercase mt-0.5 opacity-90">
+                    {selectedTx.type || 'Estimate'} # {selectedTx.qboId === '—' ? 'PENDIENTE' : selectedTx.qboId.replace('QBO #', '').replace('#', '')}
+                  </p>
                 </div>
                 <div className="text-right text-[10px] font-bold">
                   <p>Barba Construction Sandbox LLC</p>
@@ -408,6 +678,19 @@ export default function QuickBooksSandbox() {
                     </div>
                   </div>
                 </div>
+
+                {/* Import Badge for downloaded records */}
+                {selectedTx.id.startsWith('EST-') || selectedTx.id.startsWith('INV-') ? (
+                  <div className="border-t border-zinc-100 pt-3 flex justify-between items-center text-[8px] font-black uppercase text-emerald-600">
+                    <span className="flex items-center gap-1">
+                      <Check size={10} />
+                      Importado del API
+                    </span>
+                    <span className="bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded font-mono">
+                      QBO SYNC OK
+                    </span>
+                  </div>
+                ) : null}
 
               </div>
 
