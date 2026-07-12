@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Box, Droplets, Hammer, Grid, MapPin, Square, Circle, CornerDownLeft, FileText, Send, X, Trash2, Sparkles, Terminal, Settings2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Box, Droplets, Hammer, Grid, MapPin, Square, Circle, CornerDownLeft, FileText, Send, X, Trash2, Sparkles } from 'lucide-react';
 
 const CATEGORIES = [
   { id: 'roofing', title: 'Techos', desc: 'Composite & Metal', icon: Box, label: 'Techos' },
@@ -97,20 +97,7 @@ export default function EstimatorSandbox() {
   const [aiProposalText, setAiProposalText] = useState('');
   const [refineInput, setRefineInput] = useState('');
   const [isRefining, setIsRefining] = useState(false);
-  const [apiLogs, setApiLogs] = useState([]);
-  
-  // Dev Inspector Settings
-  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
-  const [temperature, setTemperature] = useState(0.2);
   const [showProposal, setShowProposal] = useState(false);
-
-  const consoleEndRef = useRef(null);
-
-  useEffect(() => {
-    if (consoleEndRef.current) {
-      consoleEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [apiLogs]);
 
   // General autocomplete handlers
   const handleAddressChange = (e) => {
@@ -235,42 +222,15 @@ export default function EstimatorSandbox() {
   const tax = subtotal * 0.0825;
   const total = subtotal + tax;
 
-  // Vertex AI trigger flow
+  // AI trigger flow
   const handleGenerateProposal = () => {
     setIsGeneratingAI(true);
-    const timestamp = new Date().toLocaleTimeString();
-    
-    setApiLogs([
-      `[${timestamp}] POST https://us-central1-aiplatform.googleapis.com/v1/projects/barba-pro/locations/us-central1/publishers/google/models/${selectedModel}:predict`,
-      `[${timestamp}] Request payload initialized. Authorization: Bearer GCP_VERTEX_TOKEN`,
-      `[${timestamp}] Temperature: ${temperature} | MaxOutputTokens: 2048 | SafetySettings: BLOCK_MEDIUM_AND_ABOVE`,
-      `[${timestamp}] System Instruction loaded: "You are the expert sales assistant of Barba Construction..."`,
-      `[${timestamp}] Homeowner data parsed: "${clientName}" at "${clientAddress}"`,
-      `[${timestamp}] Items list mapped: ${receiptItems.length} concepts ($${total.toFixed(2)})`,
-      `[${timestamp}] Vertex AI: Connection established. Dispatching request to pipeline...`
-    ]);
-
     setTimeout(() => {
-      const ts2 = new Date().toLocaleTimeString();
-      setApiLogs(prev => [
-        ...prev,
-        `[${ts2}] Vertex AI: Context received. Model is analyzing materials catalog & technical scope...`,
-        `[${ts2}] Vertex AI: Applying Service-Specific engineering rules (Roofing, Siding, Gutters)...`
-      ]);
-    }, 1000);
-
-    setTimeout(() => {
-      const ts3 = new Date().toLocaleTimeString();
       const initialText = generateInitialProposalText(clientName, receiptItems, total);
       setAiProposalText(initialText);
-      setApiLogs(prev => [
-        ...prev,
-        `[${ts3}] Vertex AI: Response generated (status 200 OK). Output length: ${initialText.length} characters.`,
-        `[${ts3}] Dev Log: Rendering Scope of Work text panel.`
-      ]);
       setIsGeneratingAI(false);
       setShowAIProposal(true);
-    }, 2400);
+    }, 2000);
   };
 
   // Refine Proposal context dynamically via user prompts
@@ -281,18 +241,8 @@ export default function EstimatorSandbox() {
     setIsRefining(true);
     const instruction = refineInput.trim();
     setRefineInput('');
-    
-    const timestamp = new Date().toLocaleTimeString();
-    setApiLogs(prev => [
-      ...prev,
-      `[${timestamp}] POST https://us-central1-aiplatform.googleapis.com/v1/projects/barba-pro/locations/us-central1/publishers/google/models/${selectedModel}:predict`,
-      `[${timestamp}] Refinement requested: "${instruction}"`,
-      `[${timestamp}] System Instruction: "You are the expert sales assistant. Rewrite current draft applying instructions..."`,
-      `[${timestamp}] Vertex AI: Calling chat history context...`
-    ]);
 
     setTimeout(() => {
-      const ts2 = new Date().toLocaleTimeString();
       let updatedText = aiProposalText;
       const lower = instruction.toLowerCase();
 
@@ -305,72 +255,52 @@ export default function EstimatorSandbox() {
           /Siding \((.*?)\)/,
           'Siding (James Hardie Plank - Custom Dark Bronze finish)'
         );
-        setApiLogs(prev => [...prev, `[${ts2}] Vertex AI: Material specifications updated to custom color palette.`]);
       } else if (lower.includes('weather') || lower.includes('clima') || lower.includes('lluvia') || lower.includes('retraso')) {
         updatedText = updatedText.replace(
           /EXCLUSIONS & TERMS/,
           'EXCLUSIONS & TERMS\n  - Weather delay clause: delays due to severe weather or environmental conditions are excluded from contract durations.'
         );
-        setApiLogs(prev => [...prev, `[${ts2}] Vertex AI: Weather exclusion clauses appended to contract terms.`]);
       } else if (lower.includes('warranty') || lower.includes('garantía') || lower.includes('garantia') || lower.includes('años')) {
         updatedText = updatedText.replace(
           /2-year comprehensive labor warranty backed by Barba Construction\./,
           '5-year extended comprehensive labor warranty backed by Barba Construction.'
         );
-        setApiLogs(prev => [...prev, `[${ts2}] Vertex AI: Warranty coverage boosted to 5 years.`]);
       } else if (lower.includes('descuento') || lower.includes('discount') || lower.includes('precio') || lower.includes('bajar')) {
         updatedText = updatedText.replace(
           /ESTIMATED PROJECT INVESTMENT: \$(.*?)/,
           `ESTIMATED PROJECT INVESTMENT: $${(total * 0.95).toFixed(2)} (Reflects a 5% promotional discount applied by AI)`
         );
-        setApiLogs(prev => [...prev, `[${ts2}] Vertex AI: Cost adjusted. 5% AI discount applied.`]);
       } else {
         // Fallback: append instruction as a custom clause
         updatedText = updatedText.replace(
           /INCLUDED SERVICES/,
           `ADDITIONAL CLAUSE\n  - ${instruction}\n\nINCLUDED SERVICES`
         );
-        setApiLogs(prev => [...prev, `[${ts2}] Vertex AI: Added custom clause to document: "${instruction}"`]);
       }
 
-      const ts3 = new Date().toLocaleTimeString();
       setAiProposalText(updatedText);
-      setApiLogs(prev => [
-        ...prev,
-        `[${ts3}] Vertex AI: Response received. Prompt refinement successfully injected.`
-      ]);
       setIsRefining(false);
-    }, 1800);
+    }, 1500);
   };
 
   return (
     <div className="w-full relative">
       
-      {/* Vertex AI Loading Screen overlay */}
+      {/* AI Generation Loading Overlay */}
       {isGeneratingAI && (
         <div className="absolute inset-0 bg-zinc-950/90 z-50 flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-[var(--border)]">
           <div className="relative mb-6">
-            <div className="w-20 h-20 rounded-full border-4 border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
-            <Sparkles size={28} className="text-[var(--accent)] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+            <div className="w-16 h-16 rounded-full border-4 border-[var(--accent)]/25 border-t-[var(--accent)] animate-spin" />
+            <Sparkles size={24} className="text-[var(--accent)] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
           </div>
-          
-          <h3 className="text-base font-bold text-white mb-2 tracking-wide uppercase">Iniciando Vertex AI Engine</h3>
-          <p className="text-xs text-[var(--text-secondary)] max-w-sm mb-6">
-            Generando "Scope of Work" técnico mediante el modelo {selectedModel} en Google Cloud Platform.
+          <h3 className="text-sm font-bold text-white mb-2 tracking-widest uppercase">Generando con IA</h3>
+          <p className="text-xs text-[var(--text-secondary)] max-w-xs leading-relaxed">
+            Redactando la propuesta técnica y el alcance de obra de forma automática...
           </p>
-
-          {/* Mini Console Log */}
-          <div className="w-full max-w-lg bg-black border border-zinc-800 rounded-xl p-4 text-left font-mono text-[9px] text-zinc-400 space-y-1.5 h-36 overflow-y-auto">
-            {apiLogs.map((log, idx) => (
-              <div key={idx} className={log.includes('POST') ? 'text-amber-500 font-bold' : log.includes('OK') ? 'text-emerald-400 font-bold' : ''}>
-                {log}
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
-      {/* Main UI switch */}
+      {/* Main UI view */}
       {!showAIProposal ? (
         
         /* standard material estimator layout */
@@ -573,7 +503,7 @@ export default function EstimatorSandbox() {
                             >
                               {trim === 'standard' ? 'Estándar' : 'Premium (+1.50/sq ft)'}
                             </button>
-                      ))}
+                          ))}
                         </div>
                       </div>
                     </>
@@ -792,10 +722,10 @@ export default function EstimatorSandbox() {
 
               <button
                 onClick={handleGenerateProposal}
-                className="crm-btn-accent w-full py-3.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-black rounded-xl text-xs font-black tracking-widest uppercase flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg"
+                className="crm-btn-accent w-full py-3.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-black rounded-xl text-xs font-black tracking-widest uppercase flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg animate-pulse"
               >
-                <Sparkles size={14} />
-                <span>Generar con Vertex AI</span>
+                <Sparkles size={14} className="mr-1" />
+                <span>Generar con IA</span>
               </button>
             </div>
           </div>
@@ -803,120 +733,41 @@ export default function EstimatorSandbox() {
         </div>
       ) : (
         
-        /* Interactive Vertex AI split screen */
-        <div className="flex flex-col lg:flex-row gap-6 items-stretch min-h-[500px]">
-          
-          {/* Left panel: Dev Settings & Logs Inspector */}
-          <div className="w-full lg:w-[380px] bg-[#0c101b] border border-[var(--border)] rounded-2xl p-5 flex flex-col justify-between gap-5 shrink-0 shadow-lg">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
-                <Settings2 size={16} className="text-[var(--accent)]" />
-                <h4 className="text-xs font-black tracking-widest uppercase text-white">Google Cloud Vertex AI</h4>
-              </div>
-
-              {/* Model Select */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Active Model</label>
-                <select
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  className="crm-select bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
-                >
-                  <option value="gemini-2.5-flash">gemini-2.5-flash (Fast, Low Cost)</option>
-                  <option value="gemini-2.5-pro">gemini-2.5-pro (High Reasoning)</option>
-                </select>
-              </div>
-
-              {/* Temperature slider */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Temperature</label>
-                  <span className="text-[10px] font-bold text-white">{temperature}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.0"
-                  max="1.0"
-                  step="0.1"
-                  value={temperature}
-                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-[var(--bg-input)] rounded-lg appearance-none cursor-pointer accent-[var(--accent)] border border-[var(--border)]"
-                />
-              </div>
-
-              {/* Performance Stats */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="bg-[#111827] border border-[var(--border)] rounded-xl p-3 flex flex-col justify-center">
-                  <span className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-wider">Latency</span>
-                  <span className="text-xs font-extrabold text-white mt-1">1.84 seconds</span>
-                </div>
-                <div className="bg-[#111827] border border-[var(--border)] rounded-xl p-3 flex flex-col justify-center">
-                  <span className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-wider">Estimated Cost</span>
-                  <span className="text-xs font-extrabold text-emerald-400 mt-1">
-                    {selectedModel === 'gemini-2.5-pro' ? '$0.00125' : '$0.00018'}
-                  </span>
-                </div>
-              </div>
-
-              {/* System prompt view */}
-              <div className="bg-black/45 border border-zinc-800 rounded-xl p-3 space-y-1.5">
-                <span className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-wider block">System Instructions</span>
-                <p className="text-[9px] text-zinc-400 leading-relaxed font-mono select-none">
-                  "You are the expert sales assistant of Barba Construction... Generate technical Scope of Work, exclude wood rot, include 2-year labor warranty..."
-                </p>
-              </div>
-            </div>
-
-            {/* API Transaction terminal logs */}
-            <div className="flex-1 flex flex-col min-h-[140px] bg-black border border-zinc-800 rounded-xl overflow-hidden p-3 font-mono text-[9px] text-zinc-400">
-              <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                <Terminal size={10} /> console.log()
-              </span>
-              <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 select-text">
-                {apiLogs.map((log, idx) => (
-                  <div key={idx} className={log.includes('POST') ? 'text-amber-500 font-bold' : log.includes('OK') ? 'text-emerald-400 font-bold' : ''}>
-                    {log}
-                  </div>
-                ))}
-                <div ref={consoleEndRef} />
-              </div>
-            </div>
-
-            {/* Actions */}
-            <button
-              onClick={() => setShowAIProposal(false)}
-              className="w-full py-2.5 border border-[var(--border)] hover:bg-white/5 rounded-xl text-xs font-bold text-white transition-all"
-            >
-              Volver al Estimador
-            </button>
-          </div>
-
-          {/* Right panel: Proposal Document Preview & Refinement Chat */}
-          <div className="flex-1 flex flex-col justify-between bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-lg min-h-[500px]">
+        /* Interactive Proposal refinement flow */
+        <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full">
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col shadow-lg min-h-[500px]">
             
-            {/* Document Header */}
-            <div className="p-4 bg-black/10 border-b border-[var(--border)] flex justify-between items-center">
+            {/* Header / Actions */}
+            <div className="p-4 bg-black/15 border-b border-[var(--border)] flex justify-between items-center flex-wrap gap-3">
+              <button
+                onClick={() => setShowAIProposal(false)}
+                className="px-3.5 py-1.5 border border-[var(--border)] hover:bg-white/5 rounded-xl text-xs font-bold text-white transition-all"
+              >
+                ← Volver al Estimador
+              </button>
+              
               <div className="flex items-center gap-2">
                 <FileText size={16} className="text-[var(--accent)]" />
-                <h4 className="text-xs font-black tracking-widest uppercase text-[var(--text-primary)]">Propuesta Generada</h4>
+                <h4 className="text-xs font-black tracking-widest uppercase text-[var(--text-primary)]">Propuesta de Trabajo</h4>
               </div>
+
               <button
                 onClick={() => setShowProposal(true)}
-                className="crm-btn-accent px-3 py-1.5 bg-[var(--accent)] text-black rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow"
+                className="crm-btn-accent px-4 py-1.5 bg-[var(--accent)] text-black rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow"
               >
                 <Send size={11} />
                 <span>Ver PDF Firmable</span>
               </button>
             </div>
 
-            {/* The Document Area */}
-            <div className="flex-1 p-6 overflow-y-auto bg-white text-zinc-950 font-sans leading-relaxed select-text shadow-inner relative">
+            {/* The Document Sheet */}
+            <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-white text-zinc-950 font-sans leading-relaxed select-text shadow-inner relative min-h-[350px]">
               
-              {/* Refinement Loader */}
+              {/* Overlay Loader */}
               {isRefining && (
-                <div className="absolute inset-0 bg-white/75 backdrop-blur-xs flex flex-col items-center justify-center text-center p-4">
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center text-center p-4">
                   <div className="w-10 h-10 rounded-full border-2 border-orange-500/20 border-t-orange-500 animate-spin mb-3" />
-                  <span className="text-xs font-bold text-zinc-800 uppercase tracking-widest animate-pulse">Gemini 2.5: Refinando Contrato...</span>
+                  <span className="text-xs font-bold text-zinc-800 uppercase tracking-widest animate-pulse">Ajustando Contrato con IA...</span>
                 </div>
               )}
 
@@ -939,7 +790,7 @@ export default function EstimatorSandbox() {
                 </div>
               </div>
 
-              {/* Generated Text */}
+              {/* Generated text content */}
               <pre className="text-xs whitespace-pre-wrap font-sans text-zinc-700 leading-relaxed font-medium">
                 {aiProposalText}
               </pre>
@@ -957,7 +808,7 @@ export default function EstimatorSandbox() {
                 <Sparkles size={14} className="text-[var(--accent)] absolute left-3.5 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="Pídele a la IA (ej. Usa tejas color carbón y añade cláusula de clima...)"
+                  placeholder="Pídele a la IA (ej. Cambia el color a tejas Charcoal y añade 5 años de garantía...)"
                   value={refineInput}
                   onChange={(e) => setRefineInput(e.target.value)}
                   className="crm-input w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-3 text-xs text-[var(--text-primary)] focus:outline-none placeholder-zinc-500"
@@ -968,12 +819,11 @@ export default function EstimatorSandbox() {
                 disabled={isRefining || !refineInput.trim()}
                 className="crm-btn-accent px-4 py-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-black rounded-xl text-xs font-black uppercase tracking-wider active:scale-95 transition-all"
               >
-                Aplicar
+                Refinar
               </button>
             </form>
 
           </div>
-
         </div>
       )}
 
@@ -1041,7 +891,7 @@ export default function EstimatorSandbox() {
               <div className="border border-zinc-100 rounded-xl p-4 bg-zinc-50 text-[10px] leading-relaxed text-zinc-600">
                 <h5 className="font-black text-zinc-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <Sparkles size={11} className="text-orange-500" />
-                  <span>Especificaciones Técnicas (Vertex AI)</span>
+                  <span>Especificaciones Técnicas (IA)</span>
                 </h5>
                 <pre className="whitespace-pre-wrap font-sans">
                   {aiProposalText}
