@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ThreeDHoverGallery from './ThreeDHoverGallery';
+import SandboxModal from './sandbox/SandboxModal';
 
 const PROJECT_ITEMS = [
   {
@@ -33,6 +34,8 @@ const PROJECT_ITEMS = [
 ];
 
 const Projects = () => {
+  const [isSandboxOpen, setIsSandboxOpen] = useState(false);
+
   return (
     <section id="work" className="projects-section">
       <div className="projects-header">
@@ -48,8 +51,18 @@ const Projects = () => {
           perspective={1200}
           hoverScale={1.03}
           transitionDuration={0.4}
+          onExploreClick={(index, item) => {
+            if (item.title.includes("Barba")) {
+              setIsSandboxOpen(true);
+            }
+          }}
         />
       </div>
+
+      <SandboxModal
+        isOpen={isSandboxOpen}
+        onClose={() => setIsSandboxOpen(false)}
+      />
 
       <style>{`
         .projects-section {

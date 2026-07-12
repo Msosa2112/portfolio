@@ -70,6 +70,7 @@ export default function ThreeDHoverGallery({
   style,
   onImageClick,
   onImageHover,
+  onExploreClick,
 }) {
   const containerRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(null);
@@ -383,7 +384,11 @@ export default function ThreeDHoverGallery({
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -5 }}
                         transition={{ duration: 0.3, delay: 0.2 }}
-                        className="td-gallery-card-btn flex items-center gap-1 text-[9px] font-bold tracking-widest uppercase text-zinc-100 hover:text-violet-400 group/btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onExploreClick?.(index, item);
+                        }}
+                        className="td-gallery-card-btn flex items-center gap-1 text-[9px] font-bold tracking-widest uppercase text-zinc-100 hover:text-violet-400 group/btn cursor-pointer"
                       >
                         <span>Explore</span>
                         <ArrowRight className="w-3 h-3 transition-transform duration-200 group-hover/btn:translate-x-1" />
