@@ -56,6 +56,8 @@ const Projects = () => {
               setIsSandboxOpen(true);
             } else if (item.title.includes("ZHomes")) {
               window.open("https://zhomesapp.com", "_blank");
+            } else if (item.title.includes("Edward")) {
+              window.open("https://edwardsidingandgutters.com/", "_blank");
             }
           }}
         />
