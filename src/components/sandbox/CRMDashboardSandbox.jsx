@@ -3,10 +3,10 @@ import { TrendingUp, Users, FileText, DollarSign, Activity, UserPlus } from 'luc
 
 const INITIAL_LEADS = [
   { id: 1, full_name: 'John Doe', status: 'ganado', source: 'Referral', created_at: '2026-07-10' },
-  { id: 2, full_name: 'Jane Smith', status: 'estimado_enviado', source: 'Google', created_at: '2026-07-09' },
-  { id: 3, full_name: 'Carlos Ortega', status: 'cita', source: 'Facebook', created_at: '2026-07-08' },
-  { id: 4, full_name: 'Sarah Connor', status: 'contactado', source: 'Instagram', created_at: '2026-07-07' },
-  { id: 5, full_name: 'Mike Tyson', status: 'nuevo', source: 'Referral', created_at: '2026-07-06' },
+  { id: 2, full_name: 'John Doe', status: 'estimado_enviado', source: 'Google', created_at: '2026-07-09' },
+  { id: 3, full_name: 'John Doe', status: 'cita', source: 'Facebook', created_at: '2026-07-08' },
+  { id: 4, full_name: 'John Doe', status: 'contactado', source: 'Instagram', created_at: '2026-07-07' },
+  { id: 5, full_name: 'John Doe', status: 'nuevo', source: 'Referral', created_at: '2026-07-06' },
 ];
 
 const STATUS_MAP = {

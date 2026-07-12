@@ -125,6 +125,27 @@ export default function TwilioSandbox() {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Teléfono Destino</label>
+              <input
+                type="text"
+                readOnly
+                value="+1 (555) 019-2834"
+                className="crm-input bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-[var(--text-muted)] focus:outline-none cursor-not-allowed opacity-70"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Email Destino</label>
+              <input
+                type="text"
+                readOnly
+                value="john.doe@example.com"
+                className="crm-input bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-[var(--text-muted)] focus:outline-none cursor-not-allowed opacity-70"
+              />
+            </div>
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Servicio Contratado</label>
             <select

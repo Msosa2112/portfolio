@@ -9,14 +9,11 @@ const CATEGORIES = [
 ];
 
 const MOCK_ADDRESSES = [
-  { address: '600 East Kentucky Street, Louisville, KY', client: 'Bessie Wilson HD' },
-  { address: '1141 Parliament Way, Louisville, KY', client: 'Jack Williams' },
-  { address: '2219 Peaslee Rd, Louisville, KY', client: 'Arlenis Andino' },
-  { address: '5002 E Bahama Ct, Louisville, KY', client: 'Kholoud Baien' },
-  { address: '9500 Moorfield Cir, Louisville, KY', client: 'Tomas Aguilera' },
-  { address: '1204 Rock Falls Trace, Louisville, KY', client: 'Moe Karimi' },
-  { address: '1421 Hobart Dr, Louisville, KY', client: 'Anthony Sumlin' },
-  { address: '3551 Blue Park Ln, Louisville, KY', client: 'Elianis Rivero' },
+  { address: '1234 Street, Louisville, KY', client: 'John Doe' },
+  { address: '1234 Street, Suite A, Louisville, KY', client: 'John Doe' },
+  { address: '1234 Street, Apt 101, Louisville, KY', client: 'John Doe' },
+  { address: '1234 Street North, Louisville, KY', client: 'John Doe' },
+  { address: '1234 Street South, Louisville, KY', client: 'John Doe' },
 ];
 
 const MOCK_ESTIMATES = [
@@ -24,9 +21,9 @@ const MOCK_ESTIMATES = [
     id: 'est-5846',
     projNo: 'PRJ-5846',
     qboNo: 'QBO #EST-0053',
-    client: 'Bessie Wilson HD',
+    client: 'John Doe',
     services: 'Roofing & Gutters',
-    address: '600 East Kentucky Street, Louisville, KY',
+    address: '1234 Street, Louisville, KY',
     total: 3319.25,
     status: 'approved',
     date: 'Jul 9, 2026',
@@ -34,15 +31,15 @@ const MOCK_ESTIMATES = [
       { id: 101, name: 'Techado (Teja Composite)', details: '8.00 SQ @ $380.00/SQ (Pendiente Estándar)', price: 3040.00 },
       { id: 102, name: 'Canal (5" K-Style)', details: '10.00 PL @ $12.50/pie (5")', price: 125.00 }
     ],
-    proposalText: `PROJECT DESCRIPTION\nBarba Construction will perform exterior renovation services for Bessie Wilson HD at 600 East Kentucky Street, Louisville, KY.\n\nSCOPE OF WORK\n  - Complete removal of existing roofing materials down to plywood decking.\n  - Installation of seamless aluminum gutters securely sloped.\n\nWARRANTY\n  - 2-year comprehensive labor warranty backed by Barba Construction.`
+    proposalText: `PROJECT DESCRIPTION\nBarba Construction will perform exterior renovation services for John Doe at 1234 Street, Louisville, KY.\nContact: +1 (555) 019-2834 | john.doe@example.com\n\nSCOPE OF WORK\n  - Complete removal of existing roofing materials down to plywood decking.\n  - Installation of seamless aluminum gutters securely sloped.\n\nWARRANTY\n  - 2-year comprehensive labor warranty backed by Barba Construction.`
   },
   {
     id: 'est-5466',
     projNo: 'PRJ-5466',
     qboNo: 'QBO #EST-0044',
-    client: 'Arlenis Andino',
+    client: 'John Doe',
     services: 'Roofing & Siding',
-    address: '2219 Peaslee Rd, Louisville, KY',
+    address: '1234 Street, Louisville, KY',
     total: 8000.00,
     status: 'approved',
     date: 'Jul 5, 2026',
@@ -51,15 +48,15 @@ const MOCK_ESTIMATES = [
       { id: 202, name: 'Siding (James Hardie Plank)', details: '120.00 sq ft @ $12.00/sq ft (Moldura Std)', price: 1440.00 },
       { id: 203, name: 'Canal (5" K-Style)', details: '50.00 PL @ $12.50/pie (5")', price: 625.00 }
     ],
-    proposalText: `PROJECT DESCRIPTION\nBarba Construction will perform exterior renovation services for Arlenis Andino at 2219 Peaslee Rd, Louisville, KY.\n\nSCOPE OF WORK\n  - Complete removal of existing roofing materials.\n  - Installation of premium siding panels.\n  - Installation of seamless gutters.`
+    proposalText: `PROJECT DESCRIPTION\nBarba Construction will perform exterior renovation services for John Doe at 1234 Street, Louisville, KY.\nContact: +1 (555) 019-2834 | john.doe@example.com\n\nSCOPE OF WORK\n  - Complete removal of existing roofing materials.\n  - Installation of premium siding panels.\n  - Installation of seamless gutters.`
   },
   {
     id: 'est-5473',
     projNo: 'PRJ-5473',
     qboNo: 'QBO #EST-0043',
-    client: 'Jack Williams',
+    client: 'John Doe',
     services: 'Gutters & Windows',
-    address: '1141 Parliament Way, Louisville, KY',
+    address: '1234 Street, Louisville, KY',
     total: 4500.00,
     status: 'draft',
     date: 'Jul 1, 2026',
@@ -67,7 +64,7 @@ const MOCK_ESTIMATES = [
       { id: 301, name: 'Canal (6" Half-Round)', details: '120.00 PL @ $15.00/pie (6")', price: 1800.00 },
       { id: 302, name: 'Ventana (Double Hung)', details: '6.00 ud. @ $450.00/ud. (Marco Blanco)', price: 2700.00 }
     ],
-    proposalText: `PROJECT DESCRIPTION\nBarba Construction will perform exterior renovation services for Jack Williams at 1141 Parliament Way, Louisville, KY.\n\nSCOPE OF WORK\n  - Installation of seamless aluminum gutters sloped properly.\n  - Precise window unit leveling and insulation.`
+    proposalText: `PROJECT DESCRIPTION\nBarba Construction will perform exterior renovation services for John Doe at 1234 Street, Louisville, KY.\nContact: +1 (555) 019-2834 | john.doe@example.com\n\nSCOPE OF WORK\n  - Installation of seamless aluminum gutters sloped properly.\n  - Precise window unit leveling and insulation.`
   }
 ];
 
@@ -210,9 +207,9 @@ export default function EstimatorSandbox() {
   const [subTab, setSubTab] = useState('list'); // 'list' or 'create'
   
   // Client details autocomplete state
-  const [addressSearch, setAddressSearch] = useState('600 East Kentucky Street, Louisville, KY');
-  const [clientName, setClientName] = useState('Bessie Wilson HD');
-  const [clientAddress, setClientAddress] = useState('600 East Kentucky Street, Louisville, KY');
+  const [addressSearch, setAddressSearch] = useState('1234 Street, Louisville, KY');
+  const [clientName, setClientName] = useState('John Doe');
+  const [clientAddress, setClientAddress] = useState('1234 Street, Louisville, KY');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -1272,6 +1269,7 @@ export default function EstimatorSandbox() {
                     <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-400 block">Homeowner:</span>
                     <p className="font-bold text-zinc-800">{clientName}</p>
                     <p>{clientAddress}</p>
+                    <p className="text-zinc-500 text-[9px] mt-0.5">+1 (555) 019-2834 | john.doe@example.com</p>
                   </div>
                   <div className="text-right">
                     <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-400 block">Date Generated:</span>
@@ -1359,6 +1357,7 @@ export default function EstimatorSandbox() {
                   <h5 className="font-bold text-[9px] uppercase tracking-widest text-zinc-400 mb-1">Para:</h5>
                   <p className="font-bold text-zinc-800">{clientName}</p>
                   <p className="text-zinc-500">{clientAddress}</p>
+                  <p className="text-zinc-400 text-[10px] mt-0.5">+1 (555) 019-2834 | john.doe@example.com</p>
                 </div>
                 <div className="text-right">
                   <h5 className="font-bold text-[9px] uppercase tracking-widest text-zinc-400 mb-1">Fecha de Emisión:</h5>

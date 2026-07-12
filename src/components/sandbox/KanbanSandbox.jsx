@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 const INITIAL_PROJECTS = [
-  { id: '1', title: 'Martínez Gutter Work', category: 'Canales', status: 'nuevo' },
-  { id: '2', title: 'Sánchez Roofing Estimate', category: 'Techos', status: 'cita' },
-  { id: '3', title: 'Wilson Siding Renovation', category: 'Siding', status: 'contactado' },
-  { id: '4', title: 'Gómez Window Replacement', category: 'Ventanas', status: 'nuevo' },
+  { id: '1', title: 'John Doe - Gutter Work', category: 'Canales', status: 'nuevo' },
+  { id: '2', title: 'John Doe - Roofing Estimate', category: 'Techos', status: 'cita' },
+  { id: '3', title: 'John Doe - Siding Renovation', category: 'Siding', status: 'contactado' },
+  { id: '4', title: 'John Doe - Window Replacement', category: 'Ventanas', status: 'nuevo' },
 ];
 
 const COLUMNS = [
