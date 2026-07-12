@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #333; }
+  .isolate { isolation: isolate; position: relative; width: 300px; height: 300px; background: rgba(255,0,0,0.5); }
+  .img { width: 100%; height: 100%; background: blue; }
+  .hole { position: absolute; top: 50px; left: 50px; width: 100px; height: 100px; background: black; mix-blend-mode: destination-out; }
+</style>
+</head>
+<body>
+  <div class="isolate">
+    <div class="img"></div>
+    <div class="hole"></div>
+  </div>
+</body>
+</html>

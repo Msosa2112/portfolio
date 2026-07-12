@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notch con Inverted Border Radius - Demo Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #07070a;
+      --card-bg: linear-gradient(135deg, rgba(20, 20, 28, 0.8) 0%, rgba(10, 10, 14, 0.9) 100%);
+      --accent: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --accent-hover: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --card-radius: 32px;
+      --notch-radius: 24px;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Fondo decorativo premium */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      top: 10%;
+      left: 20%;
+      z-index: -1;
+      filter: blur(40px);
+    }
+    body::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      bottom: 10%;
+      right: 15%;
+      z-index: -1;
+      filter: blur(50px);
+    }
+
+    /* Contenedor del Hero Card */
+    .card-hero {
+      position: relative;
+      width: 580px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--card-radius);
+      padding: 48px;
+      box-sizing: border-box;
+      box-shadow: 
+        0px 20px 50px rgba(0, 0, 0, 0.5),
+        inset 0px 1px 1px rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      overflow: hidden; /* Recorta los bordes externos y mantiene limpio el notch */
+    }
+
+    .card-content h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-top: 0;
+      margin-bottom: 16px;
+      background: linear-gradient(120deg, #ffffff 30%, #e2e8f0 70%, rgba(255,255,255,0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .card-content p {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin: 0;
+      max-width: 85%;
+      margin-bottom: 40px; /* Espacio para el notch inferior */
+    }
+
+    /* ========================================================================
+       El "Notch" o Recorte en la Esquina Inferior Derecha
+       ======================================================================== */
+    
+    .cutout-corner {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background-color: var(--bg-page); /* Mismo color del fondo exterior */
+      padding: 12px 12px 0 12px; /* Margen interior para el botón */
+      border-top-left-radius: var(--notch-radius); /* Esquina interna del notch */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    /* Esquinas curvas invertidas con pseudoelementos (Inverted Border Radius) */
+    
+    /* Curva de arriba (se conecta con el borde derecho de la tarjeta) */
+    .cutout-corner::before {
+      content: '';
+      position: absolute;
+      top: calc(-1 * var(--notch-radius));
+      right: 0;
+      width: var(--notch-radius);
+      height: var(--notch-radius);
+      background-color: transparent;
+      border-bottom-right-radius: var(--notch-radius);
+      box-shadow: 0 var(--notch-radius) 0 0 var(--bg-page); /* Dibuja la curva en el espacio vacío */
+      pointer-events: none;
+    }
+
+    /* Curva de la izquierda (se conecta con el borde inferior de la tarjeta) */
+    .cutout-corner::after {
+      content: '';
+      position: absolute;
+      left: calc(-1 * var(--notch-radius));
+      bottom: 0;
+      width: var(--notch-radius);
+      height: var(--notch-radius);
+      background-color: transparent;
+      border-bottom-right-radius: var(--notch-radius);
+      box-shadow: var(--notch-radius) 0 0 0 var(--bg-page); /* Dibuja la curva en el espacio vacío */
+      pointer-events: none;
+    }
+
+    /* Botón de consulta premium */
+    .btn-consultation {
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 16px 28px;
+      border: none;
+      border-radius: calc(var(--notch-radius) - 4px);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      box-shadow: 
+        0px 4px 12px rgba(99, 102, 241, 0.3),
+        inset 0px 1px 0px rgba(255, 255, 255, 0.2);
+      white-space: nowrap;
+    }
+
+    .btn-consultation:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 
+        0px 8px 20px rgba(99, 102, 241, 0.5),
+        inset 0px 1px 0px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-consultation:active {
+      transform: translateY(0);
+      box-shadow: 0px 4px 8px rgba(99, 102, 241, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Tarjeta Hero de Prueba -->
+  <div class="card-hero">
+    <div class="card-content">
+      <h1>Designing Spaces<br>That Inspire & Endure</h1>
+      <p>We transform visions into timeless architecture, blending innovative design with functional excellence.</p>
+    </div>
+
+    <div class="cutout-corner">
+      <button class="btn-consultation">Schedule a Free Consultation</button>
+    </div>
+  </div>
+
+</body>
+</html>
