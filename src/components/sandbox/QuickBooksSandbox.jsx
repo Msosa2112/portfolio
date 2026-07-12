@@ -517,26 +517,6 @@ export default function QuickBooksSandbox() {
 
           </div>
 
-          {/* Sync logs trace console */}
-          {activeLogTx && (
-            <div className="bg-black/45 border border-[var(--border)] rounded-2xl p-4 font-mono text-[10px] space-y-2 max-h-40 overflow-y-auto">
-              <div className="flex justify-between items-center text-[9px] font-black text-[var(--text-muted)] uppercase border-b border-[var(--border)] pb-2 mb-2">
-                <span>Consola de Auditoría OAuth / QBO API ({activeLogTx})</span>
-                <span className="text-[var(--accent)]">ACTIVO</span>
-              </div>
-              <div className="space-y-1 divide-y divide-white/5">
-                {logs.map((log, idx) => (
-                  <p key={idx} className="py-1 text-[var(--text-secondary)]">{log}</p>
-                ))}
-                {syncingId === activeLogTx && (
-                  <div className="flex items-center gap-2 text-[var(--accent)] font-bold py-1 animate-pulse">
-                    <RefreshCw size={10} className="animate-spin" />
-                    <span>Transfiriendo metadatos al catálogo de QuickBooks...</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Conflict Resolver Demonstration Box */}
           <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
