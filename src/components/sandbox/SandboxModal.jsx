@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, LayoutGrid, Calculator, Users, MessageSquare, DollarSign } from 'lucide-react';
 import KanbanSandbox from './KanbanSandbox';
 import EstimatorSandbox from './EstimatorSandbox';
@@ -17,6 +17,17 @@ const TABS = [
 export default function SandboxModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('dashboard');
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const ActiveComponent = TABS.find((tab) => tab.id === activeTab)?.component || CRMDashboardSandbox;
@@ -31,7 +42,10 @@ export default function SandboxModal({ isOpen, onClose }) {
         <div className="absolute -bottom-[10%] -right-[10%] w-[30%] h-[30%] rounded-full bg-indigo-600/10 blur-[80px] pointer-events-none" />
 
         {/* Sidebar */}
-        <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/10 bg-black/40 backdrop-blur-md p-4 flex flex-row md:flex-col gap-2 md:gap-4 overflow-x-auto md:overflow-x-visible shrink-0 items-center md:items-stretch scrollbar-none">
+        <aside 
+          data-lenis-prevent
+          className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/10 bg-black/40 backdrop-blur-md p-4 flex flex-row md:flex-col gap-2 md:gap-4 overflow-x-auto md:overflow-x-visible shrink-0 items-center md:items-stretch scrollbar-none"
+        >
           <div className="hidden md:flex items-center gap-3 px-2 py-3">
             <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm">
               BP
@@ -72,7 +86,10 @@ export default function SandboxModal({ isOpen, onClose }) {
         </aside>
 
         {/* Viewport Content */}
-        <div className="flex-1 flex flex-col min-w-0 bg-zinc-950/30 overflow-y-auto relative">
+        <div 
+          data-lenis-prevent
+          className="flex-1 flex flex-col min-w-0 bg-zinc-950/30 overflow-y-auto relative"
+        >
           {/* Header */}
           <header className="hidden md:flex items-center justify-between px-8 py-5 border-b border-white/10 shrink-0">
             <div>
