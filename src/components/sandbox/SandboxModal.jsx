@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { X, LayoutGrid, Calculator, Users, MessageSquare, DollarSign } from 'lucide-react';
+import { X, LayoutGrid, Calculator, Users, MessageSquare, DollarSign, Link2 } from 'lucide-react';
 import KanbanSandbox from './KanbanSandbox';
 import EstimatorSandbox from './EstimatorSandbox';
 import CRMDashboardSandbox from './CRMDashboardSandbox';
 import TwilioSandbox from './TwilioSandbox';
 import PayrollSandbox from './PayrollSandbox';
+import QuickBooksSandbox from './QuickBooksSandbox';
 
 const TABS = [
   { id: 'dashboard', label: 'CRM Dashboard', icon: Users, component: CRMDashboardSandbox },
   { id: 'kanban', label: 'Kanban Obras', icon: LayoutGrid, component: KanbanSandbox },
   { id: 'estimator', label: 'Estimador Pro', icon: Calculator, component: EstimatorSandbox },
+  { id: 'quickbooks', label: 'QuickBooks Sync', icon: Link2, component: QuickBooksSandbox },
   { id: 'twilio', label: 'Twilio SMS', icon: MessageSquare, component: TwilioSandbox },
   { id: 'payroll', label: 'Payroll Team', icon: DollarSign, component: PayrollSandbox },
 ];
