@@ -205,6 +205,7 @@ const calculateMaterials = (items) => {
 
 export default function EstimatorSandbox() {
   const [subTab, setSubTab] = useState('list'); // 'list' or 'create'
+  const [activeCategory, setActiveCategory] = useState('gutters');
   
   // Client details autocomplete state
   const [addressSearch, setAddressSearch] = useState('1234 Street, Louisville, KY');
