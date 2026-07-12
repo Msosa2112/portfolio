@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, Map, Sparkles, Mail, Bot, CheckCircle, AlertCircle, 
   Upload, Send, ChevronRight, Calendar, Info, RefreshCw, 
-  Home, Building, MapPin, Maximize, Flame, Lock, Eye, Menu, Search
+  Home, Building, MapPin, Maximize, Flame, Lock, Eye, Menu, Search, Heart
 } from 'lucide-react';
 
 export default function ZHomesSandboxModal({ isOpen, onClose }) {
