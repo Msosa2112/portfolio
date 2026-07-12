@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Droplets, Hammer, Grid, MapPin, Square, Circle, CornerDownLeft, FileText, Send, X, Trash2, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Droplets, Hammer, Grid, MapPin, Square, Circle, CornerDownLeft, FileText, Send, X, Trash2, Sparkles, ClipboardCheck, Truck } from 'lucide-react';
 
 const CATEGORIES = [
   { id: 'roofing', title: 'Techos', desc: 'Composite & Metal', icon: Box, label: 'Techos' },
@@ -65,6 +65,141 @@ WARRANTY
 ESTIMATED PROJECT INVESTMENT: $${total.toFixed(2)}`;
 };
 
+// Materials dynamic calculation helper
+const calculateMaterials = (items) => {
+  const list = [];
+  
+  items.forEach(item => {
+    const name = item.name.toLowerCase();
+    const details = item.details.toLowerCase();
+    
+    // Parse quantity
+    const qtyMatch = details.match(/^([\d.]+)\s*(sq|sq ft|ud\.|pl)/i);
+    const qty = qtyMatch ? parseFloat(qtyMatch[1]) : 0;
+    
+    if (qty === 0) return;
+    
+    if (name.includes('techado') || name.includes('techo') || name.includes('roofing')) {
+      const isMetal = name.includes('metal');
+      if (isMetal) {
+        list.push({
+          name: 'Metal Standing Seam Panels (24 Gauge)',
+          qty: `${qty} SQ`,
+          supplier: 'ABC Supply Co.',
+          purpose: 'Paneles de Cubierta de Techo'
+        });
+        list.push({
+          name: 'High-Temp Roof Underlayment (3\' x 72\' rolls)',
+          qty: `${Math.ceil(qty / 2)} rollos`,
+          supplier: 'ABC Supply Co.',
+          purpose: 'Subcapa Térmica'
+        });
+        list.push({
+          name: 'Metal Roofing Screws (Color Matched)',
+          qty: `${Math.ceil(qty * 1.5)} cajas`,
+          supplier: 'ABC Supply Co.',
+          purpose: 'Fijación de Metal'
+        });
+      } else {
+        list.push({
+          name: 'Tejas Asfálticas Composite (3 bundles/SQ)',
+          qty: `${Math.ceil(qty * 3)} paquetes`,
+          supplier: 'ABC Supply Co.',
+          purpose: 'Tejas de Techo'
+        });
+        list.push({
+          name: 'Synthetic Underlayment (10 SQ roll)',
+          qty: `${Math.ceil(qty / 10)} rollos`,
+          supplier: 'ABC Supply Co.',
+          purpose: 'Fieltro Sintético Impermeable'
+        });
+        list.push({
+          name: 'Ice & Water Shield (Valleys & Rakes)',
+          qty: `${Math.ceil(qty / 2.5)} rollos`,
+          supplier: 'ABC Supply Co.',
+          purpose: 'Protección de Valles/Eaves'
+        });
+        list.push({
+          name: 'Clavos Galvanizados en Bobina (1-1/4" Coil)',
+          qty: `${Math.ceil(qty / 15)} cajas`,
+          supplier: 'ABC Supply Co.',
+          purpose: 'Fijaciones de Tejas'
+        });
+      }
+    } else if (name.includes('siding')) {
+      const isVinyl = name.includes('vinilo') || name.includes('vinyl');
+      if (isVinyl) {
+        list.push({
+          name: 'D4 Vinyl Siding Panels (Double 4" Clapboard)',
+          qty: `${Math.ceil(qty / 2)} paneles`,
+          supplier: "Lowe's Pro",
+          purpose: 'Revestimiento Exterior'
+        });
+      } else {
+        list.push({
+          name: 'HardiePlank Lap Siding (8.25" x 12\')',
+          qty: `${Math.ceil(qty / 6.8)} piezas`,
+          supplier: "Lowe's Pro",
+          purpose: 'Tablones de Fibrocemento'
+        });
+      }
+      list.push({
+        name: 'House Wrap Moisture Barrier (9\' x 100\')',
+        qty: `${Math.ceil(qty / 900)} rollos`,
+        supplier: "Lowe's Pro",
+        purpose: 'Protección de Muro'
+      });
+      list.push({
+        name: 'Siding Nails (2" Galvanized)',
+        qty: `${Math.ceil(qty / 1800)} cajas`,
+        supplier: "Lowe's Pro",
+        purpose: 'Fijación de Fachada'
+      });
+    } else if (name.includes('ventana') || name.includes('window')) {
+      list.push({
+        name: `Unidades de Ventana (${item.name.replace('Ventana ', '')})`,
+        qty: `${qty} ud.`,
+        supplier: 'Home Depot Pro',
+        purpose: 'Marcos de ventana'
+      });
+      list.push({
+        name: 'Window Flashing Tape (4" x 75\')',
+        qty: `${Math.ceil(qty / 4)} rollos`,
+        supplier: 'Home Depot Pro',
+        purpose: 'Impermeabilización de junta'
+      });
+      list.push({
+        name: 'Low-Expansion Window & Door Foam (16oz)',
+        qty: `${Math.ceil(qty / 2)} latas`,
+        supplier: 'Home Depot Pro',
+        purpose: 'Sellador térmico'
+      });
+    } else if (name.includes('canal') || name.includes('gutter')) {
+      const isKStyle = name.includes('k-style');
+      list.push({
+        name: `Aluminum Gutter Coil (11.75" for ${isKStyle ? 'K-Style' : 'Half-Round'})`,
+        qty: `${qty} pies`,
+        supplier: 'ABC Supply Co.',
+        purpose: 'Formación de Canalón'
+      });
+      list.push({
+        name: 'Heavy Duty Gutter Hangers',
+        qty: `${Math.ceil(qty / 2)} soportes`,
+        supplier: 'ABC Supply Co.',
+        purpose: 'Fijaciones al alero'
+      });
+      list.push({
+        name: 'Geocel Gutter Sealant (10.3 oz)',
+        qty: `${Math.ceil(qty / 60)} tubos`,
+        supplier: 'ABC Supply Co.',
+        purpose: 'Uniones y tapas finales'
+      });
+    }
+  });
+
+  return list;
+};
+
 export default function EstimatorSandbox() {
   const [activeCategory, setActiveCategory] = useState('gutters');
   
@@ -97,7 +232,18 @@ export default function EstimatorSandbox() {
   const [aiProposalText, setAiProposalText] = useState('');
   const [refineInput, setRefineInput] = useState('');
   const [isRefining, setIsRefining] = useState(false);
+  
+  // PDF Proposal view modal
   const [showProposal, setShowProposal] = useState(false);
+
+  // Signing & Purchase Order (PO) States
+  const [signatureText, setSignatureText] = useState('');
+  const [isSigning, setIsSigning] = useState(false);
+  const [isSigned, setIsSigned] = useState(false);
+  const [isGeneratingPO, setIsGeneratingPO] = useState(false);
+  const [showPOView, setShowPOView] = useState(false);
+  const [isSendingPO, setIsSendingPO] = useState(false);
+  const [isPOSent, setIsPOSent] = useState(false);
 
   // General autocomplete handlers
   const handleAddressChange = (e) => {
@@ -283,6 +429,53 @@ export default function EstimatorSandbox() {
     }, 1500);
   };
 
+  // Sign & approve proposal contract
+  const handleSignContract = (e) => {
+    e.preventDefault();
+    if (!signatureText.trim()) return;
+
+    setIsSigning(true);
+    setTimeout(() => {
+      setIsSigning(false);
+      setIsSigned(true);
+      setIsGeneratingPO(true);
+      setShowProposal(false);
+
+      // Transition loading screen to show material PO
+      setTimeout(() => {
+        setIsGeneratingPO(false);
+        setShowPOView(true);
+      }, 2000);
+    }, 1500);
+  };
+
+  // Dispatch PO to Suppliers
+  const handleDispatchPO = () => {
+    setIsSendingPO(true);
+    setTimeout(() => {
+      setIsSendingPO(false);
+      setIsPOSent(true);
+    }, 2000);
+  };
+
+  const handleResetEstimator = () => {
+    setShowAIProposal(false);
+    setShowPOView(false);
+    setIsSigned(false);
+    setIsPOSent(false);
+    setSignatureText('');
+    setReceiptItems([
+      {
+        id: 1,
+        name: 'Mano de Obra (Instalación)',
+        details: 'Estimado 6.5 Horas de Cuadrilla',
+        price: 845.00
+      }
+    ]);
+  };
+
+  const computedMaterials = calculateMaterials(receiptItems);
+
   return (
     <div className="w-full relative">
       
@@ -300,10 +493,152 @@ export default function EstimatorSandbox() {
         </div>
       )}
 
-      {/* Main UI view */}
-      {!showAIProposal ? (
+      {/* PO Generation Loading Overlay */}
+      {isGeneratingPO && (
+        <div className="absolute inset-0 bg-zinc-950/90 z-50 flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-[var(--border)]">
+          <div className="relative mb-6 text-[var(--accent)]">
+            <ClipboardCheck size={48} className="animate-bounce" />
+          </div>
+          <h3 className="text-sm font-bold text-white mb-2 tracking-widest uppercase">Propuesta Firmada y Aprobada</h3>
+          <p className="text-xs text-[var(--text-secondary)] max-w-xs leading-relaxed">
+            Calculando materiales requeridos y generando Orden de Compra (PO) automáticamente...
+          </p>
+        </div>
+      )}
+
+      {/* Main UI Switch */}
+      {showPOView ? (
         
-        /* standard material estimator layout */
+        /* High-Fidelity Purchase Order View */
+        <div className="max-w-3xl mx-auto w-full space-y-6">
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col shadow-lg">
+            
+            {/* Header */}
+            <div className="p-4 bg-black/15 border-b border-[var(--border)] flex justify-between items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Truck size={18} className="text-[var(--accent)]" />
+                <h4 className="text-xs font-black tracking-widest uppercase text-[var(--text-primary)]">
+                  Orden de Compra de Materiales (PO)
+                </h4>
+              </div>
+              <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-black px-2 py-0.5 rounded tracking-wider uppercase">
+                {isPOSent ? 'DESPACHADO' : 'PENDIENTE DE ENVÍO'}
+              </span>
+            </div>
+
+            {/* PO Sheet */}
+            <div className="p-6 md:p-8 bg-white text-zinc-950 font-sans leading-relaxed select-text min-h-[350px] space-y-6 relative">
+              {isSendingPO && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center text-center p-4">
+                  <div className="w-10 h-10 rounded-full border-2 border-orange-500/20 border-t-orange-500 animate-spin mb-3" />
+                  <span className="text-xs font-bold text-zinc-800 uppercase tracking-widest animate-pulse">
+                    Enviando Orden al Portal del Distribuidor...
+                  </span>
+                </div>
+              )}
+
+              {/* Logo / PO Header */}
+              <div className="border-b border-zinc-200 pb-4 flex justify-between items-start">
+                <div>
+                  <h3 className="text-md font-black uppercase tracking-wide text-zinc-900">Barba Construction</h3>
+                  <p className="text-[8px] text-zinc-500 uppercase tracking-widest font-bold">Logística y Abastecimiento</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] font-black text-zinc-800">PO-2026-9042</span>
+                  <p className="text-[8px] text-zinc-400 mt-1 uppercase tracking-wider font-bold">
+                    Ref Proyecto: PROP-2026-004
+                  </p>
+                </div>
+              </div>
+
+              {/* Delivery Info */}
+              <div className="grid grid-cols-2 gap-4 text-[10px] text-zinc-600">
+                <div>
+                  <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-400 block">Enviar a Obra (Jobsite):</span>
+                  <p className="font-bold text-zinc-800">{clientName}</p>
+                  <p>{clientAddress}</p>
+                </div>
+                <div className="text-right">
+                  <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-400 block">Fecha Solicitud:</span>
+                  <p className="font-bold text-zinc-800">
+                    {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                  <p>Metodo: Entrega Directa en Obra</p>
+                </div>
+              </div>
+
+              {/* Materials Table */}
+              <div className="border border-zinc-200 rounded-xl overflow-hidden text-xs">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-zinc-50 border-b border-zinc-200 text-[9px] font-black uppercase text-zinc-500">
+                      <th className="py-2.5 px-4">Material / Insumo</th>
+                      <th className="py-2.5 px-4">Cantidad</th>
+                      <th className="py-2.5 px-4">Proveedor</th>
+                      <th className="py-2.5 px-4 text-right">Uso</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-200 text-zinc-700">
+                    {computedMaterials.map((mat, idx) => (
+                      <tr key={idx} className="hover:bg-zinc-50/50">
+                        <td className="py-3 px-4 font-bold text-zinc-800">{mat.name}</td>
+                        <td className="py-3 px-4 font-bold text-orange-600">{mat.qty}</td>
+                        <td className="py-3 px-4 text-zinc-500">{mat.supplier}</td>
+                        <td className="py-3 px-4 text-right text-zinc-400 text-[10px] font-medium">{mat.purpose}</td>
+                      </tr>
+                    ))}
+                    {computedMaterials.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-8 text-center text-zinc-400 text-xs italic">
+                          No se requieren materiales de catálogo para este estimado.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Status Message */}
+              {isPOSent && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3 text-emerald-800 text-xs leading-relaxed">
+                  <div className="h-6 w-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                    ✓
+                  </div>
+                  <div>
+                    <p className="font-bold">¡Orden de Compra Despachada!</p>
+                    <p className="text-[11px] text-emerald-600">
+                      La orden se envió automáticamente a los portales de ABC Supply, Lowe's y Home Depot. Los despachos han sido programados para la dirección del cliente.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer buttons */}
+            <div className="p-4 bg-black/15 border-t border-[var(--border)] flex gap-4">
+              <button
+                onClick={handleResetEstimator}
+                className="flex-1 py-3 border border-[var(--border)] hover:bg-white/5 rounded-xl text-xs font-bold text-white transition-all"
+              >
+                Volver / Nueva Cotización
+              </button>
+
+              {!isPOSent && computedMaterials.length > 0 && (
+                <button
+                  onClick={handleDispatchPO}
+                  disabled={isSendingPO}
+                  className="crm-btn-accent flex-1 py-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-black rounded-xl text-xs font-black uppercase tracking-wider active:scale-95 transition-all shadow-lg"
+                >
+                  Enviar Orden al Proveedor
+                </button>
+              )}
+            </div>
+
+          </div>
+        </div>
+      ) : !showAIProposal ? (
+        
+        /* Standard material estimator layout */
         <div className="flex flex-col lg:flex-row gap-8 items-start text-[var(--text-secondary)]">
           
           {/* Configurator Side */}
@@ -827,10 +1162,21 @@ export default function EstimatorSandbox() {
         </div>
       )}
 
-      {/* PDF Proposal Preview Modal */}
+      {/* PDF Proposal Preview Modal with Sign & Approve Flow */}
       {showProposal && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md text-zinc-900">
           <div className="bg-white rounded-3xl w-full max-w-xl p-8 space-y-6 shadow-2xl relative">
+            
+            {/* Signing loader overlay inside modal */}
+            {isSigning && (
+              <div className="absolute inset-0 bg-white/95 z-50 flex flex-col items-center justify-center text-center p-6 rounded-3xl">
+                <div className="relative mb-4">
+                  <div className="w-12 h-12 rounded-full border-4 border-orange-500/20 border-t-orange-500 animate-spin" />
+                </div>
+                <h4 className="text-sm font-bold text-zinc-900 uppercase tracking-widest animate-pulse">Registrando Firma del Cliente...</h4>
+              </div>
+            )}
+
             <button
               onClick={() => setShowProposal(false)}
               className="absolute top-4 right-4 h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-zinc-800 transition-all"
@@ -839,11 +1185,11 @@ export default function EstimatorSandbox() {
             </button>
 
             {/* Mock Invoice Layout */}
-            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 scrollbar-none">
+            <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-2 scrollbar-none">
               <div className="flex justify-between items-start border-b border-zinc-100 pb-5">
                 <div>
                   <h3 className="text-lg font-black tracking-wider uppercase text-zinc-900">Barba Construction</h3>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Especialista en Techos, Siding y Canales</p>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Especialista en Techos, Siding y Canales</p>
                 </div>
                 <div className="text-right">
                   <span className="text-[9px] font-black bg-zinc-100 text-zinc-600 px-2 py-1 rounded tracking-widest uppercase">Presupuesto</span>
@@ -917,12 +1263,38 @@ export default function EstimatorSandbox() {
               </div>
             </div>
 
-            <button
-              onClick={() => setShowProposal(false)}
-              className="w-full py-3.5 bg-zinc-950 text-white rounded-xl text-xs font-black tracking-widest uppercase hover:bg-zinc-800 transition-all"
-            >
-              Cerrar Vista Previa
-            </button>
+            {/* Signature Box / Action */}
+            <form onSubmit={handleSignContract} className="border-t border-zinc-100 pt-4 space-y-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">
+                  Firma Electrónica del Cliente (Escribe Nombre Completo)
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="ej. Bessie Wilson"
+                  value={signatureText}
+                  onChange={(e) => setSignatureText(e.target.value)}
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-orange-500 font-medium"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowProposal(false)}
+                  className="flex-1 py-3 border border-zinc-200 hover:bg-zinc-50 text-zinc-500 rounded-xl text-xs font-bold transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={!signatureText.trim()}
+                  className="flex-1 py-3 bg-orange-600 hover:bg-orange-500 disabled:bg-zinc-100 disabled:text-zinc-400 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-600/10"
+                >
+                  Aprobar y Firmar
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
