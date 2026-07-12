@@ -3,31 +3,25 @@ import {
   X, Map, Sparkles, Mail, Bot, CheckCircle, AlertCircle, 
   Upload, Send, ChevronRight, Calendar, Info, RefreshCw, 
   Home, Building, MapPin, Maximize, Flame, Lock, Eye, Menu,
-  Heart, Share2, Phone, Play, Pause, Trash2
+  Heart, Share2, Phone, Play, Pause, Search, User, ShieldAlert,
+  Moon, Globe, Sparkle, Compass, HelpCircle, ChevronUp
 } from 'lucide-react';
 
-const MOCK_PROPERTIES = [
-  { id: 'prop-1', address: '1234 Street, Louisville, KY', price: 450000, beds: 3, baths: 2, sqft: 1800, status: 'Active', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600', exclusive: true },
-  { id: 'prop-2', address: '334 East Kentucky St, Louisville, KY', price: 340000, beds: 4, baths: 2, sqft: 2100, status: 'Active', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600', exclusive: false },
-  { id: 'prop-3', address: '1048 Ocean Parkway, Brooklyn, NY', price: 1250000, beds: 5, baths: 4, sqft: 3400, status: 'Pending', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600', exclusive: true }
-];
-
 export default function ZHomesSandboxModal({ isOpen, onClose }) {
-  const [activeScreen, setActiveScreen] = useState('map'); // map, vibe, deal, copilot, email
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [uploadingDoc, setUploadingDoc] = useState(false);
-  const [docStatus, setDocStatus] = useState('pending_upload'); // pending_upload, scanning, approved
-  const [copilotMessages, setCopilotMessages] = useState([
-    { sender: 'bot', text: 'Hola, soy tu AI Copilot Transaccional de ZHomes. He analizado el contrato de Compra-Venta subido para 1234 Street. ¿Qué deseas consultar hoy?' }
-  ]);
-  const [copilotInput, setCopilotInput] = useState('');
-  const [copilotTyping, setCopilotTyping] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationText, setNotificationText] = useState('');
-
-  // Vibe Feed specific states
+  const [activeScreen, setActiveScreen] = useState('inicio'); // inicio, buscar, match, mapa, vibe
   const [vibeLiked, setVibeLiked] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [swipeLiked, setSwipeLiked] = useState(null); // true, false, null
+  const [isVibePlaying, setIsVibePlaying] = useState(true);
+
+  // Deal compliance simulator popup trigger
+  const [showCompliancePopup, setShowCompliancePopup] = useState(false);
+  const [docStatus, setDocStatus] = useState('pending'); // pending, scanning, approved
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [complianceLog, setComplianceLog] = useState([
+    'Iniciando auditoría de compliance de la propiedad 14812 Landmark Dr...',
+    'Contrato de Compra-Venta: VALIDADO ✓',
+    'Prueba de Fondos: VALIDADO ✓'
+  ]);
 
   // Sync scroll lock
   useEffect(() => {
@@ -48,93 +42,58 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
   const navigateTo = (screen) => {
     setActiveScreen(screen);
-    setMenuOpen(false);
   };
 
   const handleUpload = () => {
     if (docStatus === 'approved' || uploadingDoc) return;
     setUploadingDoc(true);
+    setComplianceLog(prev => [...prev, 'Cargando Reporte de Inspección...']);
     setTimeout(() => {
       setDocStatus('scanning');
+      setComplianceLog(prev => [...prev, 'Analizando Reporte de Inspección con Vision AI...']);
       setTimeout(() => {
         setDocStatus('approved');
         setUploadingDoc(false);
-        setCopilotMessages(prev => [
+        setComplianceLog(prev => [
           ...prev,
-          { sender: 'bot', text: '✓ Reporte de Inspección analizado por el OCR de Vision AI. Cláusula de compliance aprobada y guardada.' }
+          '✓ Reporte de Inspección analizado y aprobado. Cláusulas de reparación estructural conformes.',
+          '¡COMPLIANCE COMPLETADO CON ÉXITO!'
         ]);
-        triggerNotification('¡Inspección aprobada por IA e inyectada al Deal Room!');
       }, 1500);
     }, 1000);
   };
 
-  const triggerNotification = (text) => {
-    setNotificationText(text);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
-  };
-
-  const handleCopilotSend = (textToSend) => {
-    const text = textToSend || copilotInput;
-    if (!text.trim()) return;
-
-    setCopilotMessages(prev => [...prev, { sender: 'user', text }]);
-    if (!textToSend) setCopilotInput('');
-    setCopilotTyping(true);
-
-    setTimeout(() => {
-      let reply = '';
-      const lower = text.toLowerCase();
-
-      if (lower.includes('inspeccion') || lower.includes('fecha') || lower.includes('inspección')) {
-        reply = 'Según la cláusula 4.2 del contrato de Compra-Venta de 1234 Street, el plazo de inspección expira el 24 de Julio de 2026. Quedan 12 días.';
-      } else if (lower.includes('documento') || lower.includes('falta') || lower.includes('compliance')) {
-        reply = docStatus === 'approved' 
-          ? 'Todos los documentos obligatorios del checklist han sido subidos y aprobados con firma de compliance.' 
-          : 'Falta subir el "Reporte de Inspección". Haz clic en + Subir en la sección de Documentos para que el OCR lo valide.';
-      } else if (lower.includes('reenviar') || lower.includes('cliente') || lower.includes('john')) {
-        reply = 'He enviado un extracto del estado de compliance y las fechas límite del contrato al chat privado del cliente John Doe.';
-        triggerNotification('Mensaje enviado al Deal Room del cliente.');
-      } else {
-        reply = 'He verificado la metadata del Deal. Todo marcha según el cronograma. El Appraisal está fijado para el 28 de Julio.';
-      }
-
-      setCopilotMessages(prev => [...prev, { sender: 'bot', text: reply }]);
-      setCopilotTyping(false);
-    }, 1200);
-  };
-
   const getScreenDescription = () => {
     switch (activeScreen) {
-      case 'map':
+      case 'inicio':
         return {
-          title: 'Mapa & Búsqueda Geográfica',
-          desc: 'Interfaz móvil de búsqueda inmobiliaria. Reclama un diseño idéntico al del portal de ZHomes: fondo oscuro, barra de búsqueda con IA integrada y pins flotantes con los precios de los listados en rojo.',
-          highlight: 'Observa la tarjeta inferior estilo Airbnb que te permite explorar detalles de la propiedad en un formato sumamente fluido.'
+          title: 'Pantalla de Inicio (Landing)',
+          desc: 'Vista inicial de la aplicación móvil de ZHomes. Muestra la cabecera con el logotipo oficial de ZHomes Real Estate, la propiedad destacada de $1,570,000 en Landmark Dr, el buscador por texto y el acceso al portal de emparejamiento (Match).',
+          highlight: 'Haz clic en el banner rojo de "ZHomes Match" o en las herramientas (Calculadora, Agentes) para interactuar.'
+        };
+      case 'buscar':
+        return {
+          title: 'Resultados de Búsqueda',
+          desc: 'Listado de propiedades filtradas en Louisville. Replica el diseño de tarjetas completas con etiquetas sobrepuestas de IA (Luz natural, Excelente ubicación) y detalles métricos rápidos como precio por millón, habitaciones y metraje.',
+          highlight: 'Haz clic en el botón "Ver Detalles" de la propiedad para abrir el portal de cumplimiento de contratos (Compliance Deal Room).'
+        };
+      case 'match':
+        return {
+          title: 'ZHomes Match (Tinder-Style)',
+          desc: 'Simulador de Swipe. Los compradores deslizan tarjetas hacia la derecha si les atrae la propiedad, o a la izquierda para descartarla. Incluye el agente asignado (Jessica Hernandez) y el distintivo ZHomes.',
+          highlight: 'Usa los botones de Cruz (Descartar) o Corazón (Guardar) para interactuar con la tarjeta destacada.'
+        };
+      case 'mapa':
+        return {
+          title: 'Mapa Interactivo (MapLibre)',
+          desc: 'Visualización de geolocalización de propiedades. Recrea los círculos de densidad de color rojo con los contadores de listados en cada zona, además de la tarjeta inferior desplegable que permite ojear propiedades exclusivas.',
+          highlight: 'Desliza las propiedades de la lista inferior o haz clic en los pines para ver el rendimiento cartográfico.'
         };
       case 'vibe':
         return {
           title: 'Vibe Feed IA',
-          desc: 'Sección inspirada en el formato de videos verticales de TikTok. En ZHomes, los listados exclusivos se presentan mediante micro-videos del vecindario con estadísticas de estilo de vida, seguridad y accesibilidad superpuestas.',
-          highlight: 'Prueba a darle Like (Corazón) o a pausar la reproducción de la propiedad para ver cómo interactúa el feed.'
-        };
-      case 'deal':
-        return {
-          title: 'Checklist & Deal Room',
-          desc: 'Espacio de trabajo transaccional. Los Realtors y Brokers supervisan el checklist de compliance. Subir un archivo inicia un escaneo OCR automático con Vision AI que valida los hitos del contrato y los aprueba automáticamente.',
-          highlight: 'Haz clic en el botón "+ Subir" en el casillero de "Reporte de Inspección" para simular el escaneo legal y ver cómo la IA valida el documento en tiempo real.'
-        };
-      case 'copilot':
-        return {
-          title: 'AI Copilot Transaccional',
-          desc: 'El núcleo inteligente del Transaction Coordinator. El copilot accede al contrato PDF vectorizado (RAG), a la metadata de la transacción y a las fechas de inspección. Permite chatear y reenviar resúmenes directamente al cliente.',
-          highlight: 'Usa las preguntas sugeridas en la parte inferior para pedirle las fechas de inspección o simular el reenvío directo a John Doe.'
-        };
-      case 'email':
-        return {
-          title: 'Plantillas de Resend API',
-          desc: 'Auditoría visual de los correos transaccionales generados por el backend. Los emails de ZHomes fueron modernizados a una estética charcoal elegante utilizando íconos SVG vectorizados en lugar de emojis informales, despachados de un dominio verificado.',
-          highlight: 'Muestra la plantilla real recibida por el cliente y el Realtor tras la aprobación del compliance de un contrato.'
+          desc: 'Feed de videos cortos (estilo TikTok/Reels) que combina metraje de las propiedades con resúmenes proactivos de estilo de vida, ruidos y parques generados por inteligencia artificial en tiempo real.',
+          highlight: 'Interactúa con los controles de reproducción de video en la esquina derecha.'
         };
       default:
         return { title: '', desc: '', highlight: '' };
@@ -203,11 +162,11 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-1 gap-1.5">
               {[
-                { id: 'map', label: 'Buscador Mapa', icon: Map },
-                { id: 'vibe', label: 'Vibe Feed IA', icon: Sparkles },
-                { id: 'deal', label: 'Deal Checklists', icon: CheckCircle },
-                { id: 'copilot', label: 'AI Copilot Chat', icon: Bot },
-                { id: 'email', label: 'Emails Resend', icon: Mail },
+                { id: 'inicio', label: 'Inicio / Home', icon: Home },
+                { id: 'buscar', label: 'Buscador Lista', icon: Search },
+                { id: 'match', label: 'ZHomes Match', icon: Heart },
+                { id: 'mapa', label: 'Mapa Pines', icon: Map },
+                { id: 'vibe', label: 'Vibe Feed', icon: Sparkles },
               ].map((item) => {
                 const isActive = activeScreen === item.id;
                 const Icon = item.icon;
@@ -244,16 +203,63 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
           data-lenis-prevent
         >
           
-          {/* Notifications banner inside simulator */}
-          {showNotification && (
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-[#0e0f14] border border-red-500/30 text-[#E31E24] text-[10px] font-black tracking-wider uppercase px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 z-[130] animate-in slide-in-from-top-4 duration-300">
-              <CheckCircle size={12} />
-              <span>{notificationText}</span>
+          {/* Compliance deal room modal overlay popup inside simulator */}
+          {showCompliancePopup && (
+            <div className="absolute inset-0 bg-black/85 backdrop-blur-sm z-[150] flex items-center justify-center p-4 animate-in fade-in duration-200">
+              <div className="bg-[#141414] border border-zinc-800 rounded-3xl w-[260px] p-4 space-y-3.5 text-left text-zinc-300">
+                <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
+                  <span className="font-black text-[9px] uppercase tracking-wider text-[#E31E24]">Compliance Deal Room</span>
+                  <button 
+                    onClick={() => setShowCompliancePopup(false)} 
+                    className="text-zinc-500 hover:text-white"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+
+                <div className="space-y-1.5 text-[8px] bg-black/50 p-2.5 rounded-xl border border-zinc-900 font-mono text-zinc-400">
+                  {complianceLog.map((log, i) => (
+                    <p key={i} className="leading-normal">{log}</p>
+                  ))}
+                  {uploadingDoc && <span className="h-1.5 w-1.5 rounded-full bg-[#E31E24] animate-ping inline-block" />}
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">Acción Requerida</span>
+                  <div className="bg-[#1c1c1e] border border-zinc-850 p-2 rounded-xl flex items-center justify-between gap-1.5">
+                    <div>
+                      <p className="font-bold text-[9px] text-white">Reporte de Inspección</p>
+                      <span className="text-[7px] text-zinc-500">Formato PDF</span>
+                    </div>
+                    {docStatus === 'approved' ? (
+                      <span className="text-emerald-400 font-black text-[8px] flex items-center gap-0.5 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                        Aprobado
+                      </span>
+                    ) : (
+                      <button
+                        onClick={handleUpload}
+                        disabled={uploadingDoc}
+                        className="px-2 py-1 bg-[#E31E24] hover:bg-red-500 text-white font-black rounded-lg text-[8px] uppercase flex items-center gap-0.5 active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        <Upload size={8} />
+                        <span>{uploadingDoc ? '...' : '+ Subir'}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowCompliancePopup(false)}
+                  className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-[9px] font-black uppercase rounded-xl border border-zinc-800"
+                >
+                  Cerrar Deal Room
+                </button>
+              </div>
             </div>
           )}
 
           {/* Smartphone Simulator Mock Container */}
-          <div className="relative w-[300px] h-[580px] bg-black rounded-[45px] p-3 shadow-2xl border-[6px] border-zinc-800 flex flex-col overflow-hidden shrink-0">
+          <div className="relative w-[300px] h-[580px] bg-black rounded-[45px] p-3 shadow-2xl border-[6px] border-zinc-850 flex flex-col overflow-hidden shrink-0">
             
             {/* Notch */}
             <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-4.5 bg-black rounded-full z-50 flex items-center justify-center">
@@ -262,7 +268,7 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
             {/* Screen Inner Container */}
             <div 
-              className="flex-1 bg-[#121212] rounded-[32px] overflow-hidden flex flex-col relative text-[11px]"
+              className="flex-1 bg-[#f7f8fa] rounded-[32px] overflow-hidden flex flex-col relative text-[11px] text-zinc-900"
               data-lenis-prevent
             >
               
@@ -271,199 +277,459 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                 <span>9:41 AM</span>
                 <div className="flex items-center gap-1">
                   <span>LTE</span>
-                  <div className="w-4.5 h-2 border border-zinc-600 rounded-sm p-0.5 flex items-center justify-start">
-                    <div className="w-3 h-1 bg-zinc-400 rounded-2xs" />
+                  <div className="w-4.5 h-2 border border-zinc-400 rounded-sm p-0.5 flex items-center justify-start">
+                    <div className="w-3 h-1 bg-zinc-500 rounded-2xs" />
                   </div>
                 </div>
               </div>
 
-              {/* App Header */}
-              <header className="px-4 py-3 bg-[#141414]/90 backdrop-blur-md border-b border-zinc-900 flex justify-between items-center z-45 shrink-0 select-none">
-                <button 
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="p-1 hover:bg-white/5 rounded-lg text-zinc-400 hover:text-white transition-all"
-                >
-                  <Menu size={14} />
-                </button>
-                <div className="flex items-center gap-1">
-                  <span className="font-extrabold text-[10px] text-white tracking-widest">ZHOMES</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#E31E24] animate-pulse" />
-                </div>
-                <div className="w-5 h-5 rounded-full bg-red-950/40 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-[8px]">
-                  JD
-                </div>
-              </header>
-
-              {/* Sidebar Menu Overlay inside Phone Simulator */}
-              {menuOpen && (
-                <div 
-                  className="absolute inset-0 bg-black/90 backdrop-blur-sm z-[110] flex flex-col p-5 animate-in slide-in-from-left duration-200"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <div 
-                    className="w-48 bg-[#141414] h-full border-r border-zinc-900 p-4 space-y-4 flex flex-col"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex justify-between items-center border-b border-zinc-900 pb-2.5">
-                      <span className="font-black text-[9px] text-white uppercase tracking-wider">Menú ZHomes</span>
-                      <button onClick={() => setMenuOpen(false)} className="text-zinc-500 hover:text-white">
-                        <X size={12} />
-                      </button>
-                    </div>
-
-                    <div className="flex-1 flex flex-col gap-2">
-                      {[
-                        { id: 'map', label: 'Buscador Propiedades', icon: Map },
-                        { id: 'vibe', label: 'Vibe Feed IA', icon: Sparkles },
-                        { id: 'deal', label: 'Checklist Deal Room', icon: CheckCircle },
-                        { id: 'copilot', label: 'AI Copilot Assistant', icon: Bot },
-                        { id: 'email', label: 'Plantillas Email', icon: Mail },
-                      ].map((link) => {
-                        const Icon = link.icon;
-                        const isLinkActive = activeScreen === link.id;
-                        return (
-                          <button
-                            key={link.id}
-                            onClick={() => navigateTo(link.id)}
-                            className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-[9px] font-bold text-left tracking-wider uppercase transition-all ${
-                              isLinkActive ? 'bg-red-500/10 text-red-400' : 'text-zinc-400 hover:text-white'
-                            }`}
-                          >
-                            <Icon size={11} />
-                            <span>{link.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="border-t border-zinc-900 pt-3 text-[7px] text-zinc-500 font-bold uppercase tracking-wider text-center">
-                      John Doe (Realtor)
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Viewport Content */}
               <div 
-                className="flex-1 overflow-y-auto relative p-3.5 space-y-3.5 scrollbar-none select-none"
+                className="flex-1 overflow-y-auto relative pb-20 scrollbar-none select-none"
                 data-lenis-prevent
               >
                 
-                {/* 1. Map Search Page Screen */}
-                {activeScreen === 'map' && (
-                  <div className="space-y-3.5 animate-in fade-in duration-200">
+                {/* 1. SCREEN: INICIO (HOME) */}
+                {activeScreen === 'inicio' && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
                     
-                    {/* Mock Searchbar */}
-                    <div className="bg-[#1a1a1a] border border-zinc-800 rounded-2xl px-3.5 py-2.5 text-[10px] text-zinc-400 flex items-center justify-between shadow-md">
-                      <span className="truncate">Casas cerca de escuelas...</span>
+                    {/* Header bar matching Screenshot 1 */}
+                    <div className="px-4 py-2.5 flex justify-between items-center bg-transparent z-40 relative">
                       <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#E31E24] animate-ping" />
-                        <MapPin size={11} className="text-[#E31E24]" />
-                      </div>
-                    </div>
-
-                    {/* Filter Pills */}
-                    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                      <span className="px-3 py-1 rounded-full bg-red-950/40 text-red-400 border border-red-500/20 text-[8px] font-black uppercase whitespace-nowrap">Casas</span>
-                      <span className="px-3 py-1 rounded-full bg-[#1a1a1a] text-zinc-400 border border-zinc-800 text-[8px] font-black uppercase whitespace-nowrap">Departamentos</span>
-                      <span className="px-3 py-1 rounded-full bg-[#1a1a1a] text-zinc-400 border border-zinc-800 text-[8px] font-black uppercase whitespace-nowrap">AI Labels</span>
-                    </div>
-
-                    {/* Mock Map Vector Grid */}
-                    <div className="h-44 bg-[#141414] border border-zinc-800 rounded-2xl relative overflow-hidden flex items-center justify-center">
-                      
-                      {/* Grid representation */}
-                      <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 opacity-[0.03] pointer-events-none">
-                        {Array.from({ length: 36 }).map((_, i) => (
-                          <div key={i} className="border border-white" />
-                        ))}
-                      </div>
-
-                      {/* Map Pins (Prices in Red style like actual MapPageMobile) */}
-                      <div className="absolute top-1/4 left-1/3 flex flex-col items-center animate-bounce">
-                        <div className="bg-[#E31E24] text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 shadow-md">
-                          $450K
+                        <div className="w-4.5 h-4.5 rounded-full bg-[#E31E24] flex items-center justify-center text-[8px] font-black text-white">
+                          Z
                         </div>
-                        <div className="w-1.5 h-1.5 bg-[#E31E24] rotate-45 -mt-0.5" />
-                      </div>
-
-                      <div className="absolute bottom-1/3 right-1/4 flex flex-col items-center">
-                        <div className="bg-[#222] text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-zinc-700 shadow-md">
-                          $340K
+                        <div className="leading-none">
+                          <span className="font-extrabold text-[11px] text-[#E31E24] tracking-widest block">ZHOMES</span>
+                          <span className="text-[6px] text-zinc-400 tracking-wider font-bold uppercase">REAL ESTATE</span>
                         </div>
-                        <div className="w-1.5 h-1.5 bg-[#222] rotate-45 -mt-0.5" />
-                      </div>
-
-                      <span className="text-[8px] font-black tracking-widest text-zinc-700 uppercase">MapLibre Raster Engine</span>
-                    </div>
-
-                    {/* Properties List (Airbnb-style bottom card in actual code) */}
-                    <div className="space-y-2.5">
-                      <div className="flex justify-between items-center">
-                        <h5 className="text-[9px] font-black text-white uppercase tracking-wider">Propiedades Encontradas</h5>
-                        <span className="text-[8px] text-zinc-500 font-bold">3 resultados</span>
                       </div>
                       
-                      <div className="space-y-2.5">
-                        {MOCK_PROPERTIES.map((prop) => (
-                          <div 
-                            key={prop.id}
-                            onClick={() => navigateTo('deal')}
-                            className="bg-[#1a1a1a] border border-zinc-800 rounded-xl overflow-hidden flex gap-3 hover:border-red-500/20 transition-all cursor-pointer"
-                          >
-                            <div className="w-20 h-16 shrink-0 relative">
-                              <img src={prop.image} alt="" className="w-full h-full object-cover" />
-                              {prop.exclusive && (
-                                <span className="absolute top-1 left-1 bg-[#E31E24] text-white text-[6px] font-black px-1.5 py-0.2 rounded uppercase">
-                                  ZH
-                                </span>
-                              )}
-                            </div>
-                            <div className="p-2 flex flex-col justify-center min-w-0">
-                              <p className="font-bold text-white text-[9px] leading-tight truncate">{prop.address}</p>
-                              <div className="flex items-center gap-1.5 text-zinc-400 text-[8px] mt-1 font-semibold">
-                                <span>{prop.beds}bd</span>
-                                <span>•</span>
-                                <span>{prop.baths}ba</span>
-                                <span>•</span>
-                                <span className="text-[#E31E24] font-black">${(prop.price/1000)}K</span>
-                              </div>
-                            </div>
+                      {/* Icons on right */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-zinc-600 text-xs">🌙</span>
+                        <span className="text-zinc-600 text-xs">🌐</span>
+                        <button className="bg-[#E31E24] text-white px-3 py-1 rounded-full text-[8px] font-bold flex items-center gap-1">
+                          <span>👤</span> Perfil
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Hero section with dusk house and price overlay */}
+                    <div className="mx-4 rounded-3xl overflow-hidden relative shadow-md h-52 bg-zinc-800">
+                      <img 
+                        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600" 
+                        alt="" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+                      
+                      {/* Dusk card content overlay */}
+                      <div className="absolute bottom-4 left-4 right-4 text-white text-left space-y-1">
+                        <span className="text-2xl font-black tracking-tight">$1,570,000</span>
+                        <p className="text-[9px] font-bold text-zinc-200 leading-snug">14812 Landmark Dr, Louisville, KY 40245</p>
+                        <div className="flex items-center gap-1.5 text-[8px] text-zinc-300 font-semibold pt-0.5">
+                          <span>📍 Louisville</span>
+                          <span>•</span>
+                          <span>6 hab</span>
+                          <span>•</span>
+                          <span>7 baños</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* AI Search pill input overlay */}
+                    <div className="mx-6 -mt-6 relative z-10">
+                      <div className="bg-white border border-zinc-100 rounded-full px-4 py-3 text-[10px] text-zinc-400 flex items-center justify-between shadow-lg">
+                        <span>Ciudad, dirección o ZIP...</span>
+                        <Search size={12} className="text-zinc-400" />
+                      </div>
+                    </div>
+
+                    {/* Horizontal Category pills */}
+                    <div className="px-4 flex gap-1.5 overflow-x-auto scrollbar-none pt-1">
+                      <span className="px-3 py-1.5 rounded-full bg-[#E31E24] text-white text-[8px] font-black uppercase whitespace-nowrap shadow-sm">Todas</span>
+                      <span className="px-3 py-1.5 rounded-full bg-white text-zinc-500 border border-zinc-150 text-[8px] font-black uppercase whitespace-nowrap">Exclusivas</span>
+                      <span className="px-3 py-1.5 rounded-full bg-white text-zinc-500 border border-zinc-150 text-[8px] font-black uppercase whitespace-nowrap">Nuevas</span>
+                      <span className="px-3 py-1.5 rounded-full bg-white text-zinc-500 border border-zinc-150 text-[8px] font-black uppercase whitespace-nowrap">Bajo $300k</span>
+                    </div>
+
+                    {/* ZHomes Match red banner card */}
+                    <div 
+                      onClick={() => navigateTo('match')}
+                      className="mx-4 bg-gradient-to-r from-red-700 to-red-800 rounded-2xl p-3.5 flex justify-between items-center text-white cursor-pointer shadow-md hover:brightness-105 transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-2xl bg-white/10 flex items-center justify-center text-white">
+                          <Heart size={16} className="fill-white" />
+                        </div>
+                        <div className="text-left">
+                          <h4 className="font-extrabold text-[11px] leading-tight tracking-wider">ZHomes Match</h4>
+                          <p className="text-[7px] text-zinc-200">Desliza y encuentra tu hogar ideal</p>
+                        </div>
+                      </div>
+                      <ChevronRight size={14} className="text-white/60" />
+                    </div>
+
+                    {/* Tools section */}
+                    <div className="px-4 space-y-2 text-left">
+                      <h4 className="font-extrabold text-[11px] uppercase tracking-wider text-zinc-800">Herramientas</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { title: 'Calculadora', desc: 'Estima tu hipoteca', icon: '🧮' },
+                          { title: 'Agentes', desc: 'Nuestro equipo', icon: '👥' },
+                          { title: 'Mercado', desc: 'Explorar todo', icon: '📈' }
+                        ].map((tool, idx) => (
+                          <div key={idx} className="bg-white border border-zinc-150 rounded-2xl p-2.5 text-center space-y-1 shadow-2xs hover:border-[#E31E24]/20 transition-all cursor-pointer">
+                            <span className="text-base block">{tool.icon}</span>
+                            <p className="font-extrabold text-[8px] text-zinc-800 leading-tight">{tool.title}</p>
+                            <span className="text-[6px] text-zinc-400 block">{tool.desc}</span>
                           </div>
                         ))}
+                      </div>
+                    </div>
+
+                    {/* Recién Listadas section */}
+                    <div className="px-4 space-y-2.5 text-left">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-extrabold text-[11px] uppercase tracking-wider text-zinc-800">Recién Listadas</h4>
+                        <span className="text-[8px] text-[#E31E24] font-black cursor-pointer uppercase tracking-wider" onClick={() => navigateTo('buscar')}>Ver todas &gt;</span>
+                      </div>
+                      
+                      {/* Big Card matching Screenshot 2 */}
+                      <div className="bg-white border border-zinc-150 rounded-3xl overflow-hidden shadow-sm space-y-2">
+                        <div className="h-44 relative bg-zinc-800">
+                          <img 
+                            src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600" 
+                            alt="" 
+                            className="w-full h-full object-cover"
+                          />
+                          <span className="absolute top-3 left-3 bg-[#E31E24] text-white text-[7px] font-black px-2 py-0.5 rounded uppercase">
+                            ★ ZHomes
+                          </span>
+                        </div>
+                        <div className="p-3 text-left space-y-1">
+                          <h4 className="font-black text-sm text-zinc-900">$1,570,000</h4>
+                          <p className="text-[9px] font-bold text-zinc-500 truncate leading-tight">14812 Landmark Dr, Louisville, KY 40245</p>
+                          <div className="flex gap-1.5 text-[7px] text-zinc-400 pt-0.5 font-bold">
+                            <span>Louisville</span>
+                            <span>•</span>
+                            <span>6 hab</span>
+                            <span>•</span>
+                            <span>7 baños</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
                   </div>
                 )}
 
-                {/* 2. Vibe Feed Screen */}
-                {activeScreen === 'vibe' && (
-                  <div className="space-y-3.5 -m-3.5 h-[480px] relative bg-black flex flex-col justify-between overflow-hidden animate-in fade-in duration-200">
+                {/* 2. SCREEN: BUSCADOR LISTA */}
+                {activeScreen === 'buscar' && (
+                  <div className="space-y-3.5 p-3.5 animate-in fade-in duration-200">
                     
-                    {/* Background Ken Burns Pan Image Mocking Video */}
-                    <div className="absolute inset-0 z-1">
-                      <img 
-                        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600" 
-                        alt="" 
-                        className={`w-full h-full object-cover transform scale-110 origin-center ${isPlaying ? 'animate-pulse' : ''}`}
-                        style={{ filter: 'brightness(0.75)' }}
-                      />
+                    {/* Search filter bar matching Screenshot 3 */}
+                    <div className="flex gap-2 items-center">
+                      <div className="flex-1 bg-white border border-zinc-200 rounded-full px-3.5 py-2 flex items-center justify-between shadow-2xs">
+                        <span className="text-[9px] text-zinc-400">Buscar por dirección o ciudad</span>
+                        <Search size={11} className="text-zinc-400" />
+                      </div>
+                      <button className="h-8 w-8 bg-[#E31E24] text-white rounded-full flex items-center justify-center shadow">
+                        <span>🎚️</span>
+                      </button>
                     </div>
 
-                    {/* Vibe overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-black/45 z-2" />
-
-                    {/* Top overlay navigation */}
-                    <div className="p-4 flex justify-between items-center z-10 select-none">
-                      <span className="text-[10px] font-black text-white uppercase tracking-widest text-shadow">Ocean Parkway Area</span>
-                      <span className="bg-[#E31E24] text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow">
-                        92% VIBE
+                    {/* Filter pills row 1 */}
+                    <div className="flex gap-2">
+                      <span className="bg-red-500/10 text-[#E31E24] border border-red-500/20 px-2.5 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 shadow-2xs">
+                        🏷️ En Venta <span className="bg-[#E31E24] text-white px-1.5 py-0.2 rounded-full text-[6px]">4585</span>
+                      </span>
+                      <span className="bg-zinc-100 text-zinc-500 border border-zinc-200 px-2.5 py-1 rounded-full text-[8px] font-bold uppercase flex items-center gap-1">
+                        🔒 Exclusivas
                       </span>
                     </div>
 
-                    {/* Right action controls */}
-                    <div className="absolute right-3.5 bottom-24 flex flex-col gap-4 z-10 items-center">
+                    {/* Filter pills row 2 */}
+                    <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+                      <span className="px-3 py-1.5 rounded-full bg-zinc-900 text-white text-[8px] font-black uppercase whitespace-nowrap">Casas</span>
+                      <span className="px-3 py-1.5 rounded-full bg-white text-zinc-500 border border-zinc-200 text-[8px] font-black uppercase whitespace-nowrap">Apartamentos</span>
+                      <span className="px-3 py-1.5 rounded-full bg-white text-zinc-500 border border-zinc-200 text-[8px] font-black uppercase whitespace-nowrap">Lotes</span>
+                    </div>
+
+                    {/* Filter dropdowns */}
+                    <div className="flex gap-1 overflow-x-auto scrollbar-none text-[8px] font-bold text-zinc-500 uppercase pb-1 border-b border-zinc-200">
+                      <span className="px-2 py-1 bg-white border border-zinc-200 rounded-lg whitespace-nowrap">Cuartos ∨</span>
+                      <span className="px-2 py-1 bg-white border border-zinc-200 rounded-lg whitespace-nowrap">Baños ∨</span>
+                      <span className="px-2 py-1 bg-white border border-zinc-200 rounded-lg whitespace-nowrap">Sqft ∨</span>
+                      <span className="px-2 py-1 bg-white border border-zinc-200 rounded-lg whitespace-nowrap">Precio ∨</span>
+                    </div>
+
+                    {/* Results count & match button */}
+                    <div className="flex justify-between items-center text-left">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] font-bold text-zinc-500">🏷️ En Venta</span>
+                        <span className="text-[9px] font-extrabold text-zinc-800">4015 propiedades</span>
+                      </div>
+                      <button 
+                        onClick={() => navigateTo('match')}
+                        className="bg-[#E31E24] hover:bg-red-500 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 shadow-sm transition-all"
+                      >
+                        ❤️ Match
+                      </button>
+                    </div>
+
+                    {/* Property Card Detail Listing (High Fidelity matching Screenshot 3) */}
+                    <div className="bg-white border border-zinc-200 rounded-3xl overflow-hidden shadow-md space-y-0.5 relative text-left">
+                      
+                      {/* Image section */}
+                      <div className="h-56 relative bg-zinc-800">
+                        <img 
+                          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600" 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                        />
+                        
+                        {/* Overlay badges */}
+                        <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-1.5 max-w-[80%]">
+                          <span className="bg-black/60 text-white text-[7px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs">Luz natural</span>
+                          <span className="bg-black/60 text-white text-[7px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs">Excelente ubicación</span>
+                          <span className="bg-black/60 text-white text-[7px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs">🚗 30 min</span>
+                        </div>
+
+                        {/* Location capsule */}
+                        <span className="absolute top-24 left-3.5 bg-black/60 text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-xs">
+                          📍 Louisville
+                        </span>
+
+                        {/* Heart icon button */}
+                        <button className="absolute top-3.5 right-3.5 h-7 w-7 rounded-full bg-white/95 flex items-center justify-center text-red-500 shadow-md">
+                          <Heart size={12} className="fill-red-500" />
+                        </button>
+                      </div>
+
+                      {/* Info body */}
+                      <div className="p-4 space-y-3">
+                        <h4 className="font-extrabold text-[12px] text-zinc-950 leading-tight">
+                          14812 Landmark Dr, Louisville, KY 40245
+                        </h4>
+
+                        {/* Bottom stats capsules */}
+                        <div className="flex gap-2.5 text-[8.5px] font-black text-zinc-300 uppercase">
+                          <span className="bg-zinc-800 px-3 py-1 rounded-lg text-white font-black">$1.57M</span>
+                          <span className="bg-zinc-800/80 px-2.5 py-1 rounded-lg text-zinc-200">🛏️ 6</span>
+                          <span className="bg-zinc-800/80 px-2.5 py-1 rounded-lg text-zinc-200">🛁 7</span>
+                          <span className="bg-zinc-800/80 px-2.5 py-1 rounded-lg text-zinc-200">7,291 sqft</span>
+                        </div>
+
+                        {/* Ver Detalles compliance integration button */}
+                        <button 
+                          onClick={() => {
+                            setComplianceLog([
+                              'Iniciando auditoría de compliance de la propiedad 14812 Landmark Dr...',
+                              'Contrato de Compra-Venta: VALIDADO ✓',
+                              'Prueba de Fondos: VALIDADO ✓'
+                            ]);
+                            setDocStatus('pending');
+                            setShowCompliancePopup(true);
+                          }}
+                          className="w-full py-2.5 mt-1 bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold text-[9px] uppercase tracking-wider rounded-xl flex items-center justify-center gap-1 shadow-sm transition-all"
+                        >
+                          Ver Detalles &gt;
+                        </button>
+                      </div>
+
+                    </div>
+
+                  </div>
+                )}
+
+                {/* 3. SCREEN: ZHONES MATCH (SWIPE) */}
+                {activeScreen === 'match' && (
+                  <div className="space-y-4 p-4 animate-in fade-in duration-200 text-center">
+                    
+                    {/* Header row */}
+                    <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
+                      <button onClick={() => navigateTo('inicio')} className="p-1 hover:bg-zinc-100 rounded-lg text-zinc-600">
+                        <span>←</span>
+                      </button>
+                      <h4 className="font-extrabold text-[12px] text-red-600 tracking-wider">Zhomes Match</h4>
+                      <div className="w-6" />
+                    </div>
+
+                    <p className="text-[9px] text-zinc-400 leading-snug">
+                      Desliza a la derecha si te gusta, a la izquierda si no.
+                    </p>
+
+                    {/* Swiper Card Mockup matching Screenshot 5 */}
+                    <div className="relative mx-auto w-[230px] h-[340px] bg-zinc-800 rounded-3xl overflow-hidden shadow-2xl border border-zinc-200">
+                      <img 
+                        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600" 
+                        alt="" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+
+                      {/* Exclusivas badge */}
+                      <span className="absolute top-4 left-4 bg-[#E31E24] text-white text-[7px] font-black px-2 py-0.5 rounded uppercase">
+                        ★ ZHomes
+                      </span>
+
+                      {/* Card Overlay Text */}
+                      <div className="absolute bottom-4 left-4 right-4 text-left text-white space-y-1">
+                        <span className="text-xl font-black leading-none">$1,570,000</span>
+                        <p className="font-bold text-[9px] text-zinc-200 truncate">14812 Landmark Dr, Louisville, KY 40245</p>
+                        
+                        <div className="flex gap-2 text-[7px] text-zinc-300 font-bold">
+                          <span>📍 Louisville</span>
+                          <span>•</span>
+                          <span>6 Cuartos</span>
+                          <span>•</span>
+                          <span>7 Baños</span>
+                          <span>•</span>
+                          <span>7,291 sqft</span>
+                        </div>
+                        <span className="text-[6.5px] text-zinc-400 block pt-0.5">Agente: Jessica Hernandez</span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Tinder-style Actions */}
+                    <div className="flex justify-center gap-4 pt-1">
+                      <button 
+                        onClick={() => { setSwipeLiked(false); triggerNotification('Propiedad descartada'); }}
+                        className="h-11 w-11 rounded-full bg-white border border-red-200/50 flex items-center justify-center text-red-500 shadow-md active:scale-90 transition-all text-sm font-bold"
+                      >
+                        ✕
+                      </button>
+                      <button 
+                        onClick={() => { setSwipeLiked(null); triggerNotification('Deshaciendo acción...'); }}
+                        className="h-9 w-9 rounded-full bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 shadow-md active:scale-90 transition-all text-xs"
+                      >
+                        ↩
+                      </button>
+                      <button 
+                        onClick={() => { setSwipeLiked(true); triggerNotification('¡Propiedad Guardada en Favoritos!'); }}
+                        className="h-11 w-11 rounded-full bg-white border border-green-200/50 flex items-center justify-center text-emerald-500 shadow-md active:scale-90 transition-all text-sm"
+                      >
+                        ♥
+                      </button>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* 4. SCREEN: MAPA PINES (MAPLIBRE) */}
+                {activeScreen === 'mapa' && (
+                  <div className="h-[480px] -m-3.5 relative bg-[#eef1f6] flex flex-col justify-between overflow-hidden animate-in fade-in duration-200">
+                    
+                    {/* Search and filters matching Screenshot 4 */}
+                    <div className="p-3 space-y-2.5 z-10 bg-transparent relative">
+                      
+                      {/* Search bar input with search and filters icon */}
+                      <div className="bg-white border border-zinc-200/60 rounded-full px-3.5 py-2.5 text-[9.5px] text-zinc-400 flex items-center justify-between shadow-md">
+                        <span>Describe tu hogar ideal...</span>
+                        <Search size={11} className="text-zinc-400" />
+                      </div>
+
+                      {/* Row 1 pills */}
+                      <div className="flex gap-1.5 overflow-x-auto scrollbar-none text-[8px] font-bold uppercase">
+                        <span className="px-3 py-1 rounded-full bg-zinc-950 text-white font-black whitespace-nowrap">Todas</span>
+                        <span className="px-3 py-1 rounded-full bg-white text-zinc-500 border border-zinc-200 whitespace-nowrap">En Venta</span>
+                        <span className="px-3 py-1 rounded-full bg-white text-zinc-500 border border-zinc-200 whitespace-nowrap">Exclusivas</span>
+                      </div>
+
+                      {/* Row 2 pills */}
+                      <div className="flex gap-1.5 overflow-x-auto scrollbar-none text-[8px] font-bold text-zinc-500 uppercase">
+                        <span className="px-2 py-0.5 bg-zinc-900 text-white rounded-md whitespace-nowrap">Todos</span>
+                        <span className="px-2 py-0.5 bg-white border border-zinc-200 rounded-md whitespace-nowrap">Casas</span>
+                        <span className="px-2 py-0.5 bg-white border border-zinc-200 rounded-md whitespace-nowrap">Apt</span>
+                        <span className="px-2 py-0.5 bg-white border border-zinc-200 rounded-md whitespace-nowrap">Lotes</span>
+                      </div>
+
+                    </div>
+
+                    {/* Vector Map image overlay mimicking pins */}
+                    <div className="absolute inset-0 bg-[#e3eafd] flex items-center justify-center">
+                      <div className="absolute inset-0 bg-cover opacity-20" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000')" }} />
+                      
+                      {/* Map Pins counts matching Screenshot 4 */}
+                      <div className="absolute top-28 left-6 bg-[#E31E24] text-white text-[8px] font-black h-5 w-5 rounded-full flex items-center justify-center shadow-lg border border-white/20">10</div>
+                      <div className="absolute top-20 right-16 bg-[#E31E24] text-white text-[8px] font-black h-6 w-6 rounded-full flex items-center justify-center shadow-lg border border-white/20">30</div>
+                      <div className="absolute top-36 right-8 bg-[#E31E24] text-white text-[8px] font-black h-5.5 w-5.5 rounded-full flex items-center justify-center shadow-lg border border-white/20">17</div>
+                      <div className="absolute top-44 left-20 bg-[#E31E24] text-white text-[8px] font-black h-6.5 w-6.5 rounded-full flex items-center justify-center shadow-lg border border-white/20">53</div>
+                      <div className="absolute bottom-36 right-20 bg-[#E31E24] text-white text-[8px] font-black h-5.5 w-5.5 rounded-full flex items-center justify-center shadow-lg border border-white/20">27</div>
+                      <div className="absolute bottom-28 left-14 bg-[#E31E24] text-white text-[8px] font-black h-5 w-5 rounded-full flex items-center justify-center shadow-lg border border-white/20">43</div>
+
+                    </div>
+
+                    {/* Translucent floating map action buttons on right */}
+                    <div className="absolute right-3 top-36 flex flex-col gap-2 z-10">
+                      <button className="h-7 w-7 bg-white border border-zinc-200 rounded-full flex items-center justify-center text-zinc-500 shadow-md"><Map size={10} /></button>
+                      <button className="h-7 w-7 bg-white border border-zinc-200 rounded-full flex items-center justify-center text-zinc-500 shadow-md"><Flame size={10} /></button>
+                      <button className="h-7 w-7 bg-white border border-zinc-200 rounded-full flex items-center justify-center text-zinc-500 shadow-md">⎔</button>
+                    </div>
+
+                    {/* Bottom slider sheet listing matching Screenshot 4 */}
+                    <div className="z-10 bg-white/95 backdrop-blur-md rounded-t-3xl border-t border-zinc-200 p-3 space-y-2.5 text-left shadow-2xl">
+                      <div className="flex justify-between items-center px-1">
+                        <span className="text-[9px] font-black text-zinc-800 uppercase tracking-wider">Ver 40 propiedades →</span>
+                        <ChevronUp size={12} className="text-zinc-400" />
+                      </div>
+
+                      {/* Horizontal list of properties */}
+                      <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+                        
+                        {/* Card 1 */}
+                        <div className="w-36 shrink-0 bg-white border border-zinc-150 rounded-2xl overflow-hidden space-y-1.5 shadow-2xs">
+                          <div className="h-20 relative bg-zinc-800">
+                            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300" alt="" className="w-full h-full object-cover" />
+                            <span className="absolute top-1 left-1 bg-zinc-950 text-white text-[5.5px] font-black px-1.5 py-0.2 rounded">ZH</span>
+                          </div>
+                          <div className="p-1.5 text-left">
+                            <p className="font-black text-[9px] text-zinc-900">$515K</p>
+                            <span className="text-[6.5px] text-zinc-400 font-bold block">5 bd • 3 ba • 3,462 sqft</span>
+                          </div>
+                        </div>
+
+                        {/* Card 2 */}
+                        <div className="w-36 shrink-0 bg-white border border-zinc-150 rounded-2xl overflow-hidden space-y-1.5 shadow-2xs">
+                          <div className="h-20 relative bg-zinc-800">
+                            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=300" alt="" className="w-full h-full object-cover" />
+                            <span className="absolute top-1 left-1 bg-zinc-950 text-white text-[5.5px] font-black px-1.5 py-0.2 rounded">ZH</span>
+                          </div>
+                          <div className="p-1.5 text-left">
+                            <p className="font-black text-[9px] text-zinc-900">$440K</p>
+                            <span className="text-[6.5px] text-zinc-400 font-bold block">4 bd • 3 ba • 2,500 sqft</span>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* 5. SCREEN: VIBE FEED */}
+                {activeScreen === 'vibe' && (
+                  <div className="space-y-3.5 -m-3.5 h-[480px] relative bg-black flex flex-col justify-between overflow-hidden animate-in fade-in duration-200">
+                    
+                    {/* Background video mock */}
+                    <div className="absolute inset-0 z-1">
+                      <img 
+                        src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600" 
+                        alt="" 
+                        className="w-full h-full object-cover"
+                        style={{ filter: 'brightness(0.75)' }}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/35 z-2" />
+
+                    <div className="p-4 flex justify-between items-center z-10 text-white select-none">
+                      <span className="text-[9px] font-black tracking-widest text-shadow uppercase">Vibe Feed IA</span>
+                      <span className="bg-[#E31E24] text-white text-[7px] font-black px-1.5 py-0.2 rounded">LIVE SUMMARY</span>
+                    </div>
+
+                    <div className="absolute right-3 bottom-24 flex flex-col gap-4 z-10 items-center">
                       <button 
                         onClick={() => setVibeLiked(!vibeLiked)}
                         className={`h-9 w-9 rounded-full flex items-center justify-center border shadow transition-all ${
@@ -472,279 +738,29 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
                       >
                         <Heart size={14} className={vibeLiked ? 'fill-white' : ''} />
                       </button>
-                      <button className="h-9 w-9 rounded-full bg-black/40 border border-white/20 flex items-center justify-center text-white shadow">
-                        <Share2 size={12} />
-                      </button>
+                      <button className="h-9 w-9 rounded-full bg-black/40 border border-white/20 flex items-center justify-center text-white shadow"><Share2 size={12} /></button>
                       <button 
-                        onClick={() => setIsPlaying(!isPlaying)}
+                        onClick={() => setIsVibePlaying(!isVibePlaying)}
                         className="h-9 w-9 rounded-full bg-black/40 border border-white/20 flex items-center justify-center text-white shadow"
                       >
-                        {isPlaying ? <Pause size={12} /> : <Play size={12} />}
+                        {isVibePlaying ? <Pause size={12} /> : <Play size={12} />}
                       </button>
                     </div>
 
-                    {/* Bottom Property Detail overlay */}
-                    <div className="p-4 z-10 space-y-2 select-none">
+                    {/* Bottom AI data card overlay */}
+                    <div className="p-4 z-10 text-left text-white space-y-1.5 select-none">
                       <div className="flex items-center gap-1.5 text-red-400">
-                        <Sparkles size={11} />
-                        <span className="font-black text-[9px] uppercase tracking-wider">RECOMENDADO POR IA</span>
+                        <Sparkles size={11} className="animate-spin-slow" />
+                        <span className="font-black text-[9px] uppercase tracking-wider">Tranquilidad Estimada: 92%</span>
                       </div>
-                      <h4 className="text-white font-extrabold text-[12px] leading-tight text-shadow">1234 Street, Louisville, KY</h4>
+                      <h4 className="font-extrabold text-[12px] text-shadow leading-tight">10906 Milwaukee Way, Louisville, KY</h4>
                       <p className="text-[9px] text-zinc-300 leading-relaxed font-medium text-shadow">
-                        "Estadísticas del vecindario muestran bajos niveles de ruido y alta densidad de zonas verdes familiares. La IA reporta un excelente ratio de revalorización."
+                        "La IA de vecindarios destaca baja emisión de ruidos viales nocturnos, cercanía a escuelas públicas de alta valoración y senderos ecológicos."
                       </p>
-                      <div className="flex gap-1.5 text-[8px] font-black uppercase text-zinc-300 pt-1">
-                        <span className="bg-black/60 border border-white/10 px-2 py-0.5 rounded">
-                          🌳 Parques Familiares
-                        </span>
-                        <span className="bg-black/60 border border-white/10 px-2 py-0.5 rounded">
-                          📶 Fibra Simétrica
-                        </span>
+                      <div className="flex gap-1.5 text-[7px] font-black uppercase text-zinc-300 pt-0.5">
+                        <span className="bg-black/60 border border-white/10 px-2 py-0.5 rounded">🌳 Alta Densidad Verde</span>
+                        <span className="bg-black/60 border border-white/10 px-2 py-0.5 rounded">📶 Fibra Activa</span>
                       </div>
-                    </div>
-
-                  </div>
-                )}
-
-                {/* 3. Deal Checklist / Properties Screen */}
-                {activeScreen === 'deal' && (
-                  <div className="space-y-3.5 animate-in fade-in duration-200">
-                    
-                    {/* Deal Header */}
-                    <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-3 space-y-1.5 shadow-sm">
-                      <div className="flex justify-between items-center text-[7px] font-black text-zinc-500 uppercase tracking-widest">
-                        <span>DEAL: #TC-1234</span>
-                        <span className="text-[#E31E24]">Compliance Audit</span>
-                      </div>
-                      <h4 className="font-extrabold text-white text-[10px] leading-tight">1234 Street, Louisville, KY</h4>
-                      <div className="flex justify-between items-center text-[8px] pt-1 border-t border-zinc-900 mt-1">
-                        <span className="text-zinc-400 font-bold">$450,000</span>
-                        <span className="text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded">Aprobado</span>
-                      </div>
-                    </div>
-
-                    {/* Checklist Documents */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <h5 className="text-[9px] font-black text-white uppercase tracking-wider">Checklist Transaccional</h5>
-                        <span className="text-[8px] text-zinc-500 font-bold">2 / 3 Listo</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        
-                        {/* Doc 1 */}
-                        <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-2.5 flex items-center justify-between gap-3 shadow-2xs">
-                          <div className="space-y-0.5">
-                            <p className="font-bold text-white text-[9px]">Purchase Agreement</p>
-                            <span className="text-[8px] text-zinc-500">Subido el 10 Jul</span>
-                          </div>
-                          <span className="text-emerald-400 font-black flex items-center gap-1 text-[8px] uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                            <CheckCircle size={8} /> Aprobado
-                          </span>
-                        </div>
-
-                        {/* Doc 2 */}
-                        <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-2.5 flex items-center justify-between gap-3 shadow-2xs">
-                          <div className="space-y-0.5">
-                            <p className="font-bold text-white text-[9px]">Proof of Funds (POF)</p>
-                            <span className="text-[8px] text-zinc-500">Subido el 11 Jul</span>
-                          </div>
-                          <span className="text-emerald-400 font-black flex items-center gap-1 text-[8px] uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                            <CheckCircle size={8} /> Aprobado
-                          </span>
-                        </div>
-
-                        {/* Doc 3 (Interactive Upload) */}
-                        <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-2.5 flex items-center justify-between gap-3 relative overflow-hidden shadow-2xs">
-                          
-                          {/* OCR scanning overlay effect */}
-                          {docStatus === 'scanning' && (
-                            <div className="absolute inset-0 bg-red-950/20 backdrop-blur-2xs flex items-center justify-center text-red-400 font-bold text-[8px] uppercase tracking-wider">
-                              <span className="animate-pulse">Vision AI OCR Escaneando...</span>
-                            </div>
-                          )}
-
-                          <div className="space-y-0.5">
-                            <p className="font-bold text-white text-[9px]">Reporte de Inspección</p>
-                            <span className="text-[8px] text-zinc-500">
-                              {docStatus === 'approved' ? 'Aprobado automáticamente' : 'Requerido'}
-                            </span>
-                          </div>
-
-                          {docStatus === 'approved' ? (
-                            <span className="text-emerald-400 font-black flex items-center gap-1 text-[8px] uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full animate-bounce">
-                              <CheckCircle size={8} /> Aprobado
-                            </span>
-                          ) : (
-                            <button
-                              onClick={handleUpload}
-                              disabled={uploadingDoc}
-                              className="px-2.5 py-1.5 bg-[#E31E24] hover:bg-red-500 text-white font-black rounded-lg text-[8px] uppercase flex items-center gap-1 active:scale-95 transition-all disabled:opacity-50"
-                            >
-                              <Upload size={8} />
-                              <span>{uploadingDoc ? 'Cargando...' : '+ Subir'}</span>
-                            </button>
-                          )}
-                        </div>
-
-                      </div>
-                    </div>
-
-                  </div>
-                )}
-
-                {/* 4. AI Copilot Chat Screen */}
-                {activeScreen === 'copilot' && (
-                  <div className="flex flex-col h-[400px] -m-3.5 relative bg-[#121212]">
-                    
-                    {/* Chat top header */}
-                    <div className="p-3 bg-[#141414] border-b border-zinc-900 flex items-center justify-between select-none">
-                      <div className="flex items-center gap-1.5">
-                        <Bot size={12} className="text-[#E31E24] animate-pulse" />
-                        <span className="font-black text-[9px] text-white uppercase tracking-wider">Asistente Transaccional</span>
-                      </div>
-                      <span className="text-[8px] bg-red-500/10 text-red-400 border border-red-500/25 px-1.5 py-0.2 rounded font-black">RAG ACTIVE</span>
-                    </div>
-
-                    {/* Messages Scroll Area */}
-                    <div className="flex-1 p-3 overflow-y-auto space-y-3.5 scrollbar-none text-[10px]">
-                      {copilotMessages.map((msg, idx) => (
-                        <div 
-                          key={idx} 
-                          className={`flex gap-2 max-w-[85%] ${msg.sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
-                        >
-                          {msg.sender === 'bot' && (
-                            <div className="h-5 w-5 rounded bg-red-950 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
-                              <Bot size={10} />
-                            </div>
-                          )}
-                          <div className={`p-2 rounded-xl leading-normal font-medium ${
-                            msg.sender === 'user' 
-                              ? 'bg-red-500/10 text-white rounded-tr-none border border-red-500/20' 
-                              : 'bg-[#1a1a1a] text-zinc-300 border border-zinc-800 rounded-tl-none'
-                          }`}>
-                            {msg.text}
-                          </div>
-                        </div>
-                      ))}
-
-                      {copilotTyping && (
-                        <div className="flex gap-2 max-w-[85%]">
-                          <div className="h-5 w-5 rounded bg-red-950 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
-                            <Bot size={10} />
-                          </div>
-                          <div className="bg-[#1a1a1a] border border-zinc-800 p-2 rounded-xl rounded-tl-none text-zinc-500 flex items-center gap-1">
-                            <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Suggestions Area */}
-                    <div className="p-2 border-t border-zinc-900 bg-black/15 flex gap-1.5 overflow-x-auto scrollbar-none select-none">
-                      <button
-                        onClick={() => handleCopilotSend('¿Cuándo vence la inspección de 1234 Street?')}
-                        className="px-2 py-1 bg-[#1a1a1a] border border-zinc-850 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-red-500/30 whitespace-nowrap"
-                      >
-                        Inspección Fecha
-                      </button>
-                      <button
-                        onClick={() => handleCopilotSend('¿Faltan documentos en 1234 Street?')}
-                        className="px-2 py-1 bg-[#1a1a1a] border border-zinc-850 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-red-500/30 whitespace-nowrap"
-                      >
-                        Faltantes
-                      </button>
-                      <button
-                        onClick={() => handleCopilotSend('Reenviar resumen al cliente')}
-                        className="px-2 py-1 bg-[#1a1a1a] border border-zinc-850 rounded-lg text-[8px] font-black uppercase text-zinc-300 hover:border-red-500/30 whitespace-nowrap"
-                      >
-                        Reenviar Al Cliente
-                      </button>
-                    </div>
-
-                    {/* Input Bar */}
-                    <form 
-                      onSubmit={(e) => { e.preventDefault(); handleCopilotSend(); }}
-                      className="p-2 bg-black border-t border-zinc-900 flex gap-1.5 items-center select-none shrink-0"
-                    >
-                      <input
-                        type="text"
-                        placeholder="Pregúntale al Copilot..."
-                        value={copilotInput}
-                        onChange={(e) => setCopilotInput(e.target.value)}
-                        disabled={copilotTyping}
-                        className="flex-1 bg-[#1a1a1a] border border-zinc-850 rounded-xl px-2.5 py-1.5 text-[9px] text-white focus:outline-none placeholder-zinc-700"
-                      />
-                      <button
-                        type="submit"
-                        disabled={copilotTyping || !copilotInput.trim()}
-                        className="p-1.5 bg-[#E31E24] hover:bg-red-500 disabled:opacity-50 text-white rounded-lg transition-all"
-                      >
-                        <Send size={10} />
-                      </button>
-                    </form>
-
-                  </div>
-                )}
-
-                {/* 5. Resend Email Screen */}
-                {activeScreen === 'email' && (
-                  <div className="space-y-3 animate-in fade-in duration-200 text-[10px]">
-                    
-                    {/* Email Headers */}
-                    <div className="bg-[#1a1a1a] border border-zinc-800 rounded-xl p-3 space-y-1.5 text-zinc-400">
-                      <div>
-                        <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-500 block">De:</span>
-                        <p className="font-bold text-white">info@zhomesapp.com</p>
-                      </div>
-                      <div className="border-t border-zinc-900 pt-1.5">
-                        <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-500 block">Para:</span>
-                        <p className="font-bold text-white">john.doe@example.com</p>
-                      </div>
-                      <div className="border-t border-zinc-900 pt-1.5">
-                        <span className="font-bold text-[8px] uppercase tracking-wider text-zinc-500 block">Asunto:</span>
-                        <p className="font-bold text-[#E31E24] leading-tight">Compliance Aprobado - 1234 Street, Louisville, KY</p>
-                      </div>
-                    </div>
-
-                    {/* Email Template Body (Charcoal background) */}
-                    <div className="bg-[#1c1c1e] border border-zinc-800 rounded-xl p-4 space-y-4 text-zinc-355 font-medium shadow-md">
-                      
-                      {/* Logo header */}
-                      <div className="flex justify-center border-b border-zinc-800 pb-3">
-                        <span className="font-extrabold text-[12px] text-white tracking-widest">ZHOMES REAL ESTATE</span>
-                      </div>
-
-                      <p className="text-[10px] leading-relaxed">
-                        Estimado **John Doe**,
-                      </p>
-
-                      <p className="text-[10px] leading-relaxed font-medium">
-                        Nos complace informarle que el checklist de compliance para la transacción de su propiedad en **1234 Street** ha sido completado y validado.
-                      </p>
-
-                      {/* Status timeline with SVG-like Lucide items (Modernized, no emojis) */}
-                      <div className="border border-zinc-800 rounded-lg p-3 space-y-2 bg-black/10">
-                        <div className="flex items-center gap-2 text-emerald-400">
-                          <CheckCircle size={12} />
-                          <span className="font-bold">Contrato de Compra-Venta: Validado</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-emerald-400">
-                          <CheckCircle size={12} />
-                          <span className="font-bold">Prueba de Fondos (POF): Validado</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-emerald-400">
-                          <CheckCircle size={12} />
-                          <span className="font-bold">Reporte de Inspección: Validado</span>
-                        </div>
-                      </div>
-
-                      <p className="text-[9px] text-zinc-500 leading-relaxed pt-2 border-t border-zinc-800">
-                        Si tiene alguna duda sobre el Appraisal o la fecha del cierre, consulte con su Realtor o chatee con el AI Copilot en su panel.
-                      </p>
-
                     </div>
 
                   </div>
@@ -752,21 +768,56 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
               </div>
 
+              {/* FLOATING CAPSULE NAVIGATION BAR matching exactly Screenshots */}
+              <div className="absolute bottom-4 left-3.5 right-3.5 bg-white/70 backdrop-blur-md border border-zinc-200/50 rounded-full py-1.5 px-3 flex justify-between items-center shadow-lg z-50 select-none">
+                {[
+                  { id: 'inicio', label: 'Inicio', icon: '🏠' },
+                  { id: 'buscar', label: 'Buscar', icon: '🔍' },
+                  { id: 'match', label: 'Match', icon: '❤️' },
+                  { id: 'mapa', label: 'Mapa', icon: '🗺️' },
+                  { id: 'vibe', label: 'Vibe', icon: '🔥' }
+                ].map((tabItem) => {
+                  const isActive = activeScreen === tabItem.id;
+                  return (
+                    <button
+                      key={tabItem.id}
+                      onClick={() => navigateTo(tabItem.id)}
+                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full transition-all duration-200 ${
+                        isActive 
+                          ? 'bg-white text-zinc-950 font-black shadow-md border border-zinc-150' 
+                          : 'text-zinc-500 hover:text-zinc-800'
+                      }`}
+                    >
+                      <span className="text-xs leading-none">{tabItem.icon}</span>
+                      {isActive && <span className="text-[8px] font-black uppercase tracking-wider">{tabItem.label}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* Home Indicator bar */}
-              <div className="h-4 bg-[#121212] flex items-center justify-center shrink-0 select-none pb-1">
-                <div className="w-20 h-1 bg-zinc-700 rounded-full" />
+              <div className="h-4 bg-transparent flex items-center justify-center shrink-0 select-none pb-1 relative z-40">
+                <div className="w-20 h-1 bg-zinc-400 rounded-full" />
               </div>
 
             </div>
 
           </div>
 
-          {/* Floating Bubble launcher mock inside mockup window */}
-          {activeScreen !== 'copilot' && (
+          {/* Floating Assistant bubble button inside mockup */}
+          {activeScreen !== 'vibe' && (
             <button
-              onClick={() => setActiveScreen('copilot')}
+              onClick={() => {
+                setComplianceLog([
+                  'Iniciando auditoría de compliance de la propiedad 14812 Landmark Dr...',
+                  'Contrato de Compra-Venta: VALIDADO ✓',
+                  'Prueba de Fondos: VALIDADO ✓'
+                ]);
+                setDocStatus('pending');
+                setShowCompliancePopup(true);
+              }}
               className="absolute bottom-12 right-[calc(50%-120px)] h-9 w-9 rounded-full bg-[#E31E24] hover:bg-red-500 text-white flex items-center justify-center shadow-lg transition-all active:scale-95 cursor-pointer z-50 animate-bounce"
-              title="Abrir AI Copilot"
+              title="Abrir Auditoría de Compliance"
             >
               <Bot size={16} />
             </button>
