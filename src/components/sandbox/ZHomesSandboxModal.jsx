@@ -8,6 +8,7 @@ import {
 
 export default function ZHomesSandboxModal({ isOpen, onClose }) {
   const [activeScreen, setActiveScreen] = useState('inicio'); // inicio, buscar, match, mapa, vibe
+  const [iframeUrl, setIframeUrl] = useState('https://zhomesapp.com/');
   const [showCompliancePopup, setShowCompliancePopup] = useState(false);
   const [docStatus, setDocStatus] = useState('pending'); // pending, scanning, approved
   const [uploadingDoc, setUploadingDoc] = useState(false);
@@ -38,6 +39,25 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
 
   const navigateTo = (screen) => {
     setActiveScreen(screen);
+    switch (screen) {
+      case 'inicio':
+        setIframeUrl('https://zhomesapp.com/');
+        break;
+      case 'buscar':
+        setIframeUrl('https://zhomesapp.com/propiedades');
+        break;
+      case 'match':
+        setIframeUrl('https://zhomesapp.com/swipe');
+        break;
+      case 'mapa':
+        setIframeUrl('https://zhomesapp.com/mapa');
+        break;
+      case 'vibe':
+        setIframeUrl('https://zhomesapp.com/vibe');
+        break;
+      default:
+        setIframeUrl('https://zhomesapp.com/');
+    }
   };
 
   const triggerNotification = (text) => {
@@ -70,33 +90,33 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
     switch (activeScreen) {
       case 'inicio':
         return {
-          title: 'Pantalla de Inicio (Landing)',
-          desc: 'Esta es la pantalla de inicio real de la app móvil de ZHomes. Muestra el encabezado corporativo, la propiedad destacada de $1,570,000 en Landmark Dr, el buscador y las herramientas operativas.',
-          highlight: 'Haz clic en el botón de "👤 Perfil" (arriba a la derecha) o en el banner de "ZHomes Match" para interactuar.'
+          title: 'Portada / Inicio de ZHomes',
+          desc: 'La página de inicio de la aplicación ZHomes cargada en tiempo real. Contiene la cabecera, buscador, listados recomendados y accesos directos al cotizador y agentes.',
+          highlight: 'El teléfono embebe la aplicación web de producción directa de ZHomes. Puedes interactuar con ella libremente.'
         };
       case 'buscar':
         return {
-          title: 'Buscador & Listado de Propiedades',
-          desc: 'Resultados reales de búsqueda en Louisville. Presenta las tarjetas de propiedades con insignias automáticas de IA (Luz natural, Excelente ubicación) y métricas de precio/habitaciones.',
-          highlight: 'Haz clic en el botón oscuro de "Ver Detalles >" en la tarjeta de propiedad para ingresar al Deal Room de Compliance.'
+          title: 'Buscador & Lista de Propiedades',
+          desc: 'Listado público de propiedades IDX de Louisville, KY. Muestra listados actualizados con insignias sobrepuestas calculadas mediante inteligencia artificial.',
+          highlight: 'Puedes deslizar, usar los filtros superiores de cuartos o baños, o cambiar al modo mapa.'
         };
       case 'match':
         return {
           title: 'ZHomes Match (Tinder-Style)',
-          desc: 'Simulación del portal de emparejamiento interactivo de ZHomes. Los usuarios deslizan hacia la derecha o izquierda para clasificar sus casas preferidas de manera dinámica.',
-          highlight: 'Prueba a hacer clic en los botones circulares inferiores de X (Descartar) o Corazón (Favoritos) para recibir retroalimentación.'
+          desc: 'Portal interactivo de emparejamiento. Desliza hacia la derecha si te gusta la propiedad, o a la izquierda si prefieres descartarla.',
+          highlight: 'Prueba la interacción nativa del swipe o usa los botones de cruz y corazón.'
         };
       case 'mapa':
         return {
-          title: 'Mapa de Calor de Propiedades',
-          desc: 'Vista real de geolocalización de propiedades. Utiliza círculos de densidad rojos en lugar de pines individuales para facilitar la lectura del volumen de listados por zona.',
-          highlight: 'Haz clic en la lista desplegable de propiedades de la parte inferior para ver más detalles.'
+          title: 'Mapa de Calor (MapLibre)',
+          desc: 'Sección del mapa en tiempo real de ZHomes. Agrupa propiedades en clusters rojos de densidad térmica para una visualización más cómoda desde el móvil.',
+          highlight: 'Puedes deslizar el mapa para explorar las ubicaciones o hacer clic en los marcadores.'
         };
       case 'vibe':
         return {
           title: 'Vibe Feed IA de Vecindario',
-          desc: 'Sección de micro-videos verticales que detallan la vibra del vecindario, ruidos locales, parques y velocidad de internet móvil, traduciendo reportes aburridos a lenguaje visual.',
-          highlight: 'Interactúa con los botones de acción del video en el margen derecho.'
+          desc: 'Feed de videos cortos estilo TikTok/Reels que describe las cualidades y estadísticas de estilo de vida del vecindario en lenguaje natural.',
+          highlight: 'Prueba a pausar/reproducir o a interactuar con los botones de la esquina derecha.'
         };
       default:
         return { title: '', desc: '', highlight: '' };
@@ -270,10 +290,10 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
           )}
 
           {/* Smartphone Simulator Mock Container */}
-          <div className="relative w-[300px] h-[580px] bg-black rounded-[45px] p-3 shadow-2xl border-[6px] border-zinc-850 flex flex-col overflow-hidden shrink-0">
+          <div className="relative w-[300px] h-[580px] bg-black rounded-[45px] p-3.5 shadow-2xl border-[6px] border-zinc-850 flex flex-col overflow-hidden shrink-0">
             
             {/* Notch */}
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-32 h-4.5 bg-black rounded-full z-50 flex items-center justify-center">
+            <div className="absolute top-3.5 left-1/2 -translate-x-1/2 w-32 h-4.5 bg-black rounded-full z-50 flex items-center justify-center">
               <div className="w-2.5 h-2.5 rounded-full bg-zinc-900 ml-8" />
             </div>
 
@@ -283,167 +303,18 @@ export default function ZHomesSandboxModal({ isOpen, onClose }) {
               data-lenis-prevent
             >
               
-              {/* Actual screenshot rendering based on active screen */}
-              <div className="absolute inset-0 z-10 w-full h-full overflow-hidden select-none bg-zinc-100">
-                {activeScreen === 'inicio' && (
-                  <div className="w-full h-full relative">
-                    <img 
-                      src="/assets/zhomes/home.png" 
-                      alt="ZHomes Home Screen" 
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    {/* Invisible hitboxes over the screenshot for interactivity */}
-                    {/* Perfil Button (Top Right) -> opens Compliance Room */}
-                    <button 
-                      onClick={() => {
-                        setComplianceLog([
-                          'Iniciando auditoría de compliance para 14812 Landmark Dr...',
-                          'Contrato de Compra-Venta: VALIDADO ✓',
-                          'Prueba de Fondos (POF): VALIDADO ✓'
-                        ]);
-                        setDocStatus('pending');
-                        setShowCompliancePopup(true);
-                      }} 
-                      className="absolute top-[4.5%] right-[5%] w-[25%] h-[5%] bg-transparent cursor-pointer outline-none focus:outline-none"
-                    />
-
-                    {/* ZHomes Match Banner (Middle) -> navigates to match */}
-                    <button 
-                      onClick={() => navigateTo('match')} 
-                      className="absolute top-[52%] left-[5%] w-[90%] h-[11%] bg-transparent cursor-pointer outline-none focus:outline-none"
-                    />
-
-                    {/* Ver todas > (Bottom-Middle) -> navigates to search list */}
-                    <button 
-                      onClick={() => navigateTo('buscar')} 
-                      className="absolute top-[80%] right-[5%] w-[25%] h-[4%] bg-transparent cursor-pointer outline-none focus:outline-none"
-                    />
-                  </div>
-                )}
-
-                {activeScreen === 'buscar' && (
-                  <div className="w-full h-full relative">
-                    <img 
-                      src="/assets/zhomes/search.png" 
-                      alt="ZHomes Search Screen" 
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    {/* Ver Detalles Button on properties card -> opens Compliance room */}
-                    <button 
-                      onClick={() => {
-                        setComplianceLog([
-                          'Iniciando auditoría de compliance para 14812 Landmark Dr...',
-                          'Contrato de Compra-Venta: VALIDADO ✓',
-                          'Prueba de Fondos (POF): VALIDADO ✓'
-                        ]);
-                        setDocStatus('pending');
-                        setShowCompliancePopup(true);
-                      }} 
-                      className="absolute top-[82%] left-[12%] w-[76%] h-[5.5%] bg-transparent cursor-pointer outline-none focus:outline-none animate-pulse"
-                      style={{ border: '2px dashed rgba(227,30,36,0.3)', borderRadius: '12px' }}
-                      title="Ver Detalles Compliance"
-                    />
-
-                    {/* Match button at top row -> navigates to match */}
-                    <button 
-                      onClick={() => navigateTo('match')} 
-                      className="absolute top-[35%] right-[8%] w-[24%] h-[4.5%] bg-transparent cursor-pointer outline-none focus:outline-none"
-                    />
-                  </div>
-                )}
-
-                {activeScreen === 'match' && (
-                  <div className="w-full h-full relative">
-                    <img 
-                      src="/assets/zhomes/match.png" 
-                      alt="ZHomes Match Screen" 
-                      className="w-full h-full object-cover"
-                    />
-
-                    {/* Tinder controls hitboxes */}
-                    {/* Red X button */}
-                    <button 
-                      onClick={() => triggerNotification('Propiedad descartada')} 
-                      className="absolute bottom-[16%] left-[17%] w-[16%] h-[8%] bg-transparent cursor-pointer outline-none"
-                    />
-                    
-                    {/* Green Heart button */}
-                    <button 
-                      onClick={() => triggerNotification('¡Propiedad Guardada en Favoritos!')} 
-                      className="absolute bottom-[16%] right-[17%] w-[16%] h-[8%] bg-transparent cursor-pointer outline-none"
-                    />
-
-                    {/* Back arrow button top-left */}
-                    <button 
-                      onClick={() => navigateTo('inicio')} 
-                      className="absolute top-[9.5%] left-[6%] w-[10%] h-[4%] bg-transparent cursor-pointer outline-none"
-                    />
-                  </div>
-                )}
-
-                {activeScreen === 'mapa' && (
-                  <div className="w-full h-full relative">
-                    <img 
-                      src="/assets/zhomes/map.png" 
-                      alt="ZHomes Map Screen" 
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    {/* Bottom list panel -> goes to list view */}
-                    <button 
-                      onClick={() => navigateTo('buscar')} 
-                      className="absolute bottom-[15%] left-[5%] w-[90%] h-[15%] bg-transparent cursor-pointer outline-none"
-                    />
-                  </div>
-                )}
-
-                {activeScreen === 'vibe' && (
-                  <div className="w-full h-full relative">
-                    <img 
-                      src="/assets/zhomes/vibe.png" 
-                      alt="ZHomes Vibe Feed Screen" 
-                      className="w-full h-full object-cover"
-                    />
-
-                    {/* Vibe audio/play button */}
-                    <button 
-                      onClick={() => triggerNotification('Reproduciendo clip de vecindario...')} 
-                      className="absolute bottom-[23%] right-[5%] w-[12%] h-[6%] bg-transparent cursor-pointer outline-none"
-                    />
-                  </div>
-                )}
-
-                {/* GLOBAL MOCK BOTTOM NAVIGATION BAR OVERLAY */}
-                {/* We map this directly over the navigation bar in the screenshots to allow seamless switching */}
-                <div className="absolute bottom-[6%] left-[5%] right-[5%] h-[7%] z-[120] flex justify-between bg-transparent pointer-events-auto">
-                  <button 
-                    onClick={() => navigateTo('inicio')} 
-                    className="w-[18%] h-full bg-transparent hover:bg-black/5 rounded-full cursor-pointer outline-none transition-all" 
-                  />
-                  <button 
-                    onClick={() => navigateTo('buscar')} 
-                    className="w-[18%] h-full bg-transparent hover:bg-black/5 rounded-full cursor-pointer outline-none transition-all" 
-                  />
-                  <button 
-                    onClick={() => navigateTo('match')} 
-                    className="w-[18%] h-full bg-transparent hover:bg-black/5 rounded-full cursor-pointer outline-none transition-all" 
-                  />
-                  <button 
-                    onClick={() => navigateTo('mapa')} 
-                    className="w-[18%] h-full bg-transparent hover:bg-black/5 rounded-full cursor-pointer outline-none transition-all" 
-                  />
-                  <button 
-                    onClick={() => navigateTo('vibe')} 
-                    className="w-[18%] h-full bg-transparent hover:bg-black/5 rounded-full cursor-pointer outline-none transition-all" 
-                  />
-                </div>
-
+              {/* Iframe embedding the live ZHomes application */}
+              <div className="absolute inset-0 z-10 w-full h-full overflow-hidden bg-zinc-100">
+                <iframe
+                  src={iframeUrl}
+                  className="w-full h-full border-none"
+                  title="ZHomes Live App"
+                  allow="geolocation"
+                />
               </div>
 
               {/* Home Indicator bar */}
-              <div className="h-4 bg-transparent flex items-center justify-center shrink-0 select-none pb-1 relative z-40">
+              <div className="h-4 bg-white flex items-center justify-center shrink-0 select-none pb-1 relative z-40">
                 <div className="w-20 h-1 bg-zinc-400 rounded-full" />
               </div>
 
