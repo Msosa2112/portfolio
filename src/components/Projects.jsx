@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ThreeDHoverGallery from './ThreeDHoverGallery';
 import SandboxModal from './sandbox/SandboxModal';
+import ZHomesSandboxModal from './sandbox/ZHomesSandboxModal';
 
 const PROJECT_ITEMS = [
   {
@@ -35,6 +36,7 @@ const PROJECT_ITEMS = [
 
 const Projects = () => {
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
+  const [isZhomesOpen, setIsZhomesOpen] = useState(false);
 
   return (
     <section id="work" className="projects-section">
@@ -54,6 +56,8 @@ const Projects = () => {
           onExploreClick={(index, item) => {
             if (item.title.includes("Barba")) {
               setIsSandboxOpen(true);
+            } else if (item.title.includes("ZHomes")) {
+              setIsZhomesOpen(true);
             }
           }}
         />
@@ -62,6 +66,11 @@ const Projects = () => {
       <SandboxModal
         isOpen={isSandboxOpen}
         onClose={() => setIsSandboxOpen(false)}
+      />
+
+      <ZHomesSandboxModal
+        isOpen={isZhomesOpen}
+        onClose={() => setIsZhomesOpen(false)}
       />
 
       <style>{`
