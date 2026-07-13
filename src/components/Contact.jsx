@@ -5,20 +5,20 @@ import { Mail, ArrowUpRight } from 'lucide-react';
 const Contact = () => {
   const { scrollYProgress } = useScroll();
 
-  // 3D Zoom Tunnel transforms for Contact (Active from scroll 0.83 to 1.0)
-  const scale = useTransform(scrollYProgress, [0.80, 0.94], [0.35, 1.0]);
-  const opacity = useTransform(scrollYProgress, [0.80, 0.92], [0.0, 1.0]);
-  const y = useTransform(scrollYProgress, [0.80, 0.94], [100, 0]);
+  // 3D Zoom Tunnel transforms for Contact (Active from scroll 0.86 to 1.0)
+  const scale = useTransform(scrollYProgress, [0.86, 0.96], [0.35, 1.0]);
+  const opacity = useTransform(scrollYProgress, [0.86, 0.94], [0.0, 1.0]);
+  const y = useTransform(scrollYProgress, [0.86, 0.96], [100, 0]);
 
   // Hook-driven pointer state to avoid overlay interaction locks
   const [isActive, setIsActive] = React.useState(false);
 
   React.useEffect(() => {
-    setIsActive(scrollYProgress.get() >= 0.84);
+    setIsActive(scrollYProgress.get() >= 0.88);
   }, []);
 
   useMotionValueEvent(scrollYProgress, "change", (val) => {
-    const active = val >= 0.84;
+    const active = val >= 0.88;
     if (active !== isActive) {
       setIsActive(active);
     }

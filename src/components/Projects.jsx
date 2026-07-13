@@ -50,7 +50,7 @@ const PROJECT_ITEMS = [
 // Individual Project Card Section with Vertical Slide-up Transitions
 function ProjectSection({ item, index, scrollYProgress, onExplore }) {
   const count = PROJECT_ITEMS.length;
-  const step = 0.70 / count;
+  const step = 0.42 / count;
   const startIn = 0.12 + index * step;
   const center = startIn + step * 0.45;
   const startOut = center + step * 0.45;
@@ -182,10 +182,10 @@ export default function Projects({ activeSandboxId, setActiveSandboxId }) {
   const handleIndicatorClick = (idx) => {
     const pageHeight = window.innerHeight || 800;
     const count = PROJECT_ITEMS.length;
-    const step = 0.70 / count;
+    const step = 0.42 / count;
     const startIn = 0.12 + idx * step;
     const center = startIn + step * 0.45;
-    const targetScroll = center * pageHeight * 6.0;
+    const targetScroll = center * pageHeight * 8.0;
 
     if (window.lenis) {
       window.lenis.scrollTo(targetScroll, { duration: 1.2 });
@@ -198,7 +198,7 @@ export default function Projects({ activeSandboxId, setActiveSandboxId }) {
   const [activeDot, setActiveDot] = useState(0);
   useMotionValueEvent(scrollYProgress, "change", (val) => {
     const count = PROJECT_ITEMS.length;
-    const step = 0.70 / count;
+    const step = 0.42 / count;
     let activeIdx = 0;
     for (let i = 0; i < count; i++) {
       const startIn = 0.12 + i * step;
@@ -216,7 +216,7 @@ export default function Projects({ activeSandboxId, setActiveSandboxId }) {
   // Is projects section currently in view range
   const [showIndicators, setShowIndicators] = useState(false);
   useMotionValueEvent(scrollYProgress, "change", (val) => {
-    const visible = val >= 0.10 && val <= 0.84;
+    const visible = val >= 0.10 && val <= 0.55;
     if (visible !== showIndicators) {
       setShowIndicators(visible);
     }

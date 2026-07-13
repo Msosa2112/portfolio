@@ -7,6 +7,8 @@ import Projects from './components/Projects';
 import Contact from './components/Contact';
 import Grainient from './components/Grainient';
 import ThreeCanvas from './components/ThreeCanvas';
+import SovereigntyVisualizer from './components/SovereigntyVisualizer';
+import AutomationFlow from './components/AutomationFlow';
 
 function App() {
   const [activeSandboxId, setActiveSandboxId] = useState(null);
@@ -89,6 +91,8 @@ function App() {
       <main className="main-content">
         <Hero />
         <Projects activeSandboxId={activeSandboxId} setActiveSandboxId={setActiveSandboxId} />
+        <SovereigntyVisualizer scrollYProgress={scrollYProgress} />
+        <AutomationFlow scrollYProgress={scrollYProgress} />
         <Contact />
       </main>
 
@@ -130,7 +134,7 @@ function App() {
 
         /* Create native scroll height */
         .scroll-spacer {
-          height: 600vh;
+          height: 800vh;
           width: 100%;
           pointer-events: none;
         }
