@@ -112,25 +112,51 @@ export default function Projects() {
   const zIndexes = getZindex(PROJECT_ITEMS, active);
 
   return (
-    <section id="work" className="w-full min-h-[600px] py-12 md:py-20 relative flex flex-col justify-between overflow-hidden font-sans select-none">
+    <section id="work" className="w-full min-h-[600px] py-12 md:py-20 relative flex flex-col justify-between overflow-visible font-sans select-none">
       
+      {/* Decorative blurred background cards (Top-Left & Bottom-Right) */}
+      <div 
+        className="absolute w-[200px] h-[270px] rounded-[24px] border border-indigo-500/20 bg-indigo-500/10 pointer-events-none"
+        style={{
+          top: '-15px',
+          left: '-45px',
+          transform: 'rotate(-25deg)',
+          filter: 'blur(12px)',
+          opacity: 0.2,
+          zIndex: 0
+        }}
+      />
+      <div 
+        className="absolute w-[200px] h-[270px] rounded-[24px] border border-cyan-500/20 bg-cyan-500/10 pointer-events-none"
+        style={{
+          bottom: '-15px',
+          right: '-45px',
+          transform: 'rotate(25deg)',
+          filter: 'blur(12px)',
+          opacity: 0.2,
+          zIndex: 0
+        }}
+      />
+
       {/* 2D Curved abanico layout matching Fabio Ottaviani */}
       <style>{`
         .carousel-wrapper {
           position: relative;
-          z-index: 1;
+          z-index: 10;
           height: 480px;
           width: 100%;
-          overflow: hidden;
+          overflow: visible;
           pointer-events: none;
         }
 
         .carousel-card-item {
           --width: clamp(260px, 60vw, 340px);
           --height: clamp(340px, 80vw, 450px);
-          --x: calc(var(--active-val) * 780%);
-          --y: calc(var(--active-val) * 190%);
-          --rot: calc(var(--active-val) * 105deg);
+          
+          /* Scaled down offsets so adjacent cards remain beautifully visible on screen */
+          --x: calc(var(--active-val) * 310%);
+          --y: calc(var(--active-val) * 85%);
+          --rot: calc(var(--active-val) * 45deg);
 
           overflow: hidden;
           position: absolute;
@@ -147,7 +173,8 @@ export default function Projects() {
           pointer-events: all;
           transform: translate(var(--x), var(--y)) rotate(var(--rot));
           transition: transform .8s cubic-bezier(0, 0.02, 0, 1), border-color .3s ease, box-shadow .5s ease;
-          border-width: 1px;
+          border: none; /* Removed bottom card border line issues */
+          font-family: 'Bahnschrift', 'DIN Alternate', 'Inter', -apple-system, sans-serif;
         }
 
         .carousel-card-box {
@@ -159,7 +186,6 @@ export default function Projects() {
           height: 100%;
           transition: opacity .8s cubic-bezier(0, 0.02, 0, 1);
           opacity: var(--opacity-val);
-          font-family: inherit;
         }
 
         .carousel-card-box::before {
@@ -170,20 +196,7 @@ export default function Projects() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: linear-gradient(to bottom, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, .85));
-        }
-
-        .carousel-card-item .num {
-          position: absolute;
-          z-index: 3;
-          color: #fff;
-          top: 15px;
-          left: 20px;
-          font-family: 'Playfair Display', Georgia, serif;
-          font-size: clamp(40px, 12vw, 75px);
-          font-weight: 900;
-          line-height: 1;
-          opacity: 0.95;
+          background: linear-gradient(to bottom, rgba(0, 0, 0, .3), rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.15) 60%, rgba(0, 0, 0, .85));
         }
 
         .carousel-card-item .card-content {
@@ -197,11 +210,13 @@ export default function Projects() {
         }
 
         .carousel-card-item .title {
-          font-family: 'Playfair Display', Georgia, serif;
+          font-family: 'Bahnschrift', 'DIN Alternate', 'Inter', -apple-system, sans-serif;
           font-size: clamp(22px, 5vw, 28px);
-          font-weight: 900;
+          font-weight: 800;
           color: #ffffff;
           line-height: 1.1;
+          text-transform: uppercase;
+          letter-spacing: 0.02em;
         }
 
         .carousel-card-item img {
@@ -242,8 +257,8 @@ export default function Projects() {
           const activeVal = (idx - active) / PROJECT_ITEMS.length;
           const isActive = idx === active;
 
-          // Opacity formula that allows 3 cards to be visible at once (fading side cards nicely but keeping them visible)
-          const opacityVal = Math.max(0.15, 1 - Math.abs(idx - active) * 0.45);
+          // Opacity decay that allows multiple cards to show stacked behind at 55% opacity
+          const opacityVal = Math.max(0.4, 1 - Math.abs(idx - active) * 0.45);
 
           return (
             <div
@@ -259,9 +274,6 @@ export default function Projects() {
               className="carousel-card-item cursor-pointer"
             >
               <div className="carousel-card-box">
-                {/* Serif large Number */}
-                <div className="num">0{idx + 1}</div>
-                
                 {/* Cover Image */}
                 <img src={item.image} alt={item.title} />
 
@@ -291,7 +303,7 @@ export default function Projects() {
                             e.stopPropagation();
                             handleExplore(item);
                           }}
-                          className="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-black text-[9px] uppercase tracking-wider rounded-lg flex items-center gap-1 active:scale-95 transition-all shadow-md"
+                          className="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-black text-[9px] uppercase tracking-wider rounded-lg flex items-center gap-1 active:scale-95 transition-all shadow-md font-sans"
                         >
                           <span>Explore Project</span>
                           {item.exploreUrl ? <ExternalLink size={10} /> : <ArrowRight size={10} />}
