@@ -12,6 +12,26 @@ const navItems = [
 const Navbar = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
+  const handleNavClick = (e, itemId) => {
+    e.preventDefault();
+    const pageHeight = window.innerHeight || 800;
+    const totalHeight = pageHeight * 6.0; // Matches the 600vh scroll-spacer
+
+    let targetScroll = 0;
+    if (itemId === 'work') {
+      targetScroll = 0.20 * totalHeight; // Scroll to first project
+    } else if (itemId === 'about') {
+      targetScroll = 0.20 * totalHeight; // Scroll to work/about info region
+    } else if (itemId === 'contact') {
+      targetScroll = 0.95 * totalHeight; // Scroll to contact at the bottom
+    }
+
+    window.scrollTo({
+      top: targetScroll,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <motion.nav 
       initial={{ y: 100, opacity: 0 }}
@@ -29,6 +49,7 @@ const Navbar = () => {
             <a 
               key={item.id}
               href={item.href}
+              onClick={(e) => handleNavClick(e, item.id)}
               className="dock-item"
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
