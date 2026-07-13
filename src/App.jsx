@@ -140,3 +140,4 @@ function App() {
 }
 
 export default App;
+// Trigger Vercel redeployment for restored Vite workspace with animated background.
