@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import Lenis from 'lenis';
 import Navbar from './components/Navbar';
@@ -6,6 +6,7 @@ import Hero from './components/Hero';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
 import Grainient from './components/Grainient';
+import ThreeCanvas from './components/ThreeCanvas';
 
 function App() {
   const { scrollYProgress } = useScroll();
@@ -14,6 +15,10 @@ function App() {
     damping: 30,
     restDelta: 0.001
   });
+
+  // Shared WebGL Carousel states
+  const [activeIndex, setActiveIndex] = useState(0);
+  const targetRotation = useRef(0);
 
   // Enable Lenis smooth scrolling
   useEffect(() => {
@@ -43,12 +48,12 @@ function App() {
 
   return (
     <>
-      
+      {/* Background grain texture shader */}
       <div className="global-grainient-wrapper">
         <Grainient
-          color1="#7C3AED"
+          color1="#5e3acd"
           color2="#000000"
-          color3="#EAB308"
+          color3="#d0a200"
           timeSpeed={0.95}
           colorBalance={0}
           warpStrength={1}
@@ -59,10 +64,10 @@ function App() {
           blendSoftness={0.05}
           rotationAmount={500}
           noiseScale={2}
-          grainAmount={0.1}
+          grainAmount={0.08}
           grainScale={2}
           grainAnimated={false}
-          contrast={1.5}
+          contrast={1.4}
           gamma={1}
           saturation={1}
           centerX={0}
@@ -70,8 +75,15 @@ function App() {
           zoom={0.9}
         />
       </div>
-      
 
+      {/* 3D WebGL Canvas Layer (Fixed background) */}
+      <ThreeCanvas 
+        activeIndex={activeIndex}
+        setActiveIndex={setActiveIndex}
+        targetRotation={targetRotation}
+      />
+
+      {/* Top indicator bar */}
       <motion.div
         className="progress-bar"
         style={{ scaleX }}
@@ -79,9 +91,16 @@ function App() {
 
       <Navbar />
       
+      {/* HTML overlay sections */}
       <main className="main-content">
         <Hero />
-        <Projects />
+        
+        {/* Pass WebGL hooks to allow HTML interactions with 3D space */}
+        <Projects 
+          activeIndex={activeIndex}
+          targetRotation={targetRotation}
+        />
+        
         <Contact />
       </main>
       
@@ -92,7 +111,7 @@ function App() {
           left: 0;
           right: 0;
           height: 3px;
-          background: var(--accent);
+          background: #7C3AED;
           transform-origin: 0%;
           z-index: 1000;
         }
@@ -109,11 +128,22 @@ function App() {
         
         .main-content {
           position: relative;
-          z-index: 1;
+          z-index: 10; /* Put HTML layout on top of fixed WebGL canvas */
+          pointer-events: none; /* Let empty space drag fall through to WebGL */
           display: flex;
           flex-direction: column;
           align-items: center;
           width: 100%;
+        }
+
+        /* Ensure all interactive HTML elements have pointer-events-auto */
+        .main-content button,
+        .main-content a,
+        .main-content input,
+        .main-content textarea,
+        .main-content .glass-panel,
+        .main-content .glass-pill {
+          pointer-events: auto;
         }
       `}</style>
     </>
