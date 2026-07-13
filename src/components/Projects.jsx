@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import SandboxModal from './sandbox/SandboxModal';
 
