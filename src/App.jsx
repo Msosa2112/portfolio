@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import Lenis from 'lenis';
 import Navbar from './components/Navbar';
@@ -15,10 +15,6 @@ function App() {
     damping: 30,
     restDelta: 0.001
   });
-
-  // Shared WebGL Carousel states
-  const [activeIndex, setActiveIndex] = useState(0);
-  const targetRotation = useRef(0);
 
   // Enable Lenis smooth scrolling
   useEffect(() => {
@@ -76,14 +72,10 @@ function App() {
         />
       </div>
 
-      {/* 3D WebGL Canvas Layer (Fixed background) */}
-      <ThreeCanvas 
-        activeIndex={activeIndex}
-        setActiveIndex={setActiveIndex}
-        targetRotation={targetRotation}
-      />
+      {/* 3D WebGL Canvas Layer (Fixed background particles) */}
+      <ThreeCanvas />
 
-      {/* Top indicator bar */}
+      {/* Top indicator progress bar */}
       <motion.div
         className="progress-bar"
         style={{ scaleX }}
@@ -91,18 +83,15 @@ function App() {
 
       <Navbar />
       
-      {/* HTML overlay sections */}
+      {/* HTML overlay sections (fixed in viewport) */}
       <main className="main-content">
         <Hero />
-        
-        {/* Pass WebGL hooks to allow HTML interactions with 3D space */}
-        <Projects 
-          activeIndex={activeIndex}
-          targetRotation={targetRotation}
-        />
-        
+        <Projects />
         <Contact />
       </main>
+
+      {/* Transparent scrollable spacer to create native window scrollbar */}
+      <div className="scroll-spacer" />
       
       <style>{`
         .progress-bar {
@@ -127,23 +116,19 @@ function App() {
         }
         
         .main-content {
-          position: relative;
-          z-index: 10; /* Put HTML layout on top of fixed WebGL canvas */
-          pointer-events: none; /* Let empty space drag fall through to WebGL */
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+          position: fixed;
+          inset: 0;
           width: 100%;
+          height: 100vh;
+          z-index: 10;
+          pointer-events: none;
         }
 
-        /* Ensure all interactive HTML elements have pointer-events-auto */
-        .main-content button,
-        .main-content a,
-        .main-content input,
-        .main-content textarea,
-        .main-content .glass-panel,
-        .main-content .glass-pill {
-          pointer-events: auto;
+        /* Create native scroll height */
+        .scroll-spacer {
+          height: 600vh;
+          width: 100%;
+          pointer-events: none;
         }
       `}</style>
     </>

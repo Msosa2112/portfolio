@@ -1,10 +1,43 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Mail, ArrowUpRight } from 'lucide-react';
 
 const Contact = () => {
+  const { scrollYProgress } = useScroll();
+
+  // 3D Zoom Tunnel transforms for Contact (Active from scroll 0.83 to 1.0)
+  const scale = useTransform(scrollYProgress, [0.80, 0.94], [0.35, 1.0]);
+  const opacity = useTransform(scrollYProgress, [0.80, 0.92], [0.0, 1.0]);
+  const y = useTransform(scrollYProgress, [0.80, 0.94], [100, 0]);
+
+  // Hook-driven pointer state to avoid overlay interaction locks
+  const [isActive, setIsActive] = React.useState(false);
+  React.useEffect(() => {
+    return scrollYProgress.onChange((val) => {
+      setIsActive(val >= 0.84);
+    });
+  }, [scrollYProgress]);
+
   return (
-    <section id="contact" className="contact-section">
+    <motion.section 
+      id="contact" 
+      style={{
+        scale,
+        opacity,
+        y,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        pointerEvents: isActive ? 'auto' : 'none',
+        zIndex: isActive ? 20 : 0
+      }}
+      className="contact-section bg-transparent"
+    >
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -44,6 +77,7 @@ const Contact = () => {
           flex-direction: column;
           align-items: center;
           gap: 3rem;
+          box-sizing: border-box;
         }
 
         .contact-card {
@@ -98,55 +132,52 @@ const Contact = () => {
           padding: 1rem 2rem;
           border-radius: 999px;
           font-weight: 600;
-          font-size: 1rem;
-          text-decoration: none;
+          font-size: 0.95rem;
           transition: all 0.3s ease;
         }
 
         .contact-btn.primary {
-          background: var(--text-primary);
-          color: var(--bg-color);
+          background: var(--accent);
+          color: white;
         }
 
         .contact-btn.primary:hover {
+          background: var(--accent-hover);
           transform: translateY(-2px);
-          box-shadow: 0 10px 30px -10px rgba(255, 255, 255, 0.3);
+          box-shadow: 0 10px 20px rgba(94, 106, 210, 0.3);
         }
 
         .contact-btn.secondary {
           background: rgba(255, 255, 255, 0.05);
-          color: var(--text-primary);
+          color: white;
           border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .social-links a {
-          color: var(--text-secondary);
-          text-decoration: none;
-          font-size: 0.9rem;
-          transition: color 0.3s ease;
-        }
-
-        .social-links a:hover {
-          color: var(--text-primary);
+          backdrop-filter: blur(10px);
         }
 
         .contact-btn.secondary:hover {
           background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.2);
+          transform: translateY(-2px);
         }
 
         .footer {
+          position: absolute;
+          bottom: 2rem;
+          left: 0;
+          right: 0;
           width: 100%;
-          max-width: 1200px;
-          border-top: 1px solid var(--glass-border);
-          padding-top: 2rem;
+          padding: 0 2rem;
+          box-sizing: border-box;
         }
 
         .footer-content {
+          max-width: 1200px;
+          margin: 0 auto;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          flex-wrap: wrap;
-          gap: 1rem;
+          padding-top: 2rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .copyright {
@@ -159,38 +190,45 @@ const Contact = () => {
           gap: 2rem;
         }
 
-        @media (min-width: 768px) {
-          .contact-section {
-            padding: 8rem 2rem 2rem 2rem;
-            gap: 6rem;
-          }
+        .social-links a {
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+          transition: color 0.3s ease;
+        }
 
-          .contact-card {
-            padding: 6rem 4rem;
-            border-radius: 32px;
-            gap: 2rem;
-          }
+        .social-links a:hover {
+          color: white;
         }
 
         @media (max-width: 768px) {
+          .contact-card {
+            padding: 2.5rem 1.25rem;
+          }
           .contact-actions {
             flex-direction: column;
             width: 100%;
             gap: 1rem;
           }
-          
           .contact-btn {
             justify-content: center;
+            width: 100%;
           }
-
           .footer-content {
-            flex-direction: column-reverse;
-            text-align: center;
+            flex-direction: column;
             gap: 1.5rem;
+            text-align: center;
+          }
+          .social-links {
+            justify-content: center;
+          }
+          .footer {
+            position: relative;
+            bottom: auto;
+            margin-top: 2rem;
           }
         }
       `}</style>
-    </section>
+    </motion.section>
   );
 };
 
