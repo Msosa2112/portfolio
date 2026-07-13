@@ -1,74 +1,76 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ExternalLink, Hand } from 'lucide-react';
 import SandboxModal from './sandbox/SandboxModal';
 
 const PROJECT_ITEMS = [
   {
-    title: "Barba Construction CRM",
+    title: "Barba CRM",
     category: "CRM / Web App",
     description: "A modern, AI-powered CRM built for construction professionals, featuring a highly intuitive UI and real-time data sync via Supabase.",
     image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2371&auto=format&fit=crop",
-    glow: "rgba(94,106,210,0.4)",
+    glow: "rgba(94,106,210,0.55)",
     themeColor: "from-indigo-600/10 to-indigo-900/30",
-    borderColor: "border-indigo-500/20",
+    borderColor: "rgba(94,106,210,0.4)",
     badgeColor: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
     exploreUrl: null
   },
   {
-    title: "ZHomes TC Platform",
-    category: "Real Estate Platform",
+    title: "ZHomes",
+    category: "Real Estate",
     description: "Global transaction coordinator platform featuring an integrated AI Copilot for real estate professionals.",
     image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2346&auto=format&fit=crop",
-    glow: "rgba(6,182,212,0.4)",
+    glow: "rgba(6,182,212,0.55)",
     themeColor: "from-cyan-600/10 to-cyan-900/30",
-    borderColor: "border-cyan-500/20",
+    borderColor: "rgba(6,182,212,0.4)",
     badgeColor: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
     exploreUrl: "https://zhomesapp.com"
   },
   {
-    title: "Edward Siding & Gutters",
+    title: "Edward Siding",
     category: "Marketing / SEO",
     description: "A highly optimized marketing landing page with custom SEO, robots.txt, and a spectacular photo gallery.",
     image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=2340&auto=format&fit=crop",
-    glow: "rgba(245,158,11,0.4)",
+    glow: "rgba(245,158,11,0.55)",
     themeColor: "from-amber-600/10 to-amber-900/30",
-    borderColor: "border-amber-500/20",
+    borderColor: "rgba(245,158,11,0.4)",
     badgeColor: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
     exploreUrl: "https://edwardsidingandgutters.com/"
   },
   {
-    title: "Outdoor Advertising MS",
-    category: "Microservices / APIs",
+    title: "Outdoor MS",
+    category: "Microservices",
     description: "Microservice integration for scalable DOOH (Digital Out of Home) advertising platforms.",
     image: "https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=2342&auto=format&fit=crop",
-    glow: "rgba(16,185,129,0.4)",
+    glow: "rgba(16,185,129,0.55)",
     themeColor: "from-emerald-600/10 to-emerald-900/30",
-    borderColor: "border-emerald-500/20",
+    borderColor: "rgba(16,185,129,0.4)",
     badgeColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
     exploreUrl: null
   }
 ];
 
+/* Helper to get ZIndex matching the Fabio Ottaviani algorithm */
+const getZindex = (array, index) => (
+  array.map((_, i) => (index === i) ? array.length : array.length - Math.abs(index - i))
+);
+
 export default function Projects() {
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
   const [progress, setProgress] = useState(50);
-  const [isMobile, setIsMobile] = useState(false);
+  const [active, setActive] = useState(2); // Start at middle
   
   const isDown = useRef(false);
   const startX = useRef(0);
-  
-  const speedWheel = 0.05;
-  const speedDrag = -0.15;
 
+  const speedWheel = 0.02;
+  const speedDrag = -0.12;
+
+  // Sync active index when progress changes
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    const calculatedActive = Math.floor((progress / 100) * (PROJECT_ITEMS.length - 1));
+    setActive(Math.min(PROJECT_ITEMS.length - 1, Math.max(0, calculatedActive)));
+  }, [progress]);
 
   const handleExplore = (item) => {
     if (item.title.includes("Barba")) {
@@ -78,14 +80,10 @@ export default function Projects() {
     }
   };
 
-  // Animate values based on progress
-  const activeFloat = (progress / 100) * (PROJECT_ITEMS.length - 1);
-  const activeIndex = Math.min(PROJECT_ITEMS.length - 1, Math.max(0, Math.round(activeFloat)));
-  const currentProject = PROJECT_ITEMS[activeIndex];
-
   // Handlers
   const handleWheel = (e) => {
-    setProgress(prev => Math.max(0, Math.min(100, prev + e.deltaY * speedWheel)));
+    const wheelProgress = e.deltaY * speedWheel;
+    setProgress(prev => Math.max(0, Math.min(100, prev + wheelProgress)));
   };
 
   const handleMouseDown = (e) => {
@@ -96,9 +94,7 @@ export default function Projects() {
   const handleMouseMove = (e) => {
     if (!isDown.current) return;
     const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-    const diff = clientX - startX.current;
-    const mouseProgress = diff * speedDrag;
-    
+    const mouseProgress = (clientX - startX.current) * speedDrag;
     setProgress(prev => Math.max(0, Math.min(100, prev + mouseProgress)));
     startX.current = clientX;
   };
@@ -108,27 +104,134 @@ export default function Projects() {
   };
 
   const handleCardClick = (idx) => {
-    // Smoothly transition progress to center the clicked card
-    const targetProgress = (idx / (PROJECT_ITEMS.length - 1)) * 100;
-    setProgress(targetProgress);
+    // Math to smoothly align center index
+    if (idx === PROJECT_ITEMS.length - 1) {
+      setProgress(100);
+    } else {
+      setProgress(((idx + 0.5) / (PROJECT_ITEMS.length - 1)) * 100);
+    }
   };
 
+  // Stacking z-indexes
+  const zIndexes = getZindex(PROJECT_ITEMS, active);
+
   return (
-    <section id="work" className="w-full max-w-[1200px] px-4 py-16 mx-auto relative font-sans select-none overflow-hidden">
-      {/* Section Title */}
-      <div className="mb-12 space-y-3 text-center md:text-left">
-        <span className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-black uppercase tracking-widest inline-block">
+    <section id="work" className="w-full h-screen relative flex flex-col justify-between py-12 md:py-20 overflow-hidden font-sans select-none bg-gradient-to-b from-[#090a0f] to-[#040508]">
+      
+      {/* Dynamic styles to run the curved translate2d/rotate code identically */}
+      <style>{`
+        .carousel-wrapper {
+          position: relative;
+          z-index: 1;
+          height: 60vh;
+          width: 100%;
+          overflow: hidden;
+          pointer-events: none;
+        }
+
+        .carousel-card-item {
+          --items: 4;
+          --width: clamp(220px, 50vw, 290px);
+          --height: clamp(300px, 70vw, 395px);
+          --x: calc(var(--active-val) * 780%);
+          --y: calc(var(--active-val) * 190%);
+          --rot: calc(var(--active-val) * 110deg);
+          --opacity: calc(var(--z-index-val) / var(--items) * 3 - 2);
+
+          overflow: hidden;
+          position: absolute;
+          z-index: var(--z-index-val);
+          width: var(--width);
+          height: var(--height);
+          margin: calc(var(--height) * -0.5) 0 0 calc(var(--width) * -0.5);
+          border-radius: 24px;
+          top: 50%;
+          left: 50%;
+          user-select: none;
+          transform-origin: 0% 100%;
+          background: #090a0f;
+          pointer-events: all;
+          transform: translate(var(--x), var(--y)) rotate(var(--rot));
+          transition: transform .8s cubic-bezier(0, 0.02, 0, 1), border-color .3s ease, box-shadow .5s ease;
+          border-width: 1px;
+        }
+
+        .carousel-card-box {
+          position: absolute;
+          z-index: 1;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          transition: opacity .8s cubic-bezier(0, 0.02, 0, 1);
+          opacity: var(--opacity);
+          font-family: inherit;
+        }
+
+        .carousel-card-box::before {
+          content: '';
+          position: absolute;
+          z-index: 2;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to bottom, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, .85));
+        }
+
+        .carousel-card-item .num {
+          position: absolute;
+          z-index: 3;
+          color: #fff;
+          top: 15px;
+          left: 20px;
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: clamp(40px, 12vw, 75px);
+          font-weight: 900;
+          line-height: 1;
+          opacity: 0.95;
+        }
+
+        .carousel-card-item .card-content {
+          position: absolute;
+          z-index: 3;
+          bottom: 24px;
+          left: 20px;
+          right: 20px;
+          color: #fff;
+          text-align: left;
+        }
+
+        .carousel-card-item .title {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: clamp(22px, 5vw, 28px);
+          font-weight: 900;
+          color: #ffffff;
+          line-height: 1.1;
+        }
+
+        .carousel-card-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          pointer-events: none;
+        }
+      `}</style>
+
+      {/* Header Info */}
+      <div className="px-6 text-center space-y-2 mt-4 select-none shrink-0 relative z-30">
+        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-black uppercase tracking-widest inline-block">
           Selected Work
         </span>
-        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+        <h2 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-none mt-1">
           Featured <span className="text-gradient">Projects</span>
         </h2>
-        <p className="text-zinc-400 text-xs md:text-sm max-w-md leading-relaxed font-medium">
-          Arrastra horizontalmente o usa la rueda del ratón para explorar mis proyectos interactivos.
+        <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider flex items-center justify-center gap-1">
+          <Hand size={11} className="text-zinc-500" /> Arrastra horizontalmente para navegar
         </p>
       </div>
 
-      {/* Interactive 3D Perspective Carousel Container */}
+      {/* 2D Curved Drag & Wheel Carousel Viewport */}
       <div 
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
@@ -138,105 +241,100 @@ export default function Projects() {
         onTouchStart={handleMouseDown}
         onTouchMove={handleMouseMove}
         onTouchEnd={handleMouseUp}
-        className="w-full h-[460px] md:h-[500px] relative flex items-center justify-center cursor-grab active:cursor-grabbing"
-        style={{
-          perspective: '1200px',
-          transformStyle: 'preserve-3d'
-        }}
+        className="carousel-wrapper flex-1"
       >
-        <div className="absolute top-2 text-[8.5px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-1 pointer-events-none">
-          <Hand size={11} /> Arrastra horizontalmente para navegar
-        </div>
-
         {PROJECT_ITEMS.map((item, idx) => {
-          const diff = idx - activeFloat;
-          const absDiff = Math.abs(diff);
-          
-          // Spatial 3D Calculations
-          const translateX = isMobile ? diff * 155 : diff * 320;
-          const translateZ = -absDiff * 140;
-          const rotateY = diff * -32;
-          const zIndex = Math.round(100 - absDiff * 10);
-          
-          // Disappearing at screen edges (fade to 0 as it moves away from center)
-          const opacity = Math.max(0, 1 - absDiff * 0.65);
-          const isActive = idx === activeIndex;
+          const zIndex = zIndexes[idx];
+          const activeVal = (idx - active) / PROJECT_ITEMS.length;
+          const isActive = idx === active;
 
           return (
             <div
               key={idx}
               onClick={() => handleCardClick(idx)}
               style={{
-                transform: `translate3d(${translateX}px, 0, ${translateZ}px) rotateY(${rotateY}deg)`,
-                zIndex,
-                opacity,
-                pointerEvents: opacity < 0.15 ? 'none' : 'auto',
+                '--active-val': activeVal,
+                '--z-index-val': zIndex,
                 boxShadow: isActive ? `0 20px 50px -15px ${item.glow}` : '0 10px 25px rgba(0,0,0,0.5)',
-                transition: isDown.current ? 'none' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease'
+                borderColor: isActive ? item.borderColor : 'rgba(255, 255, 255, 0.04)'
               }}
-              className={`absolute w-[270px] md:w-[350px] h-[340px] md:h-[400px] rounded-[24px] border ${
-                isActive ? item.borderColor : 'border-zinc-900/50'
-              } bg-gradient-to-br ${item.themeColor} bg-[#0b0c10]/95 backdrop-blur-xl p-5 md:p-6 flex flex-col justify-between overflow-hidden`}
+              className="carousel-card-item cursor-pointer"
             >
-              {/* Card visual representation */}
-              <div 
-                className="h-28 md:h-40 w-full rounded-[16px] bg-cover bg-center shrink-0 border border-zinc-900/40"
-                style={{ backgroundImage: `url(${item.image})` }}
-              />
+              {/* Card visual wrapper */}
+              <div className="carousel-card-box">
+                {/* Serif large Number */}
+                <div className="num">0{idx + 1}</div>
+                
+                {/* Cover Image */}
+                <img src={item.image} alt={item.title} />
 
-              {/* Text metadata */}
-              <div className="flex-1 flex flex-col justify-between pt-4">
-                <div className="space-y-1.5 text-left">
-                  <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest block">
-                    {item.category}
-                  </span>
-                  <h4 className="text-sm md:text-base font-black text-white leading-tight">
-                    {item.title}
-                  </h4>
-                  <p className="text-[10px] md:text-xs text-zinc-400 leading-relaxed font-medium line-clamp-3 md:line-clamp-4">
-                    {item.description}
-                  </p>
+                {/* Content Overlay */}
+                <div className="card-content space-y-3">
+                  <div>
+                    <span className="text-[7.5px] font-black text-indigo-400 uppercase tracking-widest block mb-0.5">
+                      {item.category}
+                    </span>
+                    <h4 className="title">{item.title}</h4>
+                  </div>
+                  
+                  {/* Category and button revealed inside active card */}
+                  {isActive && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="space-y-3"
+                    >
+                      <p className="text-[10px] text-zinc-300 leading-relaxed font-medium line-clamp-2">
+                        {item.description}
+                      </p>
+                      
+                      {(item.exploreUrl || item.title.includes("Barba")) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleExplore(item);
+                          }}
+                          className="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-black text-[9px] uppercase tracking-wider rounded-lg flex items-center gap-1 active:scale-95 transition-all shadow-md"
+                        >
+                          <span>Explore Project</span>
+                          {item.exploreUrl ? <ExternalLink size={10} /> : <ArrowRight size={10} />}
+                        </button>
+                      )}
+                    </motion.div>
+                  )}
                 </div>
-
-                {/* Explore Trigger */}
-                {isActive && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleExplore(item);
-                    }}
-                    className="w-full py-2.5 bg-white hover:bg-zinc-200 text-black font-black text-[9px] md:text-[10px] uppercase tracking-wider rounded-xl flex items-center justify-center gap-1 active:scale-95 transition-all mt-4"
-                  >
-                    <span>Explore Project</span>
-                    {item.exploreUrl ? <ExternalLink size={11} /> : <ArrowRight size={11} />}
-                  </button>
-                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Progress indicators / dots */}
-      <div className="flex justify-center items-center gap-2 mt-4">
-        {PROJECT_ITEMS.map((_, idx) => {
-          const isActive = idx === activeIndex;
-          return (
+      {/* Bottom text layout inspired by CodePen */}
+      <div className="px-6 text-center shrink-0 relative z-30 mb-4 select-none max-w-sm mx-auto">
+        <p className="text-zinc-500 font-mono text-[9px] uppercase tracking-widest leading-relaxed">
+          {PROJECT_ITEMS[active].title} — {PROJECT_ITEMS[active].category}
+        </p>
+        
+        {/* Navigation Indicators */}
+        <div className="flex justify-center items-center gap-2 mt-3">
+          {PROJECT_ITEMS.map((_, idx) => (
             <button
               key={idx}
               onClick={() => handleCardClick(idx)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                isActive ? 'w-6 bg-indigo-500' : 'w-1.5 bg-zinc-700 hover:bg-zinc-600'
+              className={`h-1 rounded-full transition-all duration-300 ${
+                idx === active ? 'w-5 bg-indigo-500' : 'w-1 bg-zinc-700'
               }`}
             />
-          );
-        })}
+          ))}
+        </div>
       </div>
 
       <SandboxModal
         isOpen={isSandboxOpen}
         onClose={() => setIsSandboxOpen(false)}
       />
+
     </section>
   );
 }
