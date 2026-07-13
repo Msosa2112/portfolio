@@ -52,15 +52,12 @@ const Contact = () => {
         style={{ pointerEvents: isActive ? 'auto' : 'none' }}
         className="contact-card glass-panel"
       >
-        <h2 className="contact-title">Let's build something <br/><span className="text-gradient">extraordinary.</span></h2>
-        <p className="contact-desc">Ready to take your digital presence to the next level? I'm currently available for freelance work and new opportunities.</p>
+        <h2 className="contact-title">Construyamos infraestructura <br/><span className="text-gradient">soberana.</span></h2>
+        <p className="contact-desc">Desarrollamos soluciones de software hiper-personalizadas de alto valor sin ataduras. Entregamos el código fuente completo y creamos entornos de datos 105% independientes. Cero cobros de suscripción mensual.</p>
         
         <div className="contact-actions">
-          <a href="mailto:hello@example.com" className="contact-btn primary">
-            <Mail size={18} /> Get in Touch
-          </a>
-          <a href="#" className="contact-btn secondary">
-            View Resume <ArrowUpRight size={18} />
+          <a href="mailto:info@damelaletra.com" className="contact-btn primary">
+            <Mail size={18} /> Iniciar Proyecto
           </a>
         </div>
       </motion.div>

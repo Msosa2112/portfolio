@@ -9,7 +9,7 @@ import Grainient from './components/Grainient';
 import ThreeCanvas from './components/ThreeCanvas';
 
 function App() {
-  const [isSandboxOpen, setIsSandboxOpen] = useState(false);
+  const [activeSandboxId, setActiveSandboxId] = useState(null);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -88,14 +88,14 @@ function App() {
       {/* HTML overlay sections (fixed in viewport) */}
       <main className="main-content">
         <Hero />
-        <Projects isSandboxOpen={isSandboxOpen} setIsSandboxOpen={setIsSandboxOpen} />
+        <Projects activeSandboxId={activeSandboxId} setActiveSandboxId={setActiveSandboxId} />
         <Contact />
       </main>
 
       {/* Transparent scrollable spacer to create native window scrollbar */}
       <div className="scroll-spacer" />
 
-      <Navbar onNavClick={() => setIsSandboxOpen(false)} />
+      <Navbar onNavClick={() => setActiveSandboxId(null)} />
       
       <style>{`
         .progress-bar {

@@ -59,7 +59,7 @@ const Hero = () => {
           className="badge glass-pill"
         >
           <Sparkles size={14} className="badge-icon" />
-          <span>Available for new opportunities</span>
+          <span>Dame la Letra LLC</span>
         </motion.div>
 
         <motion.h1
@@ -68,9 +68,9 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="hero-title"
         >
-          Designing digital{' '}
+          Ingeniería de software{' '}
           <TextMorph
-            words="experiences, interfaces, products, applications, interactions"
+            words="hiper-personalizada, sin suscripciones, con código entregado, con datos propios"
             color="#a7b1ff"
             font={{
               fontFamily: "inherit",
@@ -81,8 +81,7 @@ const Hero = () => {
               display: 'inline-flex',
               verticalAlign: 'baseline',
             }}
-          />{' '}
-          that matter.
+          />
         </motion.h1>
 
         <motion.p
@@ -91,17 +90,14 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="hero-subtitle"
         >
-          I am a multidisciplinary designer and developer crafting exceptional products with precision and passion.
+          Desarrollamos infraestructura a medida para resolver problemas reales de negocio. Entregamos el código fuente de forma directa y creamos entornos de datos independientes. Cero suscripciones recurrentes.
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="hero-actions"
         >
           <button onClick={handleStartExploring} className="primary-btn glass-panel active:scale-95 transition-all">
-            View Work <ArrowRight size={16} />
+            Ver Soluciones <ArrowRight size={16} />
           </button>
         </motion.div>
       </div>

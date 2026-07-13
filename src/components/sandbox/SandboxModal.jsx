@@ -7,6 +7,8 @@ import TwilioSandbox from './TwilioSandbox';
 import PayrollSandbox from './PayrollSandbox';
 import QuickBooksSandbox from './QuickBooksSandbox';
 import CopilotSandbox from './CopilotSandbox';
+import TzelSandbox from './TzelSandbox';
+import ZHomesSandbox from './ZHomesSandbox';
 
 const TABS = [
   { id: 'dashboard', label: 'CRM Dashboard', icon: Users, component: CRMDashboardSandbox },
@@ -18,7 +20,7 @@ const TABS = [
   { id: 'payroll', label: 'Payroll Team', icon: DollarSign, component: PayrollSandbox },
 ];
 
-export default function SandboxModal({ isOpen, onClose }) {
+export default function SandboxModal({ activeSandboxId, onClose }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   
   const [showGlobalChat, setShowGlobalChat] = useState(false);
@@ -56,7 +58,7 @@ export default function SandboxModal({ isOpen, onClose }) {
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (activeSandboxId) {
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
     } else {
@@ -67,9 +69,55 @@ export default function SandboxModal({ isOpen, onClose }) {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [activeSandboxId]);
 
-  if (!isOpen) return null;
+  if (!activeSandboxId) return null;
+
+  if (activeSandboxId === 'tzel') {
+    return (
+      <div 
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+        data-lenis-prevent
+        onClick={onClose}
+      >
+        <div 
+          className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl p-2 flex flex-col overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button 
+            onClick={onClose} 
+            className="absolute top-5 right-5 text-zinc-500 hover:text-white transition-all active:scale-95 z-50 bg-zinc-900/60 p-1.5 rounded-full border border-zinc-800"
+          >
+            <X size={15} />
+          </button>
+          <TzelSandbox />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeSandboxId === 'zhomes') {
+    return (
+      <div 
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+        data-lenis-prevent
+        onClick={onClose}
+      >
+        <div 
+          className="relative w-full max-w-3xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl p-2 flex flex-col overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button 
+            onClick={onClose} 
+            className="absolute top-5 right-5 text-zinc-500 hover:text-white transition-all active:scale-95 z-50 bg-zinc-900/60 p-1.5 rounded-full border border-zinc-800"
+          >
+            <X size={15} />
+          </button>
+          <ZHomesSandbox />
+        </div>
+      </div>
+    );
+  }
 
   const ActiveComponent = TABS.find((tab) => tab.id === activeTab)?.component || CRMDashboardSandbox;
 

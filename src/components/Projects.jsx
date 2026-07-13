@@ -6,63 +6,33 @@ import SandboxModal from './sandbox/SandboxModal';
 const PROJECT_ITEMS = [
   {
     title: "Barba CRM",
-    category: "CRM / Web App",
-    description: "A modern, AI-powered CRM built for construction professionals, featuring a highly intuitive UI and real-time data sync via Supabase.",
+    category: "Operaciones de Obra & Estimaciones",
+    description: "Herramienta de presupuestos en campo diseñada para contratistas. Permite cotizar a los clientes en 30 segundos usando botones gigantes sin contraseñas ni fricciones, eliminando el papeleo de obra.",
     themeColor: "indigo",
     badgeColor: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
     glow: "rgba(94,106,210,0.45)",
     logo: "/logos/barba.png",
-    exploreUrl: null
+    sandboxId: "barba"
   },
   {
     title: "ZHomes",
-    category: "Real Estate",
-    description: "Global transaction coordinator platform featuring an integrated AI Copilot for real estate professionals.",
+    category: "Plataforma de Transacciones Inmobiliarias",
+    description: "Aplicación móvil interactiva para el descubrimiento de viviendas y simulación de hipotecas. Reduce la fricción al emparejar al comprador al instante con asesores calificados sin llamadas frías.",
     themeColor: "cyan",
     badgeColor: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
     glow: "rgba(6,182,212,0.45)",
     logo: "/logos/zhomes.png",
-    exploreUrl: "https://zhomesapp.com"
+    sandboxId: "zhomes"
   },
   {
-    title: "Edward Siding",
-    category: "Marketing / SEO",
-    description: "A highly optimized marketing landing page with custom SEO, robots.txt, and a spectacular photo gallery.",
+    title: "Tzel",
+    category: "Filtro de Deudas & Adquisiciones",
+    description: "Automatización de recolección de listados inmobiliarios con deudas o pre-ejecuciones hipotecarias. Entrega alertas inmediatas para adquirir propiedades antes de que lleguen al mercado público.",
     themeColor: "amber",
     badgeColor: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
     glow: "rgba(245,158,11,0.45)",
-    logo: "/logos/edward.png",
-    exploreUrl: "https://edwardsidingandgutters.com/"
-  },
-  {
-    title: "Pool Extended",
-    category: "Web App / Design",
-    description: "Custom design and build platforms for luxury pool remodeling and landscaping spaces.",
-    themeColor: "sky",
-    badgeColor: "bg-sky-500/10 text-sky-400 border border-sky-500/20",
-    glow: "rgba(14,165,233,0.45)",
-    logo: "/logos/pool-extended.png",
-    exploreUrl: null
-  },
-  {
-    title: "Tri Lion Academy",
-    category: "Education / Sports",
-    description: "An elite sports training academy platform with interactive registration, scheduling, and progress tracking.",
-    themeColor: "red",
-    badgeColor: "bg-red-500/10 text-red-400 border border-red-500/20",
-    glow: "rgba(239,68,68,0.45)",
-    logo: "/logos/tri-lion.png",
-    exploreUrl: null
-  },
-  {
-    title: "Clover Jewelry",
-    category: "E-Commerce / Luxury",
-    description: "A premium jewelry e-commerce experience featuring high-definition showcases and custom orders.",
-    themeColor: "emerald",
-    badgeColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-    glow: "rgba(16,185,129,0.45)",
-    logo: "/logos/clover-jewelry.png",
-    exploreUrl: null
+    logo: "/logos/tzel.png",
+    sandboxId: "tzel"
   }
 ];
 
@@ -162,13 +132,13 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
           {item.description}
         </p>
 
-        {(item.exploreUrl || item.title.includes("Barba")) && (
+        {item.sandboxId && (
           <button
             onClick={() => onExplore(item)}
             className="w-full py-3 bg-white hover:bg-zinc-200 text-black font-black text-[10px] uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md font-sans mt-2"
           >
-            <span>Explore Project</span>
-            {item.exploreUrl ? <ExternalLink size={11} /> : <ArrowRight size={11} />}
+            <span>Probar Simulación</span>
+            <ArrowRight size={11} />
           </button>
         )}
       </div>
@@ -176,14 +146,12 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
   );
 }
 
-export default function Projects({ isSandboxOpen, setIsSandboxOpen }) {
+export default function Projects({ activeSandboxId, setActiveSandboxId }) {
   const { scrollYProgress } = useScroll();
 
   const handleExplore = (item) => {
-    if (item.title.includes("Barba")) {
-      setIsSandboxOpen(true);
-    } else if (item.exploreUrl) {
-      window.open(item.exploreUrl, "_blank");
+    if (item.sandboxId) {
+      setActiveSandboxId(item.sandboxId);
     }
   };
 
@@ -271,8 +239,8 @@ export default function Projects({ isSandboxOpen, setIsSandboxOpen }) {
       </AnimatePresence>
 
       <SandboxModal
-        isOpen={isSandboxOpen}
-        onClose={() => setIsSandboxOpen(false)}
+        activeSandboxId={activeSandboxId}
+        onClose={() => setActiveSandboxId(null)}
       />
     </div>
   );
