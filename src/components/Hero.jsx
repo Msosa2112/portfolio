@@ -44,11 +44,14 @@ const Hero = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        pointerEvents: isActive ? 'auto' : 'none'
+        pointerEvents: 'none'
       }}
       className="hero-section bg-transparent"
     >
-      <div className="hero-content">
+      <div 
+        style={{ pointerEvents: isActive ? 'auto' : 'none' }}
+        className="hero-content"
+      >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

@@ -39,7 +39,7 @@ const Contact = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        pointerEvents: isActive ? 'auto' : 'none',
+        pointerEvents: 'none',
         zIndex: isActive ? 20 : 0
       }}
       className="contact-section bg-transparent"
@@ -49,6 +49,7 @@ const Contact = () => {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        style={{ pointerEvents: isActive ? 'auto' : 'none' }}
         className="contact-card glass-panel"
       >
         <h2 className="contact-title">Let's build something <br/><span className="text-gradient">extraordinary.</span></h2>
@@ -64,7 +65,7 @@ const Contact = () => {
         </div>
       </motion.div>
 
-      <footer className="footer">
+      <footer className="footer" style={{ pointerEvents: isActive ? 'auto' : 'none' }}>
         <div className="footer-content">
           <p className="copyright">© 2026 John Doe. All rights reserved.</p>
           <div className="social-links">

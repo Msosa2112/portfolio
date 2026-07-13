@@ -125,13 +125,16 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        pointerEvents: isActive ? 'auto' : 'none',
+        pointerEvents: 'none',
         zIndex: isActive ? 25 : 0
       }}
       className="px-6 flex items-center justify-center bg-transparent"
     >
       <div 
-        style={{ boxShadow: isActive ? `0 25px 50px -12px ${item.glow}` : 'none' }}
+        style={{ 
+          boxShadow: isActive ? `0 25px 50px -12px ${item.glow}` : 'none',
+          pointerEvents: isActive ? 'auto' : 'none'
+        }}
         className="max-w-md w-full bg-black/50 backdrop-blur-lg rounded-2xl border border-white/5 p-6 md:p-8 shadow-2xl space-y-4 text-center glass-panel"
       >
         <div className="flex items-center justify-between">

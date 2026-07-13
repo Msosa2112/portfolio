@@ -76,6 +76,7 @@ export default function SandboxModal({ isOpen, onClose }) {
   return (
     <div 
       className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 bg-black/85 backdrop-blur-md"
+      style={{ pointerEvents: 'auto' }}
       data-lenis-prevent
       onClick={(e) => e.stopPropagation()}
     >
