@@ -11,6 +11,7 @@ const PROJECT_ITEMS = [
     themeColor: "indigo",
     badgeColor: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
     glow: "rgba(94,106,210,0.45)",
+    logo: "/logos/barba.png",
     exploreUrl: null
   },
   {
@@ -20,6 +21,7 @@ const PROJECT_ITEMS = [
     themeColor: "cyan",
     badgeColor: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
     glow: "rgba(6,182,212,0.45)",
+    logo: "/logos/zhomes.png",
     exploreUrl: "https://zhomesapp.com"
   },
   {
@@ -29,26 +31,50 @@ const PROJECT_ITEMS = [
     themeColor: "amber",
     badgeColor: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
     glow: "rgba(245,158,11,0.45)",
+    logo: "/logos/edward.png",
     exploreUrl: "https://edwardsidingandgutters.com/"
   },
   {
-    title: "Outdoor MS",
-    category: "Microservices",
-    description: "Microservice integration for scalable DOOH (Digital Out of Home) advertising platforms.",
+    title: "Pool Extended",
+    category: "Web App / Design",
+    description: "Custom design and build platforms for luxury pool remodeling and landscaping spaces.",
+    themeColor: "sky",
+    badgeColor: "bg-sky-500/10 text-sky-400 border border-sky-500/20",
+    glow: "rgba(14,165,233,0.45)",
+    logo: "/logos/pool-extended.png",
+    exploreUrl: null
+  },
+  {
+    title: "Tri Lion Academy",
+    category: "Education / Sports",
+    description: "An elite sports training academy platform with interactive registration, scheduling, and progress tracking.",
+    themeColor: "red",
+    badgeColor: "bg-red-500/10 text-red-400 border border-red-500/20",
+    glow: "rgba(239,68,68,0.45)",
+    logo: "/logos/tri-lion.png",
+    exploreUrl: null
+  },
+  {
+    title: "Clover Jewelry",
+    category: "E-Commerce / Luxury",
+    description: "A premium jewelry e-commerce experience featuring high-definition showcases and custom orders.",
     themeColor: "emerald",
     badgeColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
     glow: "rgba(16,185,129,0.45)",
+    logo: "/logos/clover-jewelry.png",
     exploreUrl: null
   }
 ];
 
 // Individual Project Card Section with 3D Zoom Tunnel Transitions
 function ProjectSection({ item, index, scrollYProgress, onExplore }) {
-  // Math bounds for project i
-  const startIn = 0.12 + index * 0.17;
-  const center = startIn + 0.08;
-  const startOut = center + 0.08;
-  const endOut = startOut + 0.06;
+  const count = PROJECT_ITEMS.length;
+  // Divide the range [0.12, 0.82] dynamically by the number of projects
+  const step = 0.70 / count;
+  const startIn = 0.12 + index * step;
+  const center = startIn + step * 0.45;
+  const startOut = center + step * 0.45;
+  const endOut = startOut + step * 0.1;
 
   // Transforms: scale up and fade out as scroll progress advances
   const scale = useTransform(
@@ -59,7 +85,7 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
 
   const opacity = useTransform(
     scrollYProgress,
-    [startIn, startIn + 0.05, startOut + 0.02, endOut],
+    [startIn, startIn + (step * 0.25), startOut + (step * 0.1), endOut],
     [0.0, 1.0, 1.0, 0.0]
   );
 
@@ -73,9 +99,9 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
   const [isActive, setIsActive] = useState(false);
   React.useEffect(() => {
     return scrollYProgress.onChange((val) => {
-      setIsActive(val >= startIn + 0.02 && val <= startOut + 0.02);
+      setIsActive(val >= startIn + (step * 0.1) && val <= startOut + (step * 0.1));
     });
-  }, [scrollYProgress, startIn, startOut]);
+  }, [scrollYProgress, startIn, startOut, step]);
 
   return (
     <motion.div
@@ -105,11 +131,20 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
             {item.category}
           </span>
           <span className="text-zinc-500 font-mono text-[10px] font-black">
-            0{index + 1} / 0{PROJECT_ITEMS.length}
+            0{index + 1} / 0{count}
           </span>
         </div>
 
-        <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-wider font-sans leading-none mt-2">
+        {/* Brand Logo rendering */}
+        <div className="w-full flex justify-center py-2">
+          <img 
+            src={item.logo} 
+            alt={item.title} 
+            className="h-14 md:h-16 object-contain max-w-[220px] filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)]" 
+          />
+        </div>
+
+        <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider font-sans leading-none mt-1">
           {item.title}
         </h3>
 
@@ -120,7 +155,7 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
         {(item.exploreUrl || item.title.includes("Barba")) && (
           <button
             onClick={() => onExplore(item)}
-            className="w-full py-3 bg-white hover:bg-zinc-200 text-black font-black text-[10px] uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md font-sans mt-4"
+            className="w-full py-3 bg-white hover:bg-zinc-200 text-black font-black text-[10px] uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md font-sans mt-2"
           >
             <span>Explore Project</span>
             {item.exploreUrl ? <ExternalLink size={11} /> : <ArrowRight size={11} />}
@@ -145,20 +180,23 @@ export default function Projects() {
 
   const handleIndicatorClick = (idx) => {
     const pageHeight = window.innerHeight || 800;
-    // Scroll smoothly to center of project idx
-    const startIn = 0.12 + idx * 0.17;
-    const center = startIn + 0.08;
-    window.scrollTo({ top: center * pageHeight * 6.0, behavior: 'smooth' }); // driven by 600vh scrollbar spacer
+    const count = PROJECT_ITEMS.length;
+    const step = 0.70 / count;
+    const startIn = 0.12 + idx * step;
+    const center = startIn + step * 0.45;
+    window.scrollTo({ top: center * pageHeight * 6.0, behavior: 'smooth' });
   };
 
   // Compute current active dot index based on scroll progress
   const [activeDot, setActiveDot] = useState(0);
   React.useEffect(() => {
     return scrollYProgress.onChange((val) => {
+      const count = PROJECT_ITEMS.length;
+      const step = 0.70 / count;
       let activeIdx = 0;
-      for (let i = 0; i < PROJECT_ITEMS.length; i++) {
-        const startIn = 0.12 + i * 0.17;
-        const endOut = startIn + 0.22;
+      for (let i = 0; i < count; i++) {
+        const startIn = 0.12 + i * step;
+        const endOut = startIn + step + 0.05;
         if (val >= startIn && val <= endOut) {
           activeIdx = i;
           break;
