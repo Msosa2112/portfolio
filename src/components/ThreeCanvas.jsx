@@ -26,101 +26,98 @@ const PROJECT_ITEMS = [
   }
 ];
 
-// 3D Glass Building Monolith with Image Screen
-function Building({ index, item, activeIndex, isMobile }) {
+// 3D Card Stack Mesh
+function Card({ index, item, activeFloat, activeIndex, isMobile }) {
   const meshRef = useRef();
-  const glassRef = useRef();
   const glowRef = useRef();
 
-  const cardWidth = isMobile ? 1.5 : 2.1;
-  const cardHeight = isMobile ? 2.2 : 3.0;
-
-  // Alternate sides of the street: Left (even) / Right (odd)
-  const isLeft = index % 2 === 0;
-  const targetX = isLeft ? (isMobile ? -1.1 : -1.6) : (isMobile ? 1.1 : 1.6);
-  const targetZ = -(index * 6.0 + 2.5);
-
   useFrame((state) => {
-    if (!meshRef.current || !glassRef.current || !glowRef.current) return;
+    if (!meshRef.current || !glowRef.current) return;
 
-    // Parent group position translation
-    const parentZ = meshRef.current.parent.position.z;
-    const currentWorldZ = targetZ + parentZ;
-
+    // Relative distance to active index
+    const t = index - activeFloat;
     const isActive = index === activeIndex;
 
-    // Zero-gravity slow float for the active card
-    const floatY = isActive ? Math.sin(state.clock.getElapsedTime() * 1.5 + index) * 0.05 : 0;
-    const yPos = 0.3 + floatY;
+    let targetX = 0;
+    let targetY = 0;
+    let targetZ = 0;
+    let targetRotX = 0;
+    let targetRotY = 0;
+    let targetRotZ = 0;
+    let targetScale = 1.0;
+    let targetOpacity = 1.0;
 
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, yPos, 0.1);
-    glassRef.current.position.y = meshRef.current.position.y;
-    glowRef.current.position.y = meshRef.current.position.y;
+    if (t < 0) {
+      // 1. Zoom Past Camera (Card slides forward along the Z axis and fades out)
+      targetX = 0;
+      targetY = 0;
+      targetZ = -t * 2.8; // Moves forward (positive Z) towards camera
+      targetScale = 1.0 + Math.abs(t) * 0.45; // Grows larger as it zooms past
+      targetOpacity = Math.max(0, 1 + t * 1.5); // Fades out rapidly
+      targetRotX = t * 0.15; // Slanted rotation as it zooms past
+    } else {
+      // 2. Stacked in Depth (Pushed back along Z axis)
+      targetX = 0;
+      targetY = t * 0.15;
+      targetZ = -t * 0.7; // Pushed back into depth
+      targetScale = Math.max(0.65, 1.0 - t * 0.08);
+      targetOpacity = Math.max(0, 1 - t * 0.42);
+      targetRotX = -0.12 * Math.min(1.0, t);
+    }
 
-    // Interactive mouse tilt parallax (Subtle rotation when active)
-    let rotX = 0;
-    let rotY = isLeft ? 0.25 : -0.25; // Pre-angled facing the street center slightly
-    let rotZ = 0;
-
+    // Zero-gravity slight float for front active card
     if (isActive) {
-      // Tilt to face camera on pointer
-      rotY += state.pointer.x * 0.2;
-      rotX = -state.pointer.y * 0.15;
+      targetY += Math.sin(state.clock.getElapsedTime() * 1.5) * 0.05;
+      // Slight interactive mouse tilt on active card
+      targetRotY += state.pointer.x * 0.18;
+      targetRotX += -state.pointer.y * 0.14;
     }
 
-    meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, rotX, 0.1);
-    meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, rotY, 0.1);
-    meshRef.current.rotation.z = THREE.MathUtils.lerp(meshRef.current.rotation.z, rotZ, 0.1);
+    // Interpolate positions smoothly
+    meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.15);
+    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.15);
+    meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, targetZ, 0.15);
 
-    glassRef.current.rotation.copy(meshRef.current.rotation);
+    meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, targetRotX, 0.15);
+    meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotY, 0.15);
+    meshRef.current.rotation.z = THREE.MathUtils.lerp(meshRef.current.rotation.z, targetRotZ, 0.15);
+
+    meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.15);
+    meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.15);
+
+    // Sync glow halo
+    glowRef.current.position.copy(meshRef.current.position);
+    glowRef.current.position.z -= 0.01;
     glowRef.current.rotation.copy(meshRef.current.rotation);
+    glowRef.current.scale.copy(meshRef.current.scale);
+    glowRef.current.scale.x *= 1.05;
+    glowRef.current.scale.y *= 1.05;
 
-    // Opacity decays as it moves past or is too far in front
-    // Active window of focus is Z between -4 and 0
-    const distanceToFocus = Math.abs(currentWorldZ + 0.5); // 0.5 is offset in front of camera
-    const opacityVal = Math.max(0.0, 1.0 - distanceToFocus * 0.25);
-
+    // Opacity
     if (meshRef.current.material) {
-      meshRef.current.material.opacity = THREE.MathUtils.lerp(meshRef.current.material.opacity, opacityVal, 0.15);
-      meshRef.current.material.grayscale = THREE.MathUtils.lerp(meshRef.current.material.grayscale, isActive ? 0 : 0.6, 0.15);
-    }
-    if (glassRef.current.material) {
-      glassRef.current.material.opacity = THREE.MathUtils.lerp(glassRef.current.material.opacity, opacityVal * 0.25, 0.15);
+      meshRef.current.material.opacity = THREE.MathUtils.lerp(meshRef.current.material.opacity, targetOpacity, 0.15);
+      meshRef.current.material.grayscale = THREE.MathUtils.lerp(meshRef.current.material.grayscale, isActive ? 0 : 0.5, 0.15);
     }
     if (glowRef.current.material) {
-      const activeGlow = isActive ? opacityVal * 0.65 : opacityVal * 0.1;
-      glowRef.current.material.opacity = THREE.MathUtils.lerp(glowRef.current.material.opacity, activeGlow, 0.15);
+      const targetGlowOpacity = isActive ? targetOpacity * 0.75 : targetOpacity * 0.15;
+      glowRef.current.material.opacity = THREE.MathUtils.lerp(glowRef.current.material.opacity, targetGlowOpacity, 0.15);
     }
   });
 
+  const cardWidth = isMobile ? 1.7 : 2.3;
+  const cardHeight = isMobile ? 2.3 : 3.1;
+
   return (
     <group>
-      {/* 3D Semi-transparent Glass Monolith Structure */}
-      <mesh ref={glassRef} position={[targetX, 0, targetZ]}>
-        <boxGeometry args={[cardWidth + 0.1, cardHeight + 0.1, 0.25]} />
-        <meshPhysicalMaterial 
-          color={item.glow}
-          roughness={0.1}
-          metalness={0.9}
-          transparent
-          opacity={0.0}
-          transmission={0.7}
-          thickness={0.5}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-
-      {/* Glowing Neon Aura outline under the glass */}
-      <mesh ref={glowRef} position={[targetX, 0, targetZ - 0.14]}>
-        <planeGeometry args={[cardWidth + 0.18, cardHeight + 0.18]} />
+      {/* 3D Glow Border Mesh */}
+      <mesh ref={glowRef}>
+        <planeGeometry args={[cardWidth, cardHeight]} />
         <meshBasicMaterial color={item.glow} transparent opacity={0} side={THREE.DoubleSide} />
       </mesh>
-
-      {/* Main Screen (Project Image) */}
+      {/* Main Image Mesh */}
       <Image
         ref={meshRef}
         url={item.image}
-        position={[targetX, 0, targetZ + 0.13]}
         scale={[cardWidth, cardHeight]}
         transparent
         opacity={0}
@@ -130,10 +127,9 @@ function Building({ index, item, activeIndex, isMobile }) {
 }
 
 // 3D Scene Controller
-function Scene({ activeIndex, setActiveIndex, isMobile }) {
-  const streetRef = useRef();
+function Scene({ activeIndex, setActiveIndex, targetRotation, isMobile }) {
+  const stackRef = useRef();
   const sparklesRef = useRef();
-  const gridRef = useRef();
   
   const count = PROJECT_ITEMS.length;
 
@@ -145,92 +141,76 @@ function Scene({ activeIndex, setActiveIndex, isMobile }) {
 
     // 2. Animate global sparkles parallax
     if (sparklesRef.current) {
-      // Moves particles faster/upwards on scroll to simulate speed
-      sparklesRef.current.position.y = progress * 1.8;
-      // Slight slow rotation of particle galaxy
-      sparklesRef.current.rotation.y = state.clock.getElapsedTime() * 0.02;
+      sparklesRef.current.position.y = progress * 1.5;
     }
 
-    // 3. Move street group forward (along Z positive) on scroll
-    if (streetRef.current) {
-      // Hero starts at Z=0. Projects Z ranges from -2.5 to -20.5.
-      // At scrollProgress = 1.0 (Projects section), we are traveling the street.
-      // Let's translate Z from 0 to 22.0
-      // We map the scroll progress (from 0 to 2) to Z translation:
-      const maxZTranslation = 23.5;
-      
-      // Interpolate target Z based on scroll progress
-      // We use smooth interpolation to damp scroll jitters
-      const targetZ = Math.max(0.0, Math.min(maxZTranslation, progress * 11.75));
-      streetRef.current.position.z = THREE.MathUtils.lerp(
-        streetRef.current.position.z,
-        targetZ,
-        0.08
-      );
-
-      // Solve which building is closest to the front (world Z = 0)
-      let closestIdx = 0;
-      let minDistance = 999;
-      for (let i = 0; i < count; i++) {
-        const cardTargetZ = -(i * 6.0 + 2.5);
-        const cardWorldZ = cardTargetZ + streetRef.current.position.z;
-        const dist = Math.abs(cardWorldZ - 0.0);
-        if (dist < minDistance) {
-          minDistance = dist;
-          closestIdx = i;
-        }
-      }
-
-      if (closestIdx !== activeIndex) {
-        setActiveIndex(closestIdx);
-      }
+    // 3. Solve activeFloat from rotation progress (ranges from 0 to 100)
+    const dragVal = Math.min(100, Math.max(0, targetRotation.current));
+    const activeFloat = (dragVal / 100) * (count - 1);
+    
+    // Update active index
+    const closestIdx = Math.round(activeFloat);
+    if (closestIdx !== activeIndex) {
+      setActiveIndex(closestIdx);
     }
 
-    // 4. Animate the grid helper parallax
-    if (gridRef.current && streetRef.current) {
-      // Scroll the grid floor infinite texture effect by wrapping position
-      gridRef.current.position.z = (streetRef.current.position.z % 4.0) - 15.0;
+    // 4. Animate Stack Group Y and scale transition on scroll
+    if (stackRef.current) {
+      let groupY = -6.0;
+      let groupScale = 0.5;
+
+      if (progress < 1.0) {
+        // Hero -> Projects
+        const t = progress; // 0 to 1
+        groupY = -6.0 + 6.0 * t;
+        groupScale = 0.5 + 0.5 * t;
+      } else {
+        // Projects -> Contact
+        const t = Math.min(1.0, progress - 1.0); // 0 to 1
+        groupY = 0.0 - 6.0 * t;
+        groupScale = 1.0 - 0.5 * t;
+      }
+
+      stackRef.current.position.y = groupY;
+      stackRef.current.scale.setScalar(groupScale);
     }
   });
 
+  // Calculate continuous activeFloat for card coordinates
+  const dragVal = Math.min(100, Math.max(0, targetRotation.current));
+  const activeFloat = (dragVal / 100) * (count - 1);
+
   return (
     <group>
-      {/* Perspective wireframe neon grid road floor */}
-      <gridHelper 
-        ref={gridRef}
-        args={[60, 30, '#5e6ad2', '#14151f']} 
-        position={[0, -1.9, -15]} 
-        rotation={[0, 0, 0]}
-      />
-
-      {/* 3D depth street elements group */}
-      <group ref={streetRef} position={[0, 0, 0]}>
+      {/* 3D Stack Carousel */}
+      <group ref={stackRef} position={[0, -6, 0]} rotation={[0.08, 0, -0.06]}>
         {PROJECT_ITEMS.map((item, idx) => (
-          <Building
+          <Card
             key={idx}
             index={idx}
             item={item}
+            activeFloat={activeFloat}
             activeIndex={activeIndex}
             isMobile={isMobile}
           />
         ))}
       </group>
 
-      {/* Cosmic dust sparkles */}
+      {/* Global cosmic sparkles */}
       <group ref={sparklesRef}>
         <Sparkles 
-          count={isMobile ? 80 : 200} 
-          scale={[10, 8, 12]} 
+          count={isMobile ? 80 : 180} 
+          scale={[10, 8, 10]} 
           size={isMobile ? 1.5 : 2.5} 
-          speed={0.5} 
+          speed={0.4} 
           color="#5e6ad2" 
           opacity={0.65} 
         />
         <Sparkles 
-          count={isMobile ? 80 : 200} 
-          scale={[10, 8, 12]} 
+          count={isMobile ? 80 : 180} 
+          scale={[10, 8, 10]} 
           size={isMobile ? 1.2 : 2.0} 
-          speed={0.3} 
+          speed={0.25} 
           color="#06b6d2" 
           opacity={0.65} 
         />
@@ -239,7 +219,7 @@ function Scene({ activeIndex, setActiveIndex, isMobile }) {
   );
 }
 
-export default function ThreeCanvas({ activeIndex, setActiveIndex }) {
+export default function ThreeCanvas({ activeIndex, setActiveIndex, targetRotation }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -253,7 +233,7 @@ export default function ThreeCanvas({ activeIndex, setActiveIndex }) {
 
   return (
     <Canvas
-      camera={{ position: [0, 0, 0.4], fov: 65, near: 0.1, far: 50 }}
+      camera={{ position: [0, 0, 4.8], fov: 60 }}
       gl={{ antialias: true, alpha: true }}
       style={{ 
         position: 'fixed',
@@ -272,6 +252,7 @@ export default function ThreeCanvas({ activeIndex, setActiveIndex }) {
         <Scene 
           activeIndex={activeIndex}
           setActiveIndex={setActiveIndex}
+          targetRotation={targetRotation}
           isMobile={isMobile}
         />
       </Suspense>
