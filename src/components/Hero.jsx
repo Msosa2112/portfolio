@@ -38,12 +38,22 @@ const Hero = () => {
       className="hero-section bg-transparent"
     >
       <div className="hero-content">
-        <div className="badge glass-pill">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="badge glass-pill"
+        >
           <Sparkles size={14} className="badge-icon" />
           <span>Available for new opportunities</span>
-        </div>
+        </motion.div>
 
-        <h1 className="hero-title">
+        <motion.h1
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="hero-title"
+        >
           Designing digital{' '}
           <TextMorph
             words="experiences, interfaces, products, applications, interactions"
@@ -59,17 +69,27 @@ const Hero = () => {
             }}
           />{' '}
           that matter.
-        </h1>
+        </motion.h1>
 
-        <p className="hero-subtitle">
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="hero-subtitle"
+        >
           I am a multidisciplinary designer and developer crafting exceptional products with precision and passion.
-        </p>
+        </motion.p>
 
-        <div className="hero-actions">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="hero-actions"
+        >
           <button onClick={handleStartExploring} className="primary-btn glass-panel active:scale-95 transition-all">
             View Work <ArrowRight size={16} />
           </button>
-        </div>
+        </motion.div>
       </div>
 
       <style>{`
@@ -97,6 +117,62 @@ const Hero = () => {
           .hero-content {
             gap: 1.25rem;
           }
+        }
+
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: var(--text-secondary);
+        }
+
+        .badge-icon {
+          color: var(--accent);
+        }
+
+        .hero-title {
+          font-size: clamp(3rem, 8vw, 6rem);
+          font-weight: 900; /* Extra Bold / Heavy */
+          line-height: 1.05;
+          letter-spacing: -0.03em;
+        }
+
+        .hero-subtitle {
+          font-size: clamp(1.1rem, 2vw, 1.3rem);
+          color: var(--text-secondary);
+          max-width: 600px;
+          line-height: 1.6;
+          font-weight: 400;
+        }
+
+        .hero-actions {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+
+        .primary-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 1rem 2rem;
+          border-radius: 999px;
+          color: var(--text-primary);
+          font-family: inherit;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .primary-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+          transform: translateY(-2px);
+          box-shadow: 0 10px 30px -10px var(--accent-glow);
         }
       `}</style>
     </motion.section>
