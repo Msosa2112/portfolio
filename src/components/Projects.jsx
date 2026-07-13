@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence, useMotionValueEvent } from 'framer-motion';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import SandboxModal from './sandbox/SandboxModal';
 
@@ -97,11 +97,19 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
 
   // Hook-driven pointer state to avoid overlapping interaction
   const [isActive, setIsActive] = useState(false);
+
+  // Set initial state
   React.useEffect(() => {
-    return scrollYProgress.onChange((val) => {
-      setIsActive(val >= startIn + (step * 0.1) && val <= startOut + (step * 0.1));
-    });
-  }, [scrollYProgress, startIn, startOut, step]);
+    const currentVal = scrollYProgress.get();
+    setIsActive(currentVal >= startIn && currentVal <= endOut);
+  }, []);
+
+  useMotionValueEvent(scrollYProgress, "change", (val) => {
+    const active = val >= startIn && val <= endOut;
+    if (active !== isActive) {
+      setIsActive(active);
+    }
+  });
 
   return (
     <motion.div
@@ -184,35 +192,42 @@ export default function Projects() {
     const step = 0.70 / count;
     const startIn = 0.12 + idx * step;
     const center = startIn + step * 0.45;
-    window.scrollTo({ top: center * pageHeight * 6.0, behavior: 'smooth' });
+    const targetScroll = center * pageHeight * 6.0;
+
+    if (window.lenis) {
+      window.lenis.scrollTo(targetScroll, { duration: 1.2 });
+    } else {
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+    }
   };
 
   // Compute current active dot index based on scroll progress
   const [activeDot, setActiveDot] = useState(0);
-  React.useEffect(() => {
-    return scrollYProgress.onChange((val) => {
-      const count = PROJECT_ITEMS.length;
-      const step = 0.70 / count;
-      let activeIdx = 0;
-      for (let i = 0; i < count; i++) {
-        const startIn = 0.12 + i * step;
-        const endOut = startIn + step + 0.05;
-        if (val >= startIn && val <= endOut) {
-          activeIdx = i;
-          break;
-        }
+  useMotionValueEvent(scrollYProgress, "change", (val) => {
+    const count = PROJECT_ITEMS.length;
+    const step = 0.70 / count;
+    let activeIdx = 0;
+    for (let i = 0; i < count; i++) {
+      const startIn = 0.12 + i * step;
+      const endOut = startIn + step + 0.05;
+      if (val >= startIn && val <= endOut) {
+        activeIdx = i;
+        break;
       }
+    }
+    if (activeIdx !== activeDot) {
       setActiveDot(activeIdx);
-    });
-  }, [scrollYProgress]);
+    }
+  });
 
   // Is projects section currently in view range
   const [showIndicators, setShowIndicators] = useState(false);
-  React.useEffect(() => {
-    return scrollYProgress.onChange((val) => {
-      setShowIndicators(val >= 0.10 && val <= 0.84);
-    });
-  }, [scrollYProgress]);
+  useMotionValueEvent(scrollYProgress, "change", (val) => {
+    const visible = val >= 0.10 && val <= 0.84;
+    if (visible !== showIndicators) {
+      setShowIndicators(visible);
+    }
+  });
 
   return (
     <div className="relative w-full">

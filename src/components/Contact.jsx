@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import { Mail, ArrowUpRight } from 'lucide-react';
 
 const Contact = () => {
@@ -12,11 +12,17 @@ const Contact = () => {
 
   // Hook-driven pointer state to avoid overlay interaction locks
   const [isActive, setIsActive] = React.useState(false);
+
   React.useEffect(() => {
-    return scrollYProgress.onChange((val) => {
-      setIsActive(val >= 0.84);
-    });
-  }, [scrollYProgress]);
+    setIsActive(scrollYProgress.get() >= 0.84);
+  }, []);
+
+  useMotionValueEvent(scrollYProgress, "change", (val) => {
+    const active = val >= 0.84;
+    if (active !== isActive) {
+      setIsActive(active);
+    }
+  });
 
   return (
     <motion.section 

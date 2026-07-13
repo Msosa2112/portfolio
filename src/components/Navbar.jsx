@@ -26,10 +26,14 @@ const Navbar = () => {
       targetScroll = 0.95 * totalHeight; // Scroll to contact at the bottom
     }
 
-    window.scrollTo({
-      top: targetScroll,
-      behavior: 'smooth'
-    });
+    if (window.lenis) {
+      window.lenis.scrollTo(targetScroll, { duration: 1.2 });
+    } else {
+      window.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth'
+      });
+    }
   };
 
   return (

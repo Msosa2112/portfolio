@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import TextMorph from './TextMorph';
 
@@ -12,10 +12,21 @@ const Hero = () => {
   const zIndex = useTransform(scrollYProgress, [0, 0.15], [20, 0]);
   const y = useTransform(scrollYProgress, [0, 0.15], [0, -120]);
 
+  // Reactive state to toggle pointer-events so it doesn't block underlying overlays
+  const [isActive, setIsActive] = useState(true);
+  useMotionValueEvent(scrollYProgress, "change", (val) => {
+    setIsActive(val < 0.12);
+  });
+
   const handleStartExploring = () => {
     // Scroll smoothly to Projects section start
     const pageHeight = window.innerHeight || 800;
-    window.scrollTo({ top: pageHeight * 0.95, behavior: 'smooth' });
+    const targetScroll = pageHeight * 6.0 * 0.20;
+    if (window.lenis) {
+      window.lenis.scrollTo(targetScroll, { duration: 1.2 });
+    } else {
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -33,7 +44,7 @@ const Hero = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        pointerEvents: scrollYProgress.get() < 0.12 ? 'auto' : 'none'
+        pointerEvents: isActive ? 'auto' : 'none'
       }}
       className="hero-section bg-transparent"
     >
