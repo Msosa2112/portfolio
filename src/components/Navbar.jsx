@@ -11,6 +11,11 @@ const navItems = [
 
 const Navbar = ({ onNavClick }) => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [isTouch, setIsTouch] = useState(false);
+
+  React.useEffect(() => {
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
 
   const handleNavClick = (e, itemId) => {
     e.preventDefault();
@@ -42,6 +47,7 @@ const Navbar = ({ onNavClick }) => {
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      style={{ pointerEvents: 'auto', zIndex: 10000 }}
       className="dock-container"
     >
       <div className="dock glass-panel">
@@ -56,8 +62,8 @@ const Navbar = ({ onNavClick }) => {
               href={item.href}
               onClick={(e) => handleNavClick(e, item.id)}
               className="dock-item"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              onMouseEnter={() => { if (!isTouch) setHoveredIndex(index); }}
+              onMouseLeave={() => { if (!isTouch) setHoveredIndex(null); }}
             >
               <AnimatePresence>
                 {isHovered && (
@@ -92,11 +98,13 @@ const Navbar = ({ onNavClick }) => {
           position: fixed;
           bottom: 2rem;
           left: 0;
-          width: 100%;
+          right: 0;
+          margin: 0 auto;
+          width: max-content;
           display: flex;
           justify-content: center;
-          z-index: 1000;
-          pointer-events: none;
+          z-index: 10000;
+          pointer-events: auto;
         }
 
         .dock {
@@ -105,7 +113,6 @@ const Navbar = ({ onNavClick }) => {
           gap: 0.75rem;
           padding: 0.75rem 1rem;
           border-radius: 24px;
-          pointer-events: auto;
           background: rgba(10, 10, 15, 0.4);
           box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
           backdrop-filter: blur(20px);

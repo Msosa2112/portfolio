@@ -85,8 +85,6 @@ function App() {
         style={{ scaleX }}
       />
 
-      <Navbar onNavClick={() => setIsSandboxOpen(false)} />
-      
       {/* HTML overlay sections (fixed in viewport) */}
       <main className="main-content">
         <Hero />
@@ -96,6 +94,8 @@ function App() {
 
       {/* Transparent scrollable spacer to create native window scrollbar */}
       <div className="scroll-spacer" />
+
+      <Navbar onNavClick={() => setIsSandboxOpen(false)} />
       
       <style>{`
         .progress-bar {
