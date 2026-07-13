@@ -39,23 +39,23 @@ const Contact = () => {
       <style>{`
         .contact-section {
           width: 100%;
-          padding: 8rem 2rem 2rem 2rem;
+          padding: 4rem 1.25rem 2rem 1.25rem;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 6rem;
+          gap: 3rem;
         }
 
         .contact-card {
           max-width: 1000px;
           width: 100%;
-          padding: 6rem 4rem;
-          border-radius: 32px;
+          padding: 3rem 1.5rem;
+          border-radius: 24px;
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
-          gap: 2rem;
+          gap: 1.5rem;
           position: relative;
           overflow: hidden;
         }
@@ -72,7 +72,7 @@ const Contact = () => {
         }
 
         .contact-title {
-          font-size: clamp(2.5rem, 6vw, 4.5rem);
+          font-size: clamp(2rem, 6vw, 4.5rem);
           font-weight: 800;
           line-height: 1.1;
           letter-spacing: -0.03em;
@@ -80,7 +80,7 @@ const Contact = () => {
 
         .contact-desc {
           color: var(--text-secondary);
-          font-size: 1.2rem;
+          font-size: clamp(0.95rem, 2vw, 1.2rem);
           max-width: 600px;
           line-height: 1.6;
         }
@@ -119,6 +119,17 @@ const Contact = () => {
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .social-links a {
+          color: var(--text-secondary);
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+          color: var(--text-primary);
+        }
+
         .contact-btn.secondary:hover {
           background: rgba(255, 255, 255, 0.1);
         }
@@ -148,25 +159,24 @@ const Contact = () => {
           gap: 2rem;
         }
 
-        .social-links a {
-          color: var(--text-secondary);
-          text-decoration: none;
-          font-size: 0.9rem;
-          transition: color 0.3s ease;
-        }
+        @media (min-width: 768px) {
+          .contact-section {
+            padding: 8rem 2rem 2rem 2rem;
+            gap: 6rem;
+          }
 
-        .social-links a:hover {
-          color: var(--text-primary);
+          .contact-card {
+            padding: 6rem 4rem;
+            border-radius: 32px;
+            gap: 2rem;
+          }
         }
 
         @media (max-width: 768px) {
-          .contact-card {
-            padding: 4rem 2rem;
-          }
-          
           .contact-actions {
             flex-direction: column;
             width: 100%;
+            gap: 1rem;
           }
           
           .contact-btn {
@@ -176,6 +186,7 @@ const Contact = () => {
           .footer-content {
             flex-direction: column-reverse;
             text-align: center;
+            gap: 1.5rem;
           }
         }
       `}</style>

@@ -72,10 +72,17 @@ const Projects = () => {
         .projects-section {
           width: 100%;
           max-width: 1200px;
-          padding: 8rem 2rem;
+          padding: 4rem 1.25rem;
           display: flex;
           flex-direction: column;
-          gap: 4rem;
+          gap: 2.5rem;
+        }
+
+        @media (min-width: 768px) {
+          .projects-section {
+            padding: 8rem 2rem;
+            gap: 4rem;
+          }
         }
 
         .projects-header {
