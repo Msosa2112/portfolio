@@ -50,7 +50,6 @@ const PROJECT_ITEMS = [
   }
 ];
 
-/* Helper to get ZIndex matching the Fabio Ottaviani algorithm */
 const getZindex = (array, index) => (
   array.map((_, i) => (index === i) ? array.length : array.length - Math.abs(index - i))
 );
@@ -58,7 +57,7 @@ const getZindex = (array, index) => (
 export default function Projects() {
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
   const [progress, setProgress] = useState(50);
-  const [active, setActive] = useState(2); // Start at middle
+  const [active, setActive] = useState(2);
   
   const isDown = useRef(false);
   const startX = useRef(0);
@@ -66,7 +65,6 @@ export default function Projects() {
   const speedWheel = 0.02;
   const speedDrag = -0.12;
 
-  // Sync active index when progress changes
   useEffect(() => {
     const calculatedActive = Math.floor((progress / 100) * (PROJECT_ITEMS.length - 1));
     setActive(Math.min(PROJECT_ITEMS.length - 1, Math.max(0, calculatedActive)));
@@ -104,7 +102,6 @@ export default function Projects() {
   };
 
   const handleCardClick = (idx) => {
-    // Math to smoothly align center index
     if (idx === PROJECT_ITEMS.length - 1) {
       setProgress(100);
     } else {
@@ -112,31 +109,28 @@ export default function Projects() {
     }
   };
 
-  // Stacking z-indexes
   const zIndexes = getZindex(PROJECT_ITEMS, active);
 
   return (
-    <section id="work" className="w-full h-screen relative flex flex-col justify-between py-12 md:py-20 overflow-hidden font-sans select-none bg-gradient-to-b from-[#090a0f] to-[#040508]">
+    <section id="work" className="w-full min-h-[600px] py-12 md:py-20 relative flex flex-col justify-between overflow-hidden font-sans select-none">
       
-      {/* Dynamic styles to run the curved translate2d/rotate code identically */}
+      {/* 2D Curved abanico layout matching Fabio Ottaviani */}
       <style>{`
         .carousel-wrapper {
           position: relative;
           z-index: 1;
-          height: 60vh;
+          height: 480px;
           width: 100%;
           overflow: hidden;
           pointer-events: none;
         }
 
         .carousel-card-item {
-          --items: 4;
-          --width: clamp(220px, 50vw, 290px);
-          --height: clamp(300px, 70vw, 395px);
+          --width: clamp(260px, 60vw, 340px);
+          --height: clamp(340px, 80vw, 450px);
           --x: calc(var(--active-val) * 780%);
           --y: calc(var(--active-val) * 190%);
-          --rot: calc(var(--active-val) * 110deg);
-          --opacity: calc(var(--z-index-val) / var(--items) * 3 - 2);
+          --rot: calc(var(--active-val) * 105deg);
 
           overflow: hidden;
           position: absolute;
@@ -164,7 +158,7 @@ export default function Projects() {
           width: 100%;
           height: 100%;
           transition: opacity .8s cubic-bezier(0, 0.02, 0, 1);
-          opacity: var(--opacity);
+          opacity: var(--opacity-val);
           font-family: inherit;
         }
 
@@ -219,7 +213,7 @@ export default function Projects() {
       `}</style>
 
       {/* Header Info */}
-      <div className="px-6 text-center space-y-2 mt-4 select-none shrink-0 relative z-30">
+      <div className="px-6 text-center space-y-2 mt-2 select-none shrink-0 relative z-30">
         <span className="text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-black uppercase tracking-widest inline-block">
           Selected Work
         </span>
@@ -248,6 +242,9 @@ export default function Projects() {
           const activeVal = (idx - active) / PROJECT_ITEMS.length;
           const isActive = idx === active;
 
+          // Opacity formula that allows 3 cards to be visible at once (fading side cards nicely but keeping them visible)
+          const opacityVal = Math.max(0.15, 1 - Math.abs(idx - active) * 0.45);
+
           return (
             <div
               key={idx}
@@ -255,12 +252,12 @@ export default function Projects() {
               style={{
                 '--active-val': activeVal,
                 '--z-index-val': zIndex,
+                '--opacity-val': opacityVal,
                 boxShadow: isActive ? `0 20px 50px -15px ${item.glow}` : '0 10px 25px rgba(0,0,0,0.5)',
                 borderColor: isActive ? item.borderColor : 'rgba(255, 255, 255, 0.04)'
               }}
               className="carousel-card-item cursor-pointer"
             >
-              {/* Card visual wrapper */}
               <div className="carousel-card-box">
                 {/* Serif large Number */}
                 <div className="num">0{idx + 1}</div>
@@ -277,7 +274,6 @@ export default function Projects() {
                     <h4 className="title">{item.title}</h4>
                   </div>
                   
-                  {/* Category and button revealed inside active card */}
                   {isActive && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
@@ -310,8 +306,8 @@ export default function Projects() {
         })}
       </div>
 
-      {/* Bottom text layout inspired by CodePen */}
-      <div className="px-6 text-center shrink-0 relative z-30 mb-4 select-none max-w-sm mx-auto">
+      {/* Bottom text layout */}
+      <div className="px-6 text-center shrink-0 relative z-30 mb-2 select-none max-w-sm mx-auto">
         <p className="text-zinc-500 font-mono text-[9px] uppercase tracking-widest leading-relaxed">
           {PROJECT_ITEMS[active].title} — {PROJECT_ITEMS[active].category}
         </p>
