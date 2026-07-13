@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, Suspense } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Image, Sparkles } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ExternalLink, Hand } from 'lucide-react';
@@ -12,9 +12,8 @@ const PROJECT_ITEMS = [
     category: "CRM / Web App",
     description: "A modern, AI-powered CRM built for construction professionals, featuring a highly intuitive UI and real-time data sync via Supabase.",
     image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2371&auto=format&fit=crop",
-    glow: "rgba(94,106,210,0.55)",
+    glow: "#5e6ad2",
     themeColor: "indigo",
-    borderColor: "rgba(94,106,210,0.4)",
     exploreUrl: null
   },
   {
@@ -22,9 +21,8 @@ const PROJECT_ITEMS = [
     category: "Real Estate",
     description: "Global transaction coordinator platform featuring an integrated AI Copilot for real estate professionals.",
     image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2346&auto=format&fit=crop",
-    glow: "rgba(6,182,212,0.55)",
+    glow: "#06b6d2",
     themeColor: "cyan",
-    borderColor: "rgba(6,182,212,0.4)",
     exploreUrl: "https://zhomesapp.com"
   },
   {
@@ -32,9 +30,8 @@ const PROJECT_ITEMS = [
     category: "Marketing / SEO",
     description: "A highly optimized marketing landing page with custom SEO, robots.txt, and a spectacular photo gallery.",
     image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=2340&auto=format&fit=crop",
-    glow: "rgba(245,158,11,0.55)",
+    glow: "#f59e0b",
     themeColor: "amber",
-    borderColor: "rgba(245,158,11,0.4)",
     exploreUrl: "https://edwardsidingandgutters.com/"
   },
   {
@@ -42,81 +39,131 @@ const PROJECT_ITEMS = [
     category: "Microservices",
     description: "Microservice integration for scalable DOOH (Digital Out of Home) advertising platforms.",
     image: "https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=2342&auto=format&fit=crop",
-    glow: "rgba(16,185,129,0.55)",
+    glow: "#10b981",
     themeColor: "emerald",
-    borderColor: "rgba(16,185,129,0.4)",
     exploreUrl: null
   }
 ];
 
-// Individual 3D Card Mesh
-function Card({ index, item, activeIndex, totalCount, targetRotation, onSelect, isMobile }) {
+const getZindex = (array, index) => (
+  array.map((_, i) => (index === i) ? array.length : array.length - Math.abs(index - i))
+);
+
+// Individual 3D Card with Neon Border and Hover Parallax Tilt
+function Card({ index, item, activeIndex, totalCount, onSelect, isMobile }) {
   const meshRef = useRef();
+  const glowRef = useRef();
   const [hovered, setHovered] = useState(false);
 
   // Position on the 3D cylinder
-  const radius = isMobile ? 2.5 : 3.6;
+  const radius = isMobile ? 2.4 : 3.5;
   const angleStep = (Math.PI * 2) / totalCount;
   const theta = index * angleStep;
-
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    
-    // Position updates relative to parent rotation
-    const currentAngle = theta + meshRef.current.parent.rotation.y;
-    
-    // Dynamic styling based on distance to front
-    const distToFront = Math.abs(Math.atan2(Math.sin(currentAngle), Math.cos(currentAngle)));
-    
-    // Scale up active or hovered card
-    const targetScale = hovered ? 1.15 : (index === activeIndex ? 1.05 : 0.9);
-    meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.1);
-    meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.1);
-
-    // Fade out cards facing away (towards back of cylinder)
-    const targetOpacity = distToFront > Math.PI / 2 ? 0.05 : Math.max(0.2, 1 - distToFront * 0.5);
-    if (meshRef.current.material) {
-      meshRef.current.material.opacity = THREE.MathUtils.lerp(meshRef.current.material.opacity, targetOpacity, 0.1);
-      // Non-active cards are slightly grayscale
-      const targetGrayscale = index === activeIndex ? 0 : 0.45;
-      meshRef.current.material.grayscale = THREE.MathUtils.lerp(meshRef.current.material.grayscale, targetGrayscale, 0.1);
-    }
-  });
 
   // Coordinates on cylinder
   const x = Math.sin(theta) * radius;
   const z = Math.cos(theta) * radius;
 
+  useFrame((state) => {
+    if (!meshRef.current || !glowRef.current) return;
+    
+    // Parent rotation
+    const currentAngle = theta + meshRef.current.parent.rotation.y;
+    const distToFront = Math.abs(Math.atan2(Math.sin(currentAngle), Math.cos(currentAngle)));
+    
+    const isActive = index === activeIndex;
+
+    // Hover + Active scale calculation
+    const baseScale = isActive ? 1.08 : 0.88;
+    const hoverScaleMultiplier = hovered ? 1.12 : 1.0;
+    const targetScale = baseScale * hoverScaleMultiplier;
+
+    meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.1);
+    meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.1);
+
+    // Sync neon border glow scale
+    glowRef.current.scale.x = meshRef.current.scale.x * 1.04;
+    glowRef.current.scale.y = meshRef.current.scale.y * 1.04;
+
+    // Zero-gravity floating animation for active or hovered card
+    const floatOffset = (hovered || isActive) 
+      ? Math.sin(state.clock.getElapsedTime() * 1.8 + index) * 0.06 
+      : 0;
+    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, floatOffset, 0.1);
+    glowRef.current.position.y = meshRef.current.position.y;
+
+    // 3D Parallax Tilt to face cursor
+    let targetRotY = theta;
+    let targetRotX = 0;
+    if (hovered || isActive) {
+      targetRotY += state.pointer.x * 0.22;
+      targetRotX = -state.pointer.y * 0.18;
+    }
+    meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotY, 0.1);
+    meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, targetRotX, 0.1);
+    glowRef.current.rotation.y = meshRef.current.rotation.y;
+    glowRef.current.rotation.x = meshRef.current.rotation.x;
+
+    // Opacity decay
+    const targetOpacity = distToFront > Math.PI / 2 ? 0.05 : Math.max(0.12, 1 - distToFront * 0.55);
+    const glowOpacity = (isActive || hovered) ? targetOpacity * 0.85 : targetOpacity * 0.18;
+
+    if (meshRef.current.material) {
+      meshRef.current.material.opacity = THREE.MathUtils.lerp(meshRef.current.material.opacity, targetOpacity, 0.1);
+      meshRef.current.material.grayscale = THREE.MathUtils.lerp(meshRef.current.material.grayscale, isActive ? 0 : 0.5, 0.1);
+    }
+    if (glowRef.current.material) {
+      glowRef.current.material.opacity = THREE.MathUtils.lerp(glowRef.current.material.opacity, glowOpacity, 0.1);
+    }
+  });
+
   const cardWidth = isMobile ? 1.6 : 2.2;
   const cardHeight = isMobile ? 2.2 : 3.0;
 
   return (
-    <Image
-      ref={meshRef}
-      url={item.image}
-      position={[x, 0, z]}
-      rotation={[0, theta, 0]}
-      scale={[cardWidth, cardHeight]}
-      transparent
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect(index);
-      }}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        document.body.style.cursor = 'pointer';
-      }}
-      onPointerOut={(e) => {
-        e.stopPropagation();
-        setHovered(false);
-        document.body.style.cursor = 'default';
-      }}
-    />
+    <group>
+      {/* 3D Neon Aura Glow under the image card */}
+      <mesh 
+        ref={glowRef} 
+        position={[x, 0, z - 0.02]} 
+      >
+        <planeGeometry args={[cardWidth, cardHeight]} />
+        <meshBasicMaterial 
+          color={item.glow} 
+          transparent 
+          opacity={0.1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Main Image Panel */}
+      <Image
+        ref={meshRef}
+        url={item.image}
+        position={[x, 0, z]}
+        rotation={[0, theta, 0]}
+        scale={[cardWidth, cardHeight]}
+        transparent
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(index);
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = 'pointer';
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation();
+          setHovered(false);
+          document.body.style.cursor = 'default';
+        }}
+      />
+    </group>
   );
 }
 
-// 3D Carousel Cylinder Group
+// Angled 3D Carousel Cylinder
 function CylinderCarousel({ activeIndex, setActiveIndex, targetRotation, isMobile }) {
   const groupRef = useRef();
   const count = PROJECT_ITEMS.length;
@@ -125,14 +172,14 @@ function CylinderCarousel({ activeIndex, setActiveIndex, targetRotation, isMobil
   useFrame(() => {
     if (!groupRef.current) return;
 
-    // Smoothly rotate cylinder group to target angle
+    // Smoothly rotate cylinder group
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
       targetRotation.current,
       0.08
     );
 
-    // Solve for which card is currently closest to the front (Z axis positive)
+    // Determine front card
     let maxCos = -2;
     let closestIdx = 0;
     for (let i = 0; i < count; i++) {
@@ -150,20 +197,16 @@ function CylinderCarousel({ activeIndex, setActiveIndex, targetRotation, isMobil
   });
 
   const handleSelect = (idx) => {
-    // Spin the carousel to bring clicked card to front
-    // Calculate shortest angular route
     const currentRot = groupRef.current.rotation.y;
     const targetRotForCard = -idx * angleStep;
-    
-    // Find closest rotation offset to avoid spinning multiple rounds
     const difference = targetRotForCard - (currentRot % (Math.PI * 2));
     let adjustedDiff = Math.atan2(Math.sin(difference), Math.cos(difference));
-    
     targetRotation.current = currentRot + adjustedDiff;
   };
 
   return (
-    <group ref={groupRef}>
+    // Angled diagonal path tilt (X-axis tilt of 10deg, Z-axis tilt of -8deg for asymmetric premium curve)
+    <group ref={groupRef} rotation={[0.16, 0, -0.14]}>
       {PROJECT_ITEMS.map((item, idx) => (
         <Card
           key={idx}
@@ -171,7 +214,6 @@ function CylinderCarousel({ activeIndex, setActiveIndex, targetRotation, isMobil
           item={item}
           activeIndex={activeIndex}
           totalCount={count}
-          targetRotation={targetRotation}
           onSelect={handleSelect}
           isMobile={isMobile}
         />
@@ -189,7 +231,7 @@ export default function Projects() {
   const isDragging = useRef(false);
   const startX = useRef(0);
 
-  // Detect mobile
+  // Resize listener
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -199,7 +241,6 @@ export default function Projects() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Sync scroll/swipe movements
   const handlePointerDown = (e) => {
     isDragging.current = true;
     startX.current = e.clientX || (e.touches && e.touches[0].clientX) || 0;
@@ -209,8 +250,6 @@ export default function Projects() {
     if (!isDragging.current) return;
     const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
     const deltaX = clientX - startX.current;
-    
-    // Rotate cylinder proportional to horizontal drag
     const sensitivity = isMobile ? 0.009 : 0.005;
     targetRotation.current += deltaX * sensitivity;
     startX.current = clientX;
@@ -221,7 +260,6 @@ export default function Projects() {
   };
 
   const handleWheel = (e) => {
-    // Vertical mouse wheel rotates carousel
     const sensitivity = 0.0015;
     targetRotation.current += e.deltaY * sensitivity;
   };
@@ -241,6 +279,7 @@ export default function Projects() {
       id="work" 
       className="w-full h-screen relative flex flex-col justify-between py-12 md:py-20 overflow-hidden font-sans select-none bg-transparent"
     >
+      
       {/* 3D WebGL Canvas Layer */}
       <div 
         onMouseDown={handlePointerDown}
@@ -260,7 +299,6 @@ export default function Projects() {
         >
           <ambientLight intensity={1.8} />
           <directionalLight position={[0, 10, 5]} intensity={1.2} />
-          <pointLight position={[-10, -10, -10]} intensity={0.5} />
           
           <Suspense fallback={null}>
             <CylinderCarousel 
@@ -271,22 +309,22 @@ export default function Projects() {
             />
           </Suspense>
 
-          {/* Gorgeous floating stars and sparkles in WebGL */}
+          {/* WebGL Stars field */}
           <Sparkles 
-            count={isMobile ? 60 : 120} 
+            count={isMobile ? 70 : 150} 
             scale={[8, 5, 8]} 
             size={isMobile ? 1.5 : 2.5} 
             speed={0.4} 
             color="#5e6ad2" 
-            opacity={0.7} 
+            opacity={0.65} 
           />
           <Sparkles 
-            count={isMobile ? 60 : 120} 
+            count={isMobile ? 70 : 150} 
             scale={[8, 5, 8]} 
             size={isMobile ? 1.2 : 2.0} 
             speed={0.25} 
             color="#06b6d2" 
-            opacity={0.7} 
+            opacity={0.65} 
           />
         </Canvas>
       </div>
@@ -336,7 +374,7 @@ export default function Projects() {
               {(activeProject.exploreUrl || activeProject.title.includes("Barba")) && (
                 <button
                   onClick={() => handleExplore(activeProject)}
-                  className="w-full py-2.5 bg-white hover:bg-zinc-200 text-black font-black text-[10px] uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md"
+                  className="w-full py-2.5 bg-white hover:bg-zinc-200 text-black font-black text-[10px] uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md font-sans"
                 >
                   <span>Explore Project</span>
                   {activeProject.exploreUrl ? <ExternalLink size={11} /> : <ArrowRight size={11} />}
@@ -354,7 +392,6 @@ export default function Projects() {
               onClick={() => {
                 const count = PROJECT_ITEMS.length;
                 const angleStep = (Math.PI * 2) / count;
-                // Calculate shortest turn
                 const currentRot = targetRotation.current;
                 const targetRotForCard = -idx * angleStep;
                 const difference = targetRotForCard - (currentRot % (Math.PI * 2));
