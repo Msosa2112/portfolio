@@ -112,7 +112,7 @@ export default function Projects() {
   const zIndexes = getZindex(PROJECT_ITEMS, active);
 
   return (
-    <section id="work" className="w-full min-h-[600px] py-12 md:py-20 relative flex flex-col justify-between overflow-visible font-sans select-none">
+    <section id="work" className="w-full min-h-[600px] py-12 md:py-20 relative flex flex-col justify-between overflow-x-hidden overflow-y-visible font-sans select-none">
       
       {/* Decorative blurred background cards (Top-Left & Bottom-Right) */}
       <div 
@@ -122,7 +122,7 @@ export default function Projects() {
           left: '-45px',
           transform: 'rotate(-25deg)',
           filter: 'blur(12px)',
-          opacity: 0.2,
+          opacity: 0.18,
           zIndex: 0
         }}
       />
@@ -133,7 +133,7 @@ export default function Projects() {
           right: '-45px',
           transform: 'rotate(25deg)',
           filter: 'blur(12px)',
-          opacity: 0.2,
+          opacity: 0.18,
           zIndex: 0
         }}
       />
@@ -172,8 +172,9 @@ export default function Projects() {
           background: #090a0f;
           pointer-events: all;
           transform: translate(var(--x), var(--y)) rotate(var(--rot));
-          transition: transform .8s cubic-bezier(0, 0.02, 0, 1), border-color .3s ease, box-shadow .5s ease;
-          border: none; /* Removed bottom card border line issues */
+          transition: transform .8s cubic-bezier(0, 0.02, 0, 1), opacity .8s cubic-bezier(0, 0.02, 0, 1), border-color .3s ease, box-shadow .5s ease;
+          border: none;
+          opacity: var(--opacity-val); /* Opacity applied directly here so the dark background doesn't stay visible behind the transparent card content */
           font-family: 'Bahnschrift', 'DIN Alternate', 'Inter', -apple-system, sans-serif;
         }
 
@@ -184,8 +185,6 @@ export default function Projects() {
           left: 0;
           width: 100%;
           height: 100%;
-          transition: opacity .8s cubic-bezier(0, 0.02, 0, 1);
-          opacity: var(--opacity-val);
         }
 
         .carousel-card-box::before {
@@ -257,8 +256,8 @@ export default function Projects() {
           const activeVal = (idx - active) / PROJECT_ITEMS.length;
           const isActive = idx === active;
 
-          // Opacity decay that allows multiple cards to show stacked behind at 55% opacity
-          const opacityVal = Math.max(0.4, 1 - Math.abs(idx - active) * 0.45);
+          // Opacity decay applied directly to card element
+          const opacityVal = Math.max(0.0, 1 - Math.abs(idx - active) * 0.45);
 
           return (
             <div
