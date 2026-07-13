@@ -17,7 +17,7 @@ export default function CopilotSandbox() {
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: 'Hola Lázaro, soy tu Copiloto de Inteligencia Artificial. Puedo ajustar precios de materiales en el catálogo, consultar el estado de las obras o sincronizar datos en lenguaje natural. ¿En qué te ayudo hoy?'
+      text: 'Hola, soy tu Copiloto de Inteligencia Artificial. Puedo ajustar precios de materiales en el catálogo, consultar el estado de las obras o sincronizar datos en lenguaje natural. ¿En qué te ayudo hoy?'
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -54,7 +54,7 @@ export default function CopilotSandbox() {
         }));
         
         setHighlightedRow('p1');
-        replyText = `¡Listo Lázaro! He actualizado el precio de **Tejas Composite** a **$${newPrice.toFixed(2)} / SQ** en el catálogo del sistema y he enviado la actualización de inventario a QuickBooks Online.`;
+        replyText = `¡Listo! He actualizado el precio de **Tejas Composite** a **$${newPrice.toFixed(2)} / SQ** en el catálogo del sistema y he enviado la actualización de inventario a QuickBooks Online.`;
         
         setTimeout(() => setHighlightedRow(null), 3000);
 
@@ -79,7 +79,7 @@ export default function CopilotSandbox() {
       } else if (lower.includes('payroll') || lower.includes('nómina') || lower.includes('nomina')) {
         replyText = `El presupuesto total de Payroll para la semana en curso (Sábado a Viernes) es de **$3,580.00** dividido entre 4 trabajadores. El estado de la nómina es: **Pendiente de Cierre (Viernes)**.`;
       } else {
-        replyText = `Recibido Lázaro. He procesado tu instrucción sobre el sistema de Barba Construction. ¿Deseas que revise el catálogo de QuickBooks o actualice las órdenes de compra asociadas?`;
+        replyText = `Recibido. He procesado tu instrucción sobre el sistema de Barba Construction. ¿Deseas que revise el catálogo de QuickBooks o actualice las órdenes de compra asociadas?`;
       }
 
       setMessages(prev => [...prev, { sender: 'bot', text: replyText }]);

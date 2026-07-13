@@ -67,7 +67,7 @@ const Contact = () => {
 
       <footer className="footer" style={{ pointerEvents: isActive ? 'auto' : 'none' }}>
         <div className="footer-content">
-          <p className="copyright">© 2026 John Doe. All rights reserved.</p>
+          <p className="copyright">© 2026 Msosa Portfolio. All rights reserved.</p>
           <div className="social-links">
             <a href="#">Twitter</a>
             <a href="#">LinkedIn</a>
