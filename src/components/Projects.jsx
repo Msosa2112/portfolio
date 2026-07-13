@@ -1,6 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Image, Sparkles } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ExternalLink, Hand } from 'lucide-react';
+import * as THREE from 'three';
 import SandboxModal from './sandbox/SandboxModal';
 
 const PROJECT_ITEMS = [
@@ -10,9 +13,8 @@ const PROJECT_ITEMS = [
     description: "A modern, AI-powered CRM built for construction professionals, featuring a highly intuitive UI and real-time data sync via Supabase.",
     image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2371&auto=format&fit=crop",
     glow: "rgba(94,106,210,0.55)",
-    themeColor: "from-indigo-600/10 to-indigo-900/30",
+    themeColor: "indigo",
     borderColor: "rgba(94,106,210,0.4)",
-    badgeColor: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
     exploreUrl: null
   },
   {
@@ -21,9 +23,8 @@ const PROJECT_ITEMS = [
     description: "Global transaction coordinator platform featuring an integrated AI Copilot for real estate professionals.",
     image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2346&auto=format&fit=crop",
     glow: "rgba(6,182,212,0.55)",
-    themeColor: "from-cyan-600/10 to-cyan-900/30",
+    themeColor: "cyan",
     borderColor: "rgba(6,182,212,0.4)",
-    badgeColor: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
     exploreUrl: "https://zhomesapp.com"
   },
   {
@@ -32,9 +33,8 @@ const PROJECT_ITEMS = [
     description: "A highly optimized marketing landing page with custom SEO, robots.txt, and a spectacular photo gallery.",
     image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=2340&auto=format&fit=crop",
     glow: "rgba(245,158,11,0.55)",
-    themeColor: "from-amber-600/10 to-amber-900/30",
+    themeColor: "amber",
     borderColor: "rgba(245,158,11,0.4)",
-    badgeColor: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
     exploreUrl: "https://edwardsidingandgutters.com/"
   },
   {
@@ -43,32 +43,188 @@ const PROJECT_ITEMS = [
     description: "Microservice integration for scalable DOOH (Digital Out of Home) advertising platforms.",
     image: "https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=2342&auto=format&fit=crop",
     glow: "rgba(16,185,129,0.55)",
-    themeColor: "from-emerald-600/10 to-emerald-900/30",
+    themeColor: "emerald",
     borderColor: "rgba(16,185,129,0.4)",
-    badgeColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
     exploreUrl: null
   }
 ];
 
-const getZindex = (array, index) => (
-  array.map((_, i) => (index === i) ? array.length : array.length - Math.abs(index - i))
-);
+// Individual 3D Card Mesh
+function Card({ index, item, activeIndex, totalCount, targetRotation, onSelect, isMobile }) {
+  const meshRef = useRef();
+  const [hovered, setHovered] = useState(false);
+
+  // Position on the 3D cylinder
+  const radius = isMobile ? 2.5 : 3.6;
+  const angleStep = (Math.PI * 2) / totalCount;
+  const theta = index * angleStep;
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    
+    // Position updates relative to parent rotation
+    const currentAngle = theta + meshRef.current.parent.rotation.y;
+    
+    // Dynamic styling based on distance to front
+    const distToFront = Math.abs(Math.atan2(Math.sin(currentAngle), Math.cos(currentAngle)));
+    
+    // Scale up active or hovered card
+    const targetScale = hovered ? 1.15 : (index === activeIndex ? 1.05 : 0.9);
+    meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.1);
+    meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.1);
+
+    // Fade out cards facing away (towards back of cylinder)
+    const targetOpacity = distToFront > Math.PI / 2 ? 0.05 : Math.max(0.2, 1 - distToFront * 0.5);
+    if (meshRef.current.material) {
+      meshRef.current.material.opacity = THREE.MathUtils.lerp(meshRef.current.material.opacity, targetOpacity, 0.1);
+      // Non-active cards are slightly grayscale
+      const targetGrayscale = index === activeIndex ? 0 : 0.45;
+      meshRef.current.material.grayscale = THREE.MathUtils.lerp(meshRef.current.material.grayscale, targetGrayscale, 0.1);
+    }
+  });
+
+  // Coordinates on cylinder
+  const x = Math.sin(theta) * radius;
+  const z = Math.cos(theta) * radius;
+
+  const cardWidth = isMobile ? 1.6 : 2.2;
+  const cardHeight = isMobile ? 2.2 : 3.0;
+
+  return (
+    <Image
+      ref={meshRef}
+      url={item.image}
+      position={[x, 0, z]}
+      rotation={[0, theta, 0]}
+      scale={[cardWidth, cardHeight]}
+      transparent
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(index);
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = 'pointer';
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHovered(false);
+        document.body.style.cursor = 'default';
+      }}
+    />
+  );
+}
+
+// 3D Carousel Cylinder Group
+function CylinderCarousel({ activeIndex, setActiveIndex, targetRotation, isMobile }) {
+  const groupRef = useRef();
+  const count = PROJECT_ITEMS.length;
+  const angleStep = (Math.PI * 2) / count;
+
+  useFrame(() => {
+    if (!groupRef.current) return;
+
+    // Smoothly rotate cylinder group to target angle
+    groupRef.current.rotation.y = THREE.MathUtils.lerp(
+      groupRef.current.rotation.y,
+      targetRotation.current,
+      0.08
+    );
+
+    // Solve for which card is currently closest to the front (Z axis positive)
+    let maxCos = -2;
+    let closestIdx = 0;
+    for (let i = 0; i < count; i++) {
+      const theta = groupRef.current.rotation.y + i * angleStep;
+      const cosVal = Math.cos(theta);
+      if (cosVal > maxCos) {
+        maxCos = cosVal;
+        closestIdx = i;
+      }
+    }
+
+    if (closestIdx !== activeIndex) {
+      setActiveIndex(closestIdx);
+    }
+  });
+
+  const handleSelect = (idx) => {
+    // Spin the carousel to bring clicked card to front
+    // Calculate shortest angular route
+    const currentRot = groupRef.current.rotation.y;
+    const targetRotForCard = -idx * angleStep;
+    
+    // Find closest rotation offset to avoid spinning multiple rounds
+    const difference = targetRotForCard - (currentRot % (Math.PI * 2));
+    let adjustedDiff = Math.atan2(Math.sin(difference), Math.cos(difference));
+    
+    targetRotation.current = currentRot + adjustedDiff;
+  };
+
+  return (
+    <group ref={groupRef}>
+      {PROJECT_ITEMS.map((item, idx) => (
+        <Card
+          key={idx}
+          index={idx}
+          item={item}
+          activeIndex={activeIndex}
+          totalCount={count}
+          targetRotation={targetRotation}
+          onSelect={handleSelect}
+          isMobile={isMobile}
+        />
+      ))}
+    </group>
+  );
+}
 
 export default function Projects() {
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
-  const [progress, setProgress] = useState(50);
-  const [active, setActive] = useState(2);
+  const [isMobile, setIsMobile] = useState(false);
   
-  const isDown = useRef(false);
+  const targetRotation = useRef(0);
+  const isDragging = useRef(false);
   const startX = useRef(0);
 
-  const speedWheel = 0.02;
-  const speedDrag = -0.12;
-
+  // Detect mobile
   useEffect(() => {
-    const calculatedActive = Math.floor((progress / 100) * (PROJECT_ITEMS.length - 1));
-    setActive(Math.min(PROJECT_ITEMS.length - 1, Math.max(0, calculatedActive)));
-  }, [progress]);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Sync scroll/swipe movements
+  const handlePointerDown = (e) => {
+    isDragging.current = true;
+    startX.current = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isDragging.current) return;
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    const deltaX = clientX - startX.current;
+    
+    // Rotate cylinder proportional to horizontal drag
+    const sensitivity = isMobile ? 0.009 : 0.005;
+    targetRotation.current += deltaX * sensitivity;
+    startX.current = clientX;
+  };
+
+  const handlePointerUp = () => {
+    isDragging.current = false;
+  };
+
+  const handleWheel = (e) => {
+    // Vertical mouse wheel rotates carousel
+    const sensitivity = 0.0015;
+    targetRotation.current += e.deltaY * sensitivity;
+  };
 
   const handleExplore = (item) => {
     if (item.title.includes("Barba")) {
@@ -78,259 +234,135 @@ export default function Projects() {
     }
   };
 
-  // Handlers
-  const handleWheel = (e) => {
-    const wheelProgress = e.deltaY * speedWheel;
-    setProgress(prev => Math.max(0, Math.min(100, prev + wheelProgress)));
-  };
-
-  const handleMouseDown = (e) => {
-    isDown.current = true;
-    startX.current = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDown.current) return;
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-    const mouseProgress = (clientX - startX.current) * speedDrag;
-    setProgress(prev => Math.max(0, Math.min(100, prev + mouseProgress)));
-    startX.current = clientX;
-  };
-
-  const handleMouseUp = () => {
-    isDown.current = false;
-  };
-
-  const handleCardClick = (idx) => {
-    if (idx === PROJECT_ITEMS.length - 1) {
-      setProgress(100);
-    } else {
-      setProgress(((idx + 0.5) / (PROJECT_ITEMS.length - 1)) * 100);
-    }
-  };
-
-  const zIndexes = getZindex(PROJECT_ITEMS, active);
+  const activeProject = PROJECT_ITEMS[activeIndex];
 
   return (
-    <section id="work" className="w-full min-h-[600px] py-12 md:py-20 relative flex flex-col justify-between overflow-x-hidden overflow-y-visible font-sans select-none">
-      
-      {/* Decorative blurred background cards (Top-Left & Bottom-Right) */}
+    <section 
+      id="work" 
+      className="w-full h-screen relative flex flex-col justify-between py-12 md:py-20 overflow-hidden font-sans select-none bg-transparent"
+    >
+      {/* 3D WebGL Canvas Layer */}
       <div 
-        className="absolute w-[200px] h-[270px] rounded-[24px] border border-indigo-500/20 bg-indigo-500/10 pointer-events-none"
-        style={{
-          top: '-15px',
-          left: '-45px',
-          transform: 'rotate(-25deg)',
-          filter: 'blur(12px)',
-          opacity: 0.18,
-          zIndex: 0
-        }}
-      />
-      <div 
-        className="absolute w-[200px] h-[270px] rounded-[24px] border border-cyan-500/20 bg-cyan-500/10 pointer-events-none"
-        style={{
-          bottom: '-15px',
-          right: '-45px',
-          transform: 'rotate(25deg)',
-          filter: 'blur(12px)',
-          opacity: 0.18,
-          zIndex: 0
-        }}
-      />
-
-      {/* 2D Curved abanico layout matching Fabio Ottaviani */}
-      <style>{`
-        .carousel-wrapper {
-          position: relative;
-          z-index: 10;
-          height: 480px;
-          width: 100%;
-          overflow: visible;
-          pointer-events: none;
-        }
-
-        .carousel-card-item {
-          --width: clamp(260px, 60vw, 340px);
-          --height: clamp(340px, 80vw, 450px);
+        onMouseDown={handlePointerDown}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handlePointerUp}
+        onTouchStart={handlePointerDown}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
+        onWheel={handleWheel}
+        className="absolute inset-0 z-10 w-full h-full cursor-grab active:cursor-grabbing"
+      >
+        <Canvas
+          camera={{ position: [0, 0, 4.8], fov: 60 }}
+          gl={{ antialias: true, alpha: true }}
+          style={{ background: 'transparent' }}
+        >
+          <ambientLight intensity={1.8} />
+          <directionalLight position={[0, 10, 5]} intensity={1.2} />
+          <pointLight position={[-10, -10, -10]} intensity={0.5} />
           
-          /* Scaled down offsets so adjacent cards remain beautifully visible on screen */
-          --x: calc(var(--active-val) * 310%);
-          --y: calc(var(--active-val) * 85%);
-          --rot: calc(var(--active-val) * 45deg);
+          <Suspense fallback={null}>
+            <CylinderCarousel 
+              activeIndex={activeIndex}
+              setActiveIndex={setActiveIndex}
+              targetRotation={targetRotation}
+              isMobile={isMobile}
+            />
+          </Suspense>
 
-          overflow: hidden;
-          position: absolute;
-          z-index: var(--z-index-val);
-          width: var(--width);
-          height: var(--height);
-          margin: calc(var(--height) * -0.5) 0 0 calc(var(--width) * -0.5);
-          border-radius: 24px;
-          top: 50%;
-          left: 50%;
-          user-select: none;
-          transform-origin: 0% 100%;
-          background: #090a0f;
-          pointer-events: all;
-          transform: translate(var(--x), var(--y)) rotate(var(--rot));
-          transition: transform .8s cubic-bezier(0, 0.02, 0, 1), opacity .8s cubic-bezier(0, 0.02, 0, 1), border-color .3s ease, box-shadow .5s ease;
-          border: none;
-          opacity: var(--opacity-val); /* Opacity applied directly here so the dark background doesn't stay visible behind the transparent card content */
-          font-family: 'Bahnschrift', 'DIN Alternate', 'Inter', -apple-system, sans-serif;
-        }
+          {/* Gorgeous floating stars and sparkles in WebGL */}
+          <Sparkles 
+            count={isMobile ? 60 : 120} 
+            scale={[8, 5, 8]} 
+            size={isMobile ? 1.5 : 2.5} 
+            speed={0.4} 
+            color="#5e6ad2" 
+            opacity={0.7} 
+          />
+          <Sparkles 
+            count={isMobile ? 60 : 120} 
+            scale={[8, 5, 8]} 
+            size={isMobile ? 1.2 : 2.0} 
+            speed={0.25} 
+            color="#06b6d2" 
+            opacity={0.7} 
+          />
+        </Canvas>
+      </div>
 
-        .carousel-card-box {
-          position: absolute;
-          z-index: 1;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
-
-        .carousel-card-box::before {
-          content: '';
-          position: absolute;
-          z-index: 2;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(to bottom, rgba(0, 0, 0, .3), rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.15) 60%, rgba(0, 0, 0, .85));
-        }
-
-        .carousel-card-item .card-content {
-          position: absolute;
-          z-index: 3;
-          bottom: 24px;
-          left: 20px;
-          right: 20px;
-          color: #fff;
-          text-align: left;
-        }
-
-        .carousel-card-item .title {
-          font-family: 'Bahnschrift', 'DIN Alternate', 'Inter', -apple-system, sans-serif;
-          font-size: clamp(22px, 5vw, 28px);
-          font-weight: 800;
-          color: #ffffff;
-          line-height: 1.1;
-          text-transform: uppercase;
-          letter-spacing: 0.02em;
-        }
-
-        .carousel-card-item img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          pointer-events: none;
-        }
-      `}</style>
-
-      {/* Header Info */}
-      <div className="px-6 text-center space-y-2 mt-2 select-none shrink-0 relative z-30">
-        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-black uppercase tracking-widest inline-block">
+      {/* 2D HTML Content Layer (Floating on top of WebGL) */}
+      <div className="w-full px-6 text-center space-y-2 mt-2 select-none shrink-0 relative z-20 pointer-events-none">
+        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-black uppercase tracking-widest inline-block pointer-events-auto">
           Selected Work
         </span>
-        <h2 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-none mt-1">
-          Featured <span className="text-gradient">Projects</span>
+        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none mt-1">
+          Interactive <span className="text-gradient">3D Space</span>
         </h2>
         <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider flex items-center justify-center gap-1">
-          <Hand size={11} className="text-zinc-500" /> Arrastra horizontalmente para navegar
+          <Hand size={11} className="text-zinc-500" /> Arrastra o gira la rueda para explorar en 3D
         </p>
       </div>
 
-      {/* 2D Curved Drag & Wheel Carousel Viewport */}
-      <div 
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleMouseDown}
-        onTouchMove={handleMouseMove}
-        onTouchEnd={handleMouseUp}
-        className="carousel-wrapper flex-1"
-      >
-        {PROJECT_ITEMS.map((item, idx) => {
-          const zIndex = zIndexes[idx];
-          const activeVal = (idx - active) / PROJECT_ITEMS.length;
-          const isActive = idx === active;
-
-          // Opacity decay applied directly to card element
-          const opacityVal = Math.max(0.0, 1 - Math.abs(idx - active) * 0.45);
-
-          return (
-            <div
-              key={idx}
-              onClick={() => handleCardClick(idx)}
-              style={{
-                '--active-val': activeVal,
-                '--z-index-val': zIndex,
-                '--opacity-val': opacityVal,
-                boxShadow: isActive ? `0 20px 50px -15px ${item.glow}` : '0 10px 25px rgba(0,0,0,0.5)',
-                borderColor: isActive ? item.borderColor : 'rgba(255, 255, 255, 0.04)'
-              }}
-              className="carousel-card-item cursor-pointer"
+      {/* Active Project details overlay */}
+      <div className="w-full px-6 shrink-0 relative z-20 pointer-events-none mb-4 select-none">
+        <div className="max-w-md mx-auto bg-black/45 backdrop-blur-md rounded-2xl border border-white/5 p-5 md:p-6 shadow-2xl space-y-3 pointer-events-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIndex}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="space-y-3"
             >
-              <div className="carousel-card-box">
-                {/* Cover Image */}
-                <img src={item.image} alt={item.title} />
-
-                {/* Content Overlay */}
-                <div className="card-content space-y-3">
-                  <div>
-                    <span className="text-[7.5px] font-black text-indigo-400 uppercase tracking-widest block mb-0.5">
-                      {item.category}
-                    </span>
-                    <h4 className="title">{item.title}</h4>
-                  </div>
-                  
-                  {isActive && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className="space-y-3"
-                    >
-                      <p className="text-[10px] text-zinc-300 leading-relaxed font-medium line-clamp-2">
-                        {item.description}
-                      </p>
-                      
-                      {(item.exploreUrl || item.title.includes("Barba")) && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleExplore(item);
-                          }}
-                          className="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-black text-[9px] uppercase tracking-wider rounded-lg flex items-center gap-1 active:scale-95 transition-all shadow-md font-sans"
-                        >
-                          <span>Explore Project</span>
-                          {item.exploreUrl ? <ExternalLink size={10} /> : <ArrowRight size={10} />}
-                        </button>
-                      )}
-                    </motion.div>
-                  )}
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/5 border border-indigo-500/10 px-2 py-0.5 rounded">
+                  {activeProject.category}
+                </span>
+                <span className="text-zinc-500 font-mono text-[9px] font-bold">
+                  0{activeIndex + 1} / 0{PROJECT_ITEMS.length}
+                </span>
               </div>
-            </div>
-          );
-        })}
-      </div>
 
-      {/* Bottom text layout */}
-      <div className="px-6 text-center shrink-0 relative z-30 mb-2 select-none max-w-sm mx-auto">
-        <p className="text-zinc-500 font-mono text-[9px] uppercase tracking-widest leading-relaxed">
-          {PROJECT_ITEMS[active].title} — {PROJECT_ITEMS[active].category}
-        </p>
-        
-        {/* Navigation Indicators */}
-        <div className="flex justify-center items-center gap-2 mt-3">
+              <h3 className="text-xl md:text-2xl font-bold text-white uppercase tracking-wider font-sans leading-none">
+                {activeProject.title}
+              </h3>
+
+              <p className="text-[11px] text-zinc-300 leading-relaxed font-medium">
+                {activeProject.description}
+              </p>
+
+              {(activeProject.exploreUrl || activeProject.title.includes("Barba")) && (
+                <button
+                  onClick={() => handleExplore(activeProject)}
+                  className="w-full py-2.5 bg-white hover:bg-zinc-200 text-black font-black text-[10px] uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md"
+                >
+                  <span>Explore Project</span>
+                  {activeProject.exploreUrl ? <ExternalLink size={11} /> : <ArrowRight size={11} />}
+                </button>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* 3D Navigation Indicators */}
+        <div className="flex justify-center items-center gap-2 mt-4 pointer-events-auto">
           {PROJECT_ITEMS.map((_, idx) => (
             <button
               key={idx}
-              onClick={() => handleCardClick(idx)}
-              className={`h-1 rounded-full transition-all duration-300 ${
-                idx === active ? 'w-5 bg-indigo-500' : 'w-1 bg-zinc-700'
+              onClick={() => {
+                const count = PROJECT_ITEMS.length;
+                const angleStep = (Math.PI * 2) / count;
+                // Calculate shortest turn
+                const currentRot = targetRotation.current;
+                const targetRotForCard = -idx * angleStep;
+                const difference = targetRotForCard - (currentRot % (Math.PI * 2));
+                let adjustedDiff = Math.atan2(Math.sin(difference), Math.cos(difference));
+                targetRotation.current = currentRot + adjustedDiff;
+              }}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                idx === activeIndex ? 'w-6 bg-indigo-500' : 'w-1.5 bg-zinc-700 hover:bg-zinc-500'
               }`}
             />
           ))}
