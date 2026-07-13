@@ -75,6 +75,13 @@ const Hero = () => {
           overflow: hidden;
         }
 
+        @media (max-width: 768px) {
+          .hero-section {
+            min-height: 80vh;
+            padding: 5rem 1.25rem 1.5rem 1.25rem;
+          }
+        }
+
         .hero-content {
           position: relative;
           z-index: 10;
@@ -83,6 +90,12 @@ const Hero = () => {
           flex-direction: column;
           align-items: center;
           gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+          .hero-content {
+            gap: 1.25rem;
+          }
         }
 
         .badge {
