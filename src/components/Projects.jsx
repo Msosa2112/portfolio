@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ExternalLink, Hand } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import SandboxModal from './sandbox/SandboxModal';
 
 const PROJECT_ITEMS = [
@@ -8,7 +8,6 @@ const PROJECT_ITEMS = [
     title: "Barba CRM",
     category: "CRM / Web App",
     description: "A modern, AI-powered CRM built for construction professionals, featuring a highly intuitive UI and real-time data sync via Supabase.",
-    glow: "rgba(94,106,210,0.55)",
     themeColor: "indigo",
     exploreUrl: null
   },
@@ -16,7 +15,6 @@ const PROJECT_ITEMS = [
     title: "ZHomes",
     category: "Real Estate",
     description: "Global transaction coordinator platform featuring an integrated AI Copilot for real estate professionals.",
-    glow: "rgba(6,182,212,0.55)",
     themeColor: "cyan",
     exploreUrl: "https://zhomesapp.com"
   },
@@ -24,7 +22,6 @@ const PROJECT_ITEMS = [
     title: "Edward Siding",
     category: "Marketing / SEO",
     description: "A highly optimized marketing landing page with custom SEO, robots.txt, and a spectacular photo gallery.",
-    glow: "rgba(245,158,11,0.55)",
     themeColor: "amber",
     exploreUrl: "https://edwardsidingandgutters.com/"
   },
@@ -32,45 +29,20 @@ const PROJECT_ITEMS = [
     title: "Outdoor MS",
     category: "Microservices",
     description: "Microservice integration for scalable DOOH (Digital Out of Home) advertising platforms.",
-    glow: "rgba(16,185,129,0.55)",
     themeColor: "emerald",
     exploreUrl: null
   }
 ];
 
-export default function Projects({ activeIndex, targetRotation }) {
+export default function Projects({ activeIndex }) {
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-
-  const handlePointerDown = (e) => {
-    isDragging.current = true;
-    startX.current = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-  };
-
-  const handlePointerMove = (e) => {
-    if (!isDragging.current) return;
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-    // Swiping left increases index, swiping right decreases index
-    const dragSpeed = window.innerWidth < 768 ? 0.38 : 0.25;
-    const deltaProgress = (startX.current - clientX) * dragSpeed;
-    targetRotation.current = Math.min(100, Math.max(0, targetRotation.current + deltaProgress));
-    startX.current = clientX;
-  };
-
-  const handlePointerUp = () => {
-    isDragging.current = false;
-  };
-
-  const handleWheel = (e) => {
-    const sensitivity = 0.08;
-    targetRotation.current = Math.min(100, Math.max(0, targetRotation.current + e.deltaY * sensitivity));
-  };
 
   const handleCardClick = (idx) => {
-    const count = PROJECT_ITEMS.length;
-    const targetVal = (idx / (count - 1)) * 100;
-    targetRotation.current = targetVal;
+    const pageHeight = window.innerHeight || 800;
+    // Align Z to center: (idx * 6.0 + 2.5) / 11.75 is the progress ratio
+    const targetProgress = (idx * 6.0 + 2.5) / 11.75;
+    const targetScroll = targetProgress * pageHeight;
+    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
   };
 
   const handleExplore = (item) => {
@@ -86,14 +58,6 @@ export default function Projects({ activeIndex, targetRotation }) {
   return (
     <section 
       id="work" 
-      onMouseDown={handlePointerDown}
-      onMouseMove={handlePointerMove}
-      onMouseUp={handlePointerUp}
-      onMouseLeave={handlePointerUp}
-      onTouchStart={handlePointerDown}
-      onTouchMove={handlePointerMove}
-      onTouchEnd={handlePointerUp}
-      onWheel={handleWheel}
       className="w-full h-screen relative flex flex-col justify-between py-12 md:py-20 select-none overflow-hidden bg-transparent pointer-events-auto"
     >
       
@@ -106,11 +70,11 @@ export default function Projects({ activeIndex, targetRotation }) {
           Interactive <span className="text-gradient">3D Space</span>
         </h2>
         <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider flex items-center justify-center gap-1">
-          <Hand size={11} className="text-zinc-500" /> Arrastra horizontalmente para navegar
+          Haz scroll vertical para avanzar por la avenida de proyectos
         </p>
       </div>
 
-      {/* Transparent gap where the 3D stack cards sit */}
+      {/* Spacer where the 3D depth street monoliths float */}
       <div className="flex-1 min-h-[220px] pointer-events-none" />
 
       {/* Active Project details overlay */}
