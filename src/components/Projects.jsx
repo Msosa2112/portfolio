@@ -22,7 +22,8 @@ const PROJECT_ITEMS = [
     badgeColor: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
     glow: "rgba(6,182,212,0.45)",
     logo: "/logos/zhomes.png",
-    sandboxId: "zhomes"
+    sandboxId: "zhomes",
+    exploreUrl: "https://zhomesapp.com/"
   },
   {
     title: "Tzel",
@@ -33,6 +34,16 @@ const PROJECT_ITEMS = [
     glow: "rgba(245,158,11,0.45)",
     logo: "/logos/tzel.png",
     sandboxId: "tzel"
+  },
+  {
+    title: "Tri Lion Academy",
+    category: "Plataforma de Reservas & Membresías",
+    description: "Sistema de inscripciones y cobros recurrentes automatizados para academias deportivas. Elimina la gestión manual de horarios de entrenamiento y registros de atletas en recepción.",
+    themeColor: "red",
+    badgeColor: "bg-red-500/10 text-red-400 border border-red-500/20",
+    glow: "rgba(239,68,68,0.45)",
+    logo: "/logos/tri-lion.png",
+    exploreUrl: "https://trilionacademy.com/"
   }
 ];
 
@@ -132,15 +143,28 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
           {item.description}
         </p>
 
-        {item.sandboxId && (
-          <button
-            onClick={() => onExplore(item)}
-            className="w-full py-3 bg-white hover:bg-zinc-200 text-black font-black text-[10px] uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md font-sans mt-2"
-          >
-            <span>Probar Simulación</span>
-            <ArrowRight size={11} />
-          </button>
-        )}
+        <div className="flex flex-col gap-2 mt-3">
+          {item.sandboxId && (
+            <button
+              onClick={() => onExplore(item)}
+              className="w-full py-3 bg-white hover:bg-zinc-200 text-black font-black text-[10px] uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md font-sans"
+            >
+              <span>Probar Simulación</span>
+              <ArrowRight size={11} />
+            </button>
+          )}
+          {item.exploreUrl && (
+            <a
+              href={item.exploreUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 text-white font-black text-[10px] uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all font-sans"
+            >
+              <span>Visitar Sitio Web</span>
+              <ExternalLink size={11} />
+            </a>
+          )}
+        </div>
       </div>
     </motion.div>
   );
