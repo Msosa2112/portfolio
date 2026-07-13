@@ -66,21 +66,27 @@ const PROJECT_ITEMS = [
   }
 ];
 
-// Individual Project Card Section with 3D Zoom Tunnel Transitions
+// Individual Project Card Section with Vertical Slide-up Transitions
 function ProjectSection({ item, index, scrollYProgress, onExplore }) {
   const count = PROJECT_ITEMS.length;
-  // Divide the range [0.12, 0.82] dynamically by the number of projects
   const step = 0.70 / count;
   const startIn = 0.12 + index * step;
   const center = startIn + step * 0.45;
   const startOut = center + step * 0.45;
   const endOut = startOut + step * 0.1;
 
-  // Transforms: scale up and fade out as scroll progress advances
+  // Vertical scrolling translation: slides UP from bottom to top
+  const y = useTransform(
+    scrollYProgress,
+    [startIn, center, startOut, endOut],
+    [550, 0, 0, -550]
+  );
+
+  // Flat scale (No deep Z zoom, only a subtle entrance/exit scale)
   const scale = useTransform(
     scrollYProgress,
     [startIn, center, startOut, endOut],
-    [0.35, 1.0, 1.0, 3.8]
+    [0.92, 1.0, 1.0, 0.92]
   );
 
   const opacity = useTransform(
@@ -89,16 +95,9 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
     [0.0, 1.0, 1.0, 0.0]
   );
 
-  const y = useTransform(
-    scrollYProgress,
-    [startIn, center, startOut, endOut],
-    [100, 0, 0, -120]
-  );
-
   // Hook-driven pointer state to avoid overlapping interaction
   const [isActive, setIsActive] = useState(false);
 
-  // Set initial state
   React.useEffect(() => {
     const currentVal = scrollYProgress.get();
     setIsActive(currentVal >= startIn && currentVal <= endOut);
