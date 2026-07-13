@@ -51,10 +51,10 @@ export default function Projects({ activeIndex, targetRotation }) {
   const handlePointerMove = (e) => {
     if (!isDragging.current) return;
     const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-    const deltaX = clientX - startX.current;
-    
-    const sensitivity = window.innerWidth < 768 ? 0.009 : 0.005;
-    targetRotation.current += deltaX * sensitivity;
+    // Swiping left increases index, swiping right decreases index
+    const dragSpeed = window.innerWidth < 768 ? 0.38 : 0.25;
+    const deltaProgress = (startX.current - clientX) * dragSpeed;
+    targetRotation.current = Math.min(100, Math.max(0, targetRotation.current + deltaProgress));
     startX.current = clientX;
   };
 
@@ -63,18 +63,14 @@ export default function Projects({ activeIndex, targetRotation }) {
   };
 
   const handleWheel = (e) => {
-    const sensitivity = 0.0015;
-    targetRotation.current += e.deltaY * sensitivity;
+    const sensitivity = 0.08;
+    targetRotation.current = Math.min(100, Math.max(0, targetRotation.current + e.deltaY * sensitivity));
   };
 
   const handleCardClick = (idx) => {
     const count = PROJECT_ITEMS.length;
-    const angleStep = (Math.PI * 2) / count;
-    const currentRot = targetRotation.current;
-    const targetRotForCard = -idx * angleStep;
-    const difference = targetRotForCard - (currentRot % (Math.PI * 2));
-    let adjustedDiff = Math.atan2(Math.sin(difference), Math.cos(difference));
-    targetRotation.current = currentRot + adjustedDiff;
+    const targetVal = (idx / (count - 1)) * 100;
+    targetRotation.current = targetVal;
   };
 
   const handleExplore = (item) => {
@@ -110,12 +106,12 @@ export default function Projects({ activeIndex, targetRotation }) {
           Interactive <span className="text-gradient">3D Space</span>
         </h2>
         <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider flex items-center justify-center gap-1">
-          <Hand size={11} className="text-zinc-500" /> Arrastra o gira la rueda para explorar en 3D
+          <Hand size={11} className="text-zinc-500" /> Arrastra horizontalmente para navegar
         </p>
       </div>
 
-      {/* Placeholder transparent gap for the 3D canvas cards */}
-      <div className="flex-1 min-h-[180px] pointer-events-none" />
+      {/* Transparent gap where the 3D stack cards sit */}
+      <div className="flex-1 min-h-[220px] pointer-events-none" />
 
       {/* Active Project details overlay */}
       <div className="w-full px-6 shrink-0 relative z-20 pointer-events-none mb-4 select-none">

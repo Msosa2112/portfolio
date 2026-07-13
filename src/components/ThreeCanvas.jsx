@@ -26,104 +26,103 @@ const PROJECT_ITEMS = [
   }
 ];
 
-// Helper to get ZIndex
-const getZindex = (array, index) => (
-  array.map((_, i) => (index === i) ? array.length : array.length - Math.abs(index - i))
-);
-
-// Individual 3D Card
-function Card({ index, item, activeIndex, totalCount, onSelect, isMobile }) {
+// 3D Card Stack Mesh
+function Card({ index, item, activeFloat, activeIndex, isMobile }) {
   const meshRef = useRef();
   const glowRef = useRef();
-  const [hovered, setHovered] = useState(false);
-
-  const radius = isMobile ? 2.4 : 3.5;
-  const angleStep = (Math.PI * 2) / totalCount;
-  const theta = index * angleStep;
-
-  const x = Math.sin(theta) * radius;
-  const z = Math.cos(theta) * radius;
 
   useFrame((state) => {
     if (!meshRef.current || !glowRef.current) return;
-    
-    const parentRotY = meshRef.current.parent.rotation.y;
-    const currentAngle = theta + parentRotY;
-    const distToFront = Math.abs(Math.atan2(Math.sin(currentAngle), Math.cos(currentAngle)));
-    
+
+    // Relative distance to active index
+    const t = index - activeFloat;
     const isActive = index === activeIndex;
 
-    // Scales
-    const baseScale = isActive ? 1.08 : 0.88;
-    const hoverScaleMultiplier = hovered ? 1.12 : 1.0;
-    const targetScale = baseScale * hoverScaleMultiplier;
-
-    meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.1);
-    meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.1);
-
-    glowRef.current.scale.x = meshRef.current.scale.x * 1.04;
-    glowRef.current.scale.y = meshRef.current.scale.y * 1.04;
-
-    // Float animation
-    const floatOffset = (hovered || isActive) 
-      ? Math.sin(state.clock.getElapsedTime() * 1.8 + index) * 0.06 
-      : 0;
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, floatOffset, 0.1);
-    glowRef.current.position.y = meshRef.current.position.y;
-
-    // Pointer parallax tilt
-    let targetRotY = theta;
+    let targetX = 0;
+    let targetY = 0;
+    let targetZ = 0;
     let targetRotX = 0;
-    if (hovered || isActive) {
-      targetRotY += state.pointer.x * 0.22;
-      targetRotX = -state.pointer.y * 0.18;
+    let targetRotY = 0;
+    let targetRotZ = 0;
+    let targetScale = 1.0;
+    let targetOpacity = 1.0;
+
+    if (t < 0) {
+      // 1. Swiped Away (Flies out to the left in a smooth 3D arc)
+      targetX = t * 3.8;
+      targetY = t * -1.2;
+      targetZ = t * 0.4;
+      targetRotZ = t * 0.5;
+      targetScale = 1.0;
+      targetOpacity = Math.max(0, 1 + t);
+    } else {
+      // 2. Stacked in Depth (pushed back and slightly staggered)
+      targetX = 0;
+      targetY = t * 0.16;
+      targetZ = t * -0.58;
+      targetScale = Math.max(0.65, 1.0 - t * 0.08);
+      targetOpacity = Math.max(0, 1 - t * 0.42);
+      targetRotX = -0.12 * Math.min(1.0, t);
     }
-    meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotY, 0.1);
-    meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, targetRotX, 0.1);
-    glowRef.current.rotation.y = meshRef.current.rotation.y;
-    glowRef.current.rotation.x = meshRef.current.rotation.x;
+
+    // Zero-gravity slight float for front active card
+    if (isActive) {
+      targetY += Math.sin(state.clock.getElapsedTime() * 1.5) * 0.05;
+    }
+
+    // Interpolate positions smoothly
+    meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.15);
+    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.15);
+    meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, targetZ, 0.15);
+
+    meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, targetRotX, 0.15);
+    meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotY, 0.15);
+    meshRef.current.rotation.z = THREE.MathUtils.lerp(meshRef.current.rotation.z, targetRotZ, 0.15);
+
+    meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.15);
+    meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.15);
+
+    // Sync glow halo
+    glowRef.current.position.copy(meshRef.current.position);
+    glowRef.current.position.z -= 0.01;
+    glowRef.current.rotation.copy(meshRef.current.rotation);
+    glowRef.current.scale.copy(meshRef.current.scale);
+    glowRef.current.scale.x *= 1.05;
+    glowRef.current.scale.y *= 1.05;
 
     // Opacity
-    const targetOpacity = distToFront > Math.PI / 2 ? 0.02 : Math.max(0.12, 1 - distToFront * 0.55);
-    const glowOpacity = (isActive || hovered) ? targetOpacity * 0.85 : targetOpacity * 0.18;
-
     if (meshRef.current.material) {
-      meshRef.current.material.opacity = THREE.MathUtils.lerp(meshRef.current.material.opacity, targetOpacity, 0.1);
-      meshRef.current.material.grayscale = THREE.MathUtils.lerp(meshRef.current.material.grayscale, isActive ? 0 : 0.5, 0.1);
+      meshRef.current.material.opacity = THREE.MathUtils.lerp(meshRef.current.material.opacity, targetOpacity, 0.15);
+      meshRef.current.material.grayscale = THREE.MathUtils.lerp(meshRef.current.material.grayscale, isActive ? 0 : 0.5, 0.15);
     }
     if (glowRef.current.material) {
-      glowRef.current.material.opacity = THREE.MathUtils.lerp(glowRef.current.material.opacity, glowOpacity, 0.1);
+      const targetGlowOpacity = isActive ? targetOpacity * 0.75 : targetOpacity * 0.15;
+      glowRef.current.material.opacity = THREE.MathUtils.lerp(glowRef.current.material.opacity, targetGlowOpacity, 0.15);
     }
   });
 
-  const cardWidth = isMobile ? 1.6 : 2.2;
-  const cardHeight = isMobile ? 2.2 : 3.0;
+  const cardWidth = isMobile ? 1.7 : 2.3;
+  const cardHeight = isMobile ? 2.3 : 3.1;
 
   return (
     <group>
-      <mesh ref={glowRef} position={[x, 0, z - 0.02]}>
+      {/* 3D Glow Border Mesh */}
+      <mesh ref={glowRef}>
         <planeGeometry args={[cardWidth, cardHeight]} />
-        <meshBasicMaterial color={item.glow} transparent opacity={0.1} side={THREE.DoubleSide} />
+        <meshBasicMaterial color={item.glow} transparent opacity={0} side={THREE.DoubleSide} />
       </mesh>
+      {/* Main Image Mesh */}
       <Image
         ref={meshRef}
         url={item.image}
-        position={[x, 0, z]}
-        rotation={[0, theta, 0]}
         scale={[cardWidth, cardHeight]}
         transparent
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelect(index);
-        }}
         onPointerOver={(e) => {
           e.stopPropagation();
-          setHovered(true);
           document.body.style.cursor = 'pointer';
         }}
         onPointerOut={(e) => {
           e.stopPropagation();
-          setHovered(false);
           document.body.style.cursor = 'default';
         }}
       />
@@ -133,12 +132,10 @@ function Card({ index, item, activeIndex, totalCount, onSelect, isMobile }) {
 
 // 3D Scene Controller
 function Scene({ activeIndex, setActiveIndex, targetRotation, isMobile }) {
-  const torusRef = useRef();
-  const carouselRef = useRef();
+  const stackRef = useRef();
   const sparklesRef = useRef();
   
   const count = PROJECT_ITEMS.length;
-  const angleStep = (Math.PI * 2) / count;
 
   useFrame((state) => {
     // 1. Solve Scroll Progress (Hero = 0, Projects = 1, Contact = 2)
@@ -151,110 +148,60 @@ function Scene({ activeIndex, setActiveIndex, targetRotation, isMobile }) {
       sparklesRef.current.position.y = progress * 1.5;
     }
 
-    // 3. Animate Hero object (TorusKnot)
-    if (torusRef.current) {
-      // Spinning
-      torusRef.current.rotation.x += 0.005;
-      torusRef.current.rotation.y += 0.007;
-
-      // Mouse parallax tilt
-      torusRef.current.rotation.y += state.pointer.x * 0.02;
-      torusRef.current.rotation.x += -state.pointer.y * 0.02;
-
-      // Transition out on scroll
-      const t = Math.min(1.0, Math.max(0.0, progress));
-      torusRef.current.position.y = t * 3.8 + Math.sin(state.clock.getElapsedTime() * 1.5) * 0.08;
-      torusRef.current.position.z = t * -2.0;
-      const targetScale = Math.max(0.0, 1.0 - t * 1.2);
-      torusRef.current.scale.setScalar(targetScale);
+    // 3. Solve activeFloat from rotation progress
+    // Normalize targetRotation.current between 0 and 100 to map activeFloat
+    const dragVal = Math.min(100, Math.max(0, targetRotation.current));
+    const activeFloat = (dragVal / 100) * (count - 1);
+    
+    // Update active index
+    const closestIdx = Math.round(activeFloat);
+    if (closestIdx !== activeIndex) {
+      setActiveIndex(closestIdx);
     }
 
-    // 4. Animate Projects Carousel Y transition
-    if (carouselRef.current) {
-      let carouselY = -6.0;
-      let carouselScale = 0.5;
+    // 4. Animate Stack Group Y and scale transition on scroll
+    if (stackRef.current) {
+      let groupY = -6.0;
+      let groupScale = 0.5;
 
       if (progress < 1.0) {
         // Hero -> Projects
         const t = progress; // 0 to 1
-        carouselY = -6.0 + 6.0 * t;
-        carouselScale = 0.5 + 0.5 * t;
+        groupY = -6.0 + 6.0 * t;
+        groupScale = 0.5 + 0.5 * t;
       } else {
         // Projects -> Contact
         const t = Math.min(1.0, progress - 1.0); // 0 to 1
-        carouselY = 0.0 - 6.0 * t;
-        carouselScale = 1.0 - 0.5 * t;
+        groupY = 0.0 - 6.0 * t;
+        groupScale = 1.0 - 0.5 * t;
       }
 
-      carouselRef.current.position.y = carouselY;
-      carouselRef.current.scale.setScalar(carouselScale);
-
-      // Rotate carousel
-      carouselRef.current.rotation.y = THREE.MathUtils.lerp(
-        carouselRef.current.rotation.y,
-        targetRotation.current,
-        0.08
-      );
-
-      // Solve front index
-      let maxCos = -2;
-      let closestIdx = 0;
-      for (let i = 0; i < count; i++) {
-        const theta = carouselRef.current.rotation.y + i * angleStep;
-        const cosVal = Math.cos(theta);
-        if (cosVal > maxCos) {
-          maxCos = cosVal;
-          closestIdx = i;
-        }
-      }
-
-      if (closestIdx !== activeIndex) {
-        setActiveIndex(closestIdx);
-      }
+      stackRef.current.position.y = groupY;
+      stackRef.current.scale.setScalar(groupScale);
     }
   });
 
-  const handleSelect = (idx) => {
-    if (!carouselRef.current) return;
-    const currentRot = carouselRef.current.rotation.y;
-    const targetRotForCard = -idx * angleStep;
-    const difference = targetRotForCard - (currentRot % (Math.PI * 2));
-    let adjustedDiff = Math.atan2(Math.sin(difference), Math.cos(difference));
-    targetRotation.current = currentRot + adjustedDiff;
-  };
+  // Calculate continuous activeFloat for card coordinates
+  const dragVal = Math.min(100, Math.max(0, targetRotation.current));
+  const activeFloat = (dragVal / 100) * (count - 1);
 
   return (
     <group>
-      {/* Hero Glass Dodecahedron object */}
-      <mesh ref={torusRef} position={[0, 0, 0]}>
-        <dodecahedronGeometry args={[1.0, 1]} />
-        <meshPhysicalMaterial 
-          roughness={0.12} 
-          metalness={0.6} 
-          color="#8076eb" 
-          transmission={0.7} 
-          thickness={0.5} 
-          clearcoat={1.0} 
-          clearcoatRoughness={0.1} 
-        />
-      </mesh>
-
-      {/* Projects 3D cylinder group */}
-      <group ref={carouselRef} position={[0, -6, 0]} rotation={[0.16, 0, -0.14]}>
+      {/* 3D Stack Carousel */}
+      <group ref={stackRef} position={[0, -6, 0]} rotation={[0.08, 0, -0.06]}>
         {PROJECT_ITEMS.map((item, idx) => (
           <Card
             key={idx}
             index={idx}
             item={item}
+            activeFloat={activeFloat}
             activeIndex={activeIndex}
-            totalCount={count}
-            onSelect={handleSelect}
             isMobile={isMobile}
           />
         ))}
       </group>
 
-      {/* Global space sparkles */}
+      {/* Global cosmic sparkles */}
       <group ref={sparklesRef}>
         <Sparkles 
           count={isMobile ? 80 : 180} 
@@ -299,8 +246,8 @@ export default function ThreeCanvas({ activeIndex, setActiveIndex, targetRotatio
         left: 0,
         width: '100vw',
         height: '100vh',
-        zIndex: 1, // Runs directly in background of content
-        pointerEvents: 'none' // Allows interaction events to fall through to HTML links
+        zIndex: 1,
+        pointerEvents: 'none'
       }}
     >
       <ambientLight intensity={1.8} />
