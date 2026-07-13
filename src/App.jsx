@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import Lenis from 'lenis';
 import Navbar from './components/Navbar';
@@ -9,6 +9,7 @@ import Grainient from './components/Grainient';
 import ThreeCanvas from './components/ThreeCanvas';
 
 function App() {
+  const [isSandboxOpen, setIsSandboxOpen] = useState(false);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -84,12 +85,12 @@ function App() {
         style={{ scaleX }}
       />
 
-      <Navbar />
+      <Navbar onNavClick={() => setIsSandboxOpen(false)} />
       
       {/* HTML overlay sections (fixed in viewport) */}
       <main className="main-content">
         <Hero />
-        <Projects />
+        <Projects isSandboxOpen={isSandboxOpen} setIsSandboxOpen={setIsSandboxOpen} />
         <Contact />
       </main>
 

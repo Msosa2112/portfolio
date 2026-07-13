@@ -9,11 +9,12 @@ const navItems = [
   { id: 'contact', icon: Mail, label: 'Contact', href: '#contact' }
 ];
 
-const Navbar = () => {
+const Navbar = ({ onNavClick }) => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const handleNavClick = (e, itemId) => {
     e.preventDefault();
+    if (onNavClick) onNavClick();
     const pageHeight = window.innerHeight || 800;
     const totalHeight = pageHeight * 6.0; // Matches the 600vh scroll-spacer
 

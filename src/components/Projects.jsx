@@ -176,8 +176,7 @@ function ProjectSection({ item, index, scrollYProgress, onExplore }) {
   );
 }
 
-export default function Projects() {
-  const [isSandboxOpen, setIsSandboxOpen] = useState(false);
+export default function Projects({ isSandboxOpen, setIsSandboxOpen }) {
   const { scrollYProgress } = useScroll();
 
   const handleExplore = (item) => {
